@@ -1,0 +1,6 @@
+@baseUrl = http://localhost:4000/api/v1/user
+
+#Auth
+
+# @name getAllUser
+GET {{baseUrl}}

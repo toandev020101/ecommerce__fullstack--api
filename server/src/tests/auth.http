@@ -1,0 +1,33 @@
+@baseUrl = http://localhost:4000/api/v1/auth
+
+#Auth
+
+# @name registerUser
+POST {{baseUrl}}/register
+Content-Type: application/json
+
+{
+  "firstName": "",
+  "lastName": "",
+  "username": "",
+  "password": "",
+  "email": "",
+  "gender": 2,
+  "roleId": ""
+}
+
+###
+
+# @name loginUser
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "username": "toan020101",
+  "password": "toando2001"
+}
+
+###
+
+# @name refreshTokenUser
+GET {{baseUrl}}/refresh_token
