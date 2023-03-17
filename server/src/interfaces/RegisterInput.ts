@@ -1,6 +1,5 @@
 export interface RegisterInput {
-  firstName: string;
-  lastName: string;
+  fullName: string;
   username: string;
   password: string;
   gender: number;

@@ -2,7 +2,7 @@ import jwtDecode, { JwtPayload } from 'jwt-decode';
 import * as authApi from '../apis/authApi';
 
 const JWTManager = () => {
-  const LOGOUT_EVENT_NAME = 'mbshop-logout';
+  const LOGOUT_EVENT_NAME = 'ecomshop_logout';
   let inMemoryToken: string | null = null;
   let refreshTokenTimeoutId: number | null = null;
   let userId: number | null = null;
@@ -36,7 +36,9 @@ const JWTManager = () => {
 
   // To logout all tabs (nullify inMemoryToken)
   window.addEventListener('storage', (e) => {
-    if (e.key === LOGOUT_EVENT_NAME) inMemoryToken = null;
+    if (e.key === LOGOUT_EVENT_NAME) {
+      inMemoryToken = null;
+    }
   });
 
   const getRefreshToken = async () => {

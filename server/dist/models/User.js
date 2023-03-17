@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
+const Media_1 = require("./Media");
 const Role_1 = require("./Role");
 let User = class User extends typeorm_1.BaseEntity {
 };
@@ -19,19 +20,15 @@ __decorate([
     __metadata("design:type", Number)
 ], User.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 20 }),
+    (0, typeorm_1.Column)({ length: 45 }),
     __metadata("design:type", String)
-], User.prototype, "firstName", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ length: 20 }),
-    __metadata("design:type", String)
-], User.prototype, "lastName", void 0);
+], User.prototype, "fullName", void 0);
 __decorate([
     (0, typeorm_1.Column)({ unique: true, length: 45 }),
     __metadata("design:type", String)
 ], User.prototype, "username", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ select: false }),
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
 __decorate([
@@ -51,13 +48,17 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "phoneNumber", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1, comment: '0: bị khóa, 1: đang hoạt động' }),
-    __metadata("design:type", Boolean)
+    (0, typeorm_1.Column)({ default: 1, comment: '0: bị khóa, 1: đang hoạt động', type: 'tinyint' }),
+    __metadata("design:type", Number)
 ], User.prototype, "isActive", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], User.prototype, "tokenVersion", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Media_1.Media, (media) => media.user),
+    __metadata("design:type", Array)
+], User.prototype, "medias", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)

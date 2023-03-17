@@ -30,8 +30,7 @@ const RegisterForm: React.FC = () => {
 
   const form = useForm<Values>({
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      fullName: '',
       username: '',
       password: '',
       confirmPassword: '',
@@ -40,7 +39,7 @@ const RegisterForm: React.FC = () => {
     resolver: yupResolver(registerSchema),
   });
 
-  const handleSubmit = async ({ confirmPassword, ...others }: Values) => {
+  const handleRegisterSubmit = async ({ confirmPassword, ...others }: Values) => {
     dispatch(authPending());
     try {
       const res = await authApi.register(others);
@@ -71,8 +70,8 @@ const RegisterForm: React.FC = () => {
             options: { theme: 'colored', toastId: 'homeId' },
           }),
         );
-      } else {
-        // lỗi 500
+      } else if (data.code === 401 || data.code === 403 || data.code === 500) {
+        navigate(`/error/${data.code}`);
       }
 
       dispatch(authFai());
@@ -83,16 +82,13 @@ const RegisterForm: React.FC = () => {
     <>
       <Box
         component="form"
-        onSubmit={form.handleSubmit(handleSubmit)}
+        onSubmit={form.handleSubmit(handleRegisterSubmit)}
         display="flex"
         flexDirection="column"
         width="100%"
         marginTop="20px"
       >
-        <Box display="flex" gap="10px">
-          <InputField form={form} errorServers={errors} name="firstName" label="Họ" required />
-          <InputField form={form} errorServers={errors} name="lastName" label="Tên" required />
-        </Box>
+        <InputField form={form} errorServers={errors} name="fullName" label="Họ và tên" required />
 
         <RadioGroupField
           form={form}
@@ -125,7 +121,7 @@ const RegisterForm: React.FC = () => {
           sx={{
             backgroundColor: theme.palette.primary[500],
             color: theme.palette.neutral[1000],
-            height: '40px',
+            height: '45px',
             fontSize: '14px',
           }}
         >

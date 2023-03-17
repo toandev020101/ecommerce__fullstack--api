@@ -1,13 +1,12 @@
-import { UserAuthPayload } from './../interfaces/UserAuthPayload';
-import { BaseResponse } from './../interfaces/BaseResponse';
-import { Response, NextFunction, Request } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { Secret, verify } from 'jsonwebtoken';
+import { BaseResponse } from './../interfaces/BaseResponse';
+import { UserAuthPayload } from './../interfaces/UserAuthPayload';
 
-export const checkAuth = (req: Request, res: Response<BaseResponse>, next: NextFunction) => {
+export const checkAuth = (req: Request<any, any, any, any>, res: Response<BaseResponse>, next: NextFunction) => {
   try {
     // authHeader here is "Bearer accessToken"
-    const authHeader = req.header('Authorization');
-    const accessToken = authHeader && authHeader.split(' ')[1];
+    const accessToken = req.headers.authorization?.split(' ')[1];
 
     // check access token
     if (!accessToken)
@@ -27,8 +26,7 @@ export const checkAuth = (req: Request, res: Response<BaseResponse>, next: NextF
         message: 'Token không hợp lệ!',
       });
 
-    // send user
-    req.body.user = decodedUser;
+    req.userId = decodedUser.userId;
 
     return next();
   } catch (error) {

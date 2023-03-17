@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
+const Media_1 = require("./models/Media");
 const Role_1 = require("./models/Role");
 const User_1 = require("./models/User");
 const AppDataSource = new typeorm_1.DataSource({
@@ -10,7 +11,7 @@ const AppDataSource = new typeorm_1.DataSource({
     database: process.env.DB_NAME || '',
     synchronize: true,
     logging: false,
-    entities: [User_1.User, Role_1.Role],
+    entities: [User_1.User, Role_1.Role, Media_1.Media],
 });
 exports.default = AppDataSource;
 //# sourceMappingURL=AppDataSource.js.map

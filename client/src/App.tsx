@@ -1,20 +1,31 @@
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
-import { Fragment, useEffect, useMemo } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from './app/hook';
 import AuthRoute from './components/AuthRoute';
+import Error from './components/Error';
+import LoadingPage from './components/LoadingPage';
 import PrivateRoute from './components/PrivateRoute';
 import ClientLayout from './layouts/ClientLayout';
 import { authRoutes, privateRoutes, publicRoutes } from './routes';
-import { authFai, authPending, authSuccess } from './slices/authSlice';
+import { authFai, authPending, authSuccess, selectIsLoading } from './slices/authSlice';
 import { selectMode } from './slices/globalSlice';
 import { themeSettings } from './theme';
 import JWTManager from './utils/jwt';
 
 const App: React.FC = () => {
   const dispatch = useAppDispatch();
+  const isLoading = useAppSelector(selectIsLoading);
   const mode = useAppSelector(selectMode);
   const theme = useMemo(() => createTheme(themeSettings(mode) as any), [mode]);
+  const [loadingPage, setLoadingPage] = useState<boolean>(true);
+
+  // mặc định loading 0.5s
+  useEffect(() => {
+    setTimeout(() => {
+      setLoadingPage(false);
+    }, 500);
+  }, []);
 
   // check login on start application
   useEffect(() => {
@@ -26,6 +37,7 @@ const App: React.FC = () => {
         dispatch(authSuccess());
       } else {
         const success = await JWTManager.getRefreshToken();
+
         if (success) {
           dispatch(authSuccess());
         } else {
@@ -36,6 +48,10 @@ const App: React.FC = () => {
 
     authenticate();
   }, [dispatch]);
+
+  if (loadingPage || isLoading) {
+    return <LoadingPage />;
+  }
 
   return (
     <div className="App">
@@ -119,7 +135,10 @@ const App: React.FC = () => {
               })}
             </Route>
 
-            {/* <Route path="*" element={<NotFound />} /> */}
+            <Route path="/error/401" element={<Error type={401} />} />
+            <Route path="/error/403" element={<Error type={403} />} />
+            <Route path="/error/500" element={<Error type={500} />} />
+            <Route path="*" element={<Error type={404} />} />
           </Routes>
         </Router>
       </ThemeProvider>

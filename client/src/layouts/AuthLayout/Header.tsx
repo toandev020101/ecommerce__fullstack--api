@@ -8,14 +8,14 @@ const Header: React.FC = () => {
   const theme: Theme = useTheme();
 
   return (
-    <Box bgcolor={theme.palette.background.default} boxShadow="0 6px 6px #000000f">
+    <Box bgcolor={theme.palette.neutral[950]} boxShadow="0 6px 6px #000000f">
       <Container maxWidth="lg">
         <Box
           display="flex"
           justifyContent="space-between"
           alignItems="center"
           height="80px"
-          bgcolor={theme.palette.background.default}
+          bgcolor={theme.palette.neutral[950]}
         >
           <Link to="/">
             <Box display="flex" alignItems="center" gap="5px" color={theme.palette.primary[500]}>

@@ -1,3 +1,4 @@
+import { checkAuth } from './../middlewares/checkAuth';
 import express from 'express';
 import validateYup from '../middlewares/validateYup';
 import * as userController from '../controllers/userController';
@@ -20,5 +21,10 @@ router.post('/login', validateYup(loginSchema), userController.login);
 // @desc Refresh token user
 // @access private
 router.get('/refresh-token', userController.refreshToken);
+
+// @route GET api/v1/auth/logout
+// @desc Logout user
+// @access private
+router.get('/logout/:id', checkAuth, userController.logout);
 
 export default router;

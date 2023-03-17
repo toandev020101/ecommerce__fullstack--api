@@ -11,10 +11,10 @@ const Content: React.FC<Props> = ({ children }) => {
   const theme: Theme = useTheme();
 
   return (
-    <Box bgcolor={theme.palette.primary[500]} height="calc(100vh - 80px)">
+    <Box bgcolor={theme.palette.primary.main} height="calc(100vh - 80px)">
       <Container maxWidth="lg">
         <Grid container spacing="30px" margin="0">
-          <Grid item md={6} xs={0}>
+          <Grid item md={6} sm={0}>
             <Box
               display="flex"
               flexDirection="column"
@@ -22,7 +22,7 @@ const Content: React.FC<Props> = ({ children }) => {
               alignItems="center"
               gap="10px"
               height="calc(100vh - 80px)"
-              color={theme.palette.neutral[1000]}
+              color={theme.palette.neutral[950]}
             >
               <RiShoppingBag3FillIcon size="100px" />
               <Typography variant="h2" fontSize="50px" paddingTop="5px">
@@ -31,7 +31,7 @@ const Content: React.FC<Props> = ({ children }) => {
               <Typography fontSize="25px">Mua bán điện thoại, laptop và phụ kiện uy tín</Typography>
             </Box>
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={6} sm={12}>
             {children}
           </Grid>
         </Grid>

@@ -12,7 +12,7 @@ interface Props {
   [key: string]: any;
 }
 
-const InputField: React.FC<Props> = ({ form, name, errorServers, ...props }) => {
+const InputField: React.FC<Props> = ({ form, name, errorServers, hidden, label, required, ...props }) => {
   const theme: Theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const type = props.type;
@@ -22,7 +22,7 @@ const InputField: React.FC<Props> = ({ form, name, errorServers, ...props }) => 
       name={name}
       control={form.control}
       render={({ field: { onChange, onBlur, value, name, ref }, fieldState: { invalid, error: errorClient } }) => (
-        <Box position="relative">
+        <Box position="relative" width="100%" display={hidden ? 'none' : 'block'}>
           <TextField
             onBlur={onBlur} // notify when input is touched
             onChange={(e) => {
@@ -32,11 +32,10 @@ const InputField: React.FC<Props> = ({ form, name, errorServers, ...props }) => 
             value={value}
             inputRef={ref}
             name={name}
+            label={`${label}${required ? ' *' : ''}`}
             {...props}
             error={invalid || !!errorServers.find((error) => error.field === name)}
-            helperText={
-              errorClient?.message || errorServers[errorServers.findIndex((error) => error.field === name)]?.message
-            }
+            helperText={errorClient?.message || errorServers.find((error) => error.field === name)?.message}
             type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
             fullWidth
             sx={{

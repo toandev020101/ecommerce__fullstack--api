@@ -1,5 +1,5 @@
 import { BaseResponse } from './BaseResponse';
-import { User } from './User';
+import { User } from '../models/User';
 
 export interface AuthResponse extends BaseResponse {
   data?: User;

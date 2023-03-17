@@ -1,0 +1,8 @@
+﻿fullName,username,password,gender,email,phoneNumber,isActive,roleId,avatar
+Đức Toàn,toan020101,toando2001,0,toan_2051220154@dau.edu.vn,84924212027,1,1,http://localhost:4000/1679028715359_28461386-avatar3.jpg
+Thị A,thia123,thia123,1,a_1924838837@dau.edu.vn,,1,2,http://localhost:4000/1679028715350_525770119-avatar2.png
+Hoàng Long,hoanglong123,hoanglong123,0,long_2021453245@dau.edu.vn,84912415464,0,2,http://localhost:4000/1679028715362_472395417-avatar4.jpg
+Anh Kha,anhkha123,anhkha123,0,kha_2012421534@dau.edu.vn,84821454752,1,2,
+Hồ B,hob123,hob123,1,b_213243535@dau.edu.vn,,0,1,http://localhost:4000/1679028715348_921295069-avatar1.jpg
+Minh Tuấn,mintuan123,mintuan123,0,tuan_182946735@dau.edu.vn,84712497421,1,2,http://localhost:4000/1679028715363_889857246-avatar5.jpg
+Quang Tùng,quantung123,quantung123,0,tung_201242155@dau.edu.vn,84924212027,1,2,

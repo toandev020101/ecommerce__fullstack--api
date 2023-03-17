@@ -1,13 +1,14 @@
 import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup, useTheme } from '@mui/material';
 import React from 'react';
 import { Controller } from 'react-hook-form';
+import { ValueObject } from '../interfaces/ValueObject';
 import { Theme } from '../theme';
 
 interface Props {
   form: any;
   title: string;
   name: string;
-  valueObjects: { label: string; value: string | number }[];
+  valueObjects: ValueObject[];
   row: boolean;
   required: boolean;
   [key: string]: any;
@@ -33,7 +34,7 @@ const RadioGroupField: React.FC<Props> = ({ form, title, name, valueObjects, row
           >
             {title}
           </FormLabel>
-          <RadioGroup aria-labelledby={name} name={name} value={value} row={row}>
+          <RadioGroup aria-labelledby={name} name={name} value={value} row={row} defaultValue={valueObjects[0].value}>
             {valueObjects.map((valueObject, index) => (
               <FormControlLabel
                 key={`radio-${index}`}

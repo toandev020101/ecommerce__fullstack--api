@@ -17,3 +17,8 @@ export const refreshToken = (): Promise<AuthResponse> => {
   const url = '/auth/refresh-token';
   return axiosCLient.get(url);
 };
+
+export const logout = (id: number): Promise<AuthResponse> => {
+  const url = `/auth/logout/${id}`;
+  return axiosCLient.get(url);
+};

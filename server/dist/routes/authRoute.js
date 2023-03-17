@@ -26,6 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const checkAuth_1 = require("./../middlewares/checkAuth");
 const express_1 = __importDefault(require("express"));
 const validateYup_1 = __importDefault(require("../middlewares/validateYup"));
 const userController = __importStar(require("../controllers/userController"));
@@ -35,5 +36,6 @@ const router = express_1.default.Router();
 router.post('/register', (0, validateYup_1.default)(registerSchema_1.default), userController.register);
 router.post('/login', (0, validateYup_1.default)(loginSchema_1.default), userController.login);
 router.get('/refresh-token', userController.refreshToken);
+router.get('/logout/:id', checkAuth_1.checkAuth, userController.logout);
 exports.default = router;
 //# sourceMappingURL=authRoute.js.map

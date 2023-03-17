@@ -11,13 +11,13 @@ const axiosCLient = axios.create({
 
 // Add a request interceptor
 axiosCLient.interceptors.request.use(
-  function (config) {
+  function (config: any) {
     // Do something before request is sent
     // send token
-    const token = JWTManager.getToken();
+    const token = JWTManager.getToken() as string;
 
     config.headers = {
-      authorization: `Bearer ${token}`,
+      authorization: `Bearer ${token ? token : ''}`,
     } as any;
     return config;
   },

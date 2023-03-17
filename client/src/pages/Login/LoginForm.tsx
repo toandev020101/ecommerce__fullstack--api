@@ -31,7 +31,7 @@ const LoginForm: React.FC = () => {
     resolver: yupResolver(loginSchema),
   });
 
-  const handleSubmit = async (values: LoginInput) => {
+  const handleLoginSubmit = async (values: LoginInput) => {
     dispatch(authPending());
     try {
       const res = await authApi.login(values);
@@ -59,11 +59,11 @@ const LoginForm: React.FC = () => {
             page: 'login',
             type: 'error',
             message: data.message,
-            options: { theme: 'colored', toastId: 'homeId' },
+            options: { theme: 'colored', toastId: 'loginId' },
           }),
         );
-      } else {
-        // lỗi 500
+      } else if (data.code === 401 || data.code === 403 || data.code === 500) {
+        navigate(`/error/${data.code}`);
       }
 
       dispatch(authFai());
@@ -74,7 +74,7 @@ const LoginForm: React.FC = () => {
     <>
       <Box
         component="form"
-        onSubmit={form.handleSubmit(handleSubmit)}
+        onSubmit={form.handleSubmit(handleLoginSubmit)}
         display="flex"
         flexDirection="column"
         width="100%"
@@ -91,7 +91,7 @@ const LoginForm: React.FC = () => {
           sx={{
             backgroundColor: theme.palette.primary[500],
             color: theme.palette.neutral[1000],
-            height: '40px',
+            height: '45px',
             fontSize: '14px',
           }}
         >

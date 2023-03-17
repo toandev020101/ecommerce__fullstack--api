@@ -10,6 +10,7 @@ const validateYup = (schema: any) => async (req: Request, res: Response<void | B
     return next();
   } catch (error) {
     let errors: FieldError[] = [];
+    
     error.inner.forEach((err: any) => {
       errors = [...errors, { field: err.path, message: err.message }];
     });

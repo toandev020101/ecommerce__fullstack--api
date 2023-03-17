@@ -15,7 +15,7 @@ const initialState: ToastState = {
   page: null,
   type: 'info',
   message: undefined,
-  options: {},
+  options: { autoClose: 2000 },
 };
 
 export const toastSlice = createSlice({
@@ -23,8 +23,14 @@ export const toastSlice = createSlice({
   // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
-    showToast: (_state, action: PayloadAction<ToastState>) => {
-      return action.payload;
+    showToast: (state, action: PayloadAction<ToastState>) => {
+      state.page = action.payload.page;
+      state.type = action.payload.type;
+      state.message = action.payload.message;
+      state.options = {
+        ...state.options,
+        ...action.payload.options,
+      };
     },
     closeToast: () => {
       return initialState;

@@ -9,6 +9,7 @@
 body {
   font-family: 'Roboto', sans-serif;
   text-rendering: optimizeSpeed;
+  position: relative;
 }
 
 a {

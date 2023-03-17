@@ -26,10 +26,20 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const checkAuth_1 = require("./../middlewares/checkAuth");
 const express_1 = __importDefault(require("express"));
+const validateYup_1 = __importDefault(require("../middlewares/validateYup"));
 const userController = __importStar(require("../controllers/userController"));
+const userSchema_1 = __importDefault(require("../validations/userSchema"));
+const yup = __importStar(require("yup"));
 const router = express_1.default.Router();
-router.get('/', userController.getAll);
-router.get('/:id', userController.getOneById);
+router.get('/pagination/role', checkAuth_1.checkAuth, userController.getPaginationAndRole);
+router.get('/role', checkAuth_1.checkAuth, userController.getAllAndRole);
+router.get('/:id/role', checkAuth_1.checkAuth, userController.getOneAndRoleById);
+router.post('/any', checkAuth_1.checkAuth, (0, validateYup_1.default)(yup.array().of(userSchema_1.default)), userController.addAny);
+router.post('', checkAuth_1.checkAuth, (0, validateYup_1.default)(userSchema_1.default), userController.addOne);
+router.patch('/:id', checkAuth_1.checkAuth, userController.updateOne);
+router.delete('', checkAuth_1.checkAuth, userController.removeAny);
+router.delete('/:id', checkAuth_1.checkAuth, userController.removeOne);
 exports.default = router;
 //# sourceMappingURL=userRoute.js.map
