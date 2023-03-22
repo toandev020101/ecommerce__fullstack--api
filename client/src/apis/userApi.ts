@@ -20,22 +20,27 @@ export const getOneAndRoleById = (id: number): Promise<Response<User>> => {
 };
 
 export const addAny = (data: UserInput[]): Promise<Response<null>> => {
-  const url = `/user/any`;
+  const url = '/user/any';
   return axiosCLient.post(url, data);
 };
 
 export const addOne = (data: UserInput): Promise<Response<null>> => {
-  const url = `/user`;
+  const url = '/user';
   return axiosCLient.post(url, data);
 };
 
-export const updateOne = (id: number, data: { isActive: boolean }): Promise<Response<null>> => {
+export const updateOne = (id: number, data: UserInput): Promise<Response<null>> => {
+  const url = `/user/${id}`;
+  return axiosCLient.put(url, data);
+};
+
+export const changeActive = (id: number, data: { isActive: number }): Promise<Response<null>> => {
   const url = `/user/${id}`;
   return axiosCLient.patch(url, data);
 };
 
 export const removeAny = (ids: number[]): Promise<Response<null>> => {
-  const url = `/user`;
+  const url = '/user';
   return axiosCLient.delete(url, { data: { ids } });
 };
 

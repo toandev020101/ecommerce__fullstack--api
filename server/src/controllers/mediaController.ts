@@ -23,10 +23,10 @@ export const getPaginationAndUser = async (
   const { _limit, _page, _sort, _order, type, date, searchTerm } = req.query;
 
   try {
-    const userRepository = AppDataSource.getRepository(Media);
-    const queryBuilder = userRepository.createQueryBuilder('media');
+    const mediaRepository = AppDataSource.getRepository(Media);
+    const queryBuilder = mediaRepository.createQueryBuilder('media');
 
-    // find users
+    // find medias
     queryBuilder.select([
       'media.id',
       'media.fileUrl',

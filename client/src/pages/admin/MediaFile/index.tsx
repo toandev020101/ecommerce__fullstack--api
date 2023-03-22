@@ -1,3 +1,4 @@
+import { LoadingButton } from '@mui/lab';
 import {
   Box,
   Button,
@@ -20,24 +21,24 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import TitlePage from '../../../components/TitlePage';
-import ToastNotify from '../../../components/ToastNotify';
-import { Theme } from '../../../theme';
+import { AiOutlineFileAdd as AiOutlineFileAddIcon } from 'react-icons/ai';
 import {
-  BiTrashAlt as BiTrashAltIcon,
-  BiSearchAlt as BiSearchAltIcon,
   BiChevronLeft as BiChevronLeftIcon,
   BiChevronRight as BiChevronRightIcon,
+  BiSearchAlt as BiSearchAltIcon,
+  BiTrashAlt as BiTrashAltIcon,
   BiX as BiXIcon,
 } from 'react-icons/bi';
-import { FiPlusSquare as FiPlusSquareIcon } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
-import { Media } from '../../../models/Media';
-import * as mediaApi from '../../../apis/mediaApi';
-import { LoadingButton } from '@mui/lab';
 import { BsFillCheckSquareFill as BsFillCheckSquareFillIcon } from 'react-icons/bs';
+import { FiPlusSquare as FiPlusSquareIcon } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import * as mediaApi from '../../../apis/mediaApi';
 import { useAppDispatch } from '../../../app/hook';
+import TitlePage from '../../../components/TitlePage';
+import ToastNotify from '../../../components/ToastNotify';
+import { Media } from '../../../models/Media';
 import { showToast } from '../../../slices/toastSlice';
+import { Theme } from '../../../theme';
 import { dateToString, monthToString, toDate } from '../../../utils/date';
 
 const limit = 20;
@@ -72,8 +73,12 @@ const MediaFile: React.FC = () => {
 
   const [selectedArr, setSelectedArr] = useState<number[]>([]);
   const [modeSelect, setModeSelect] = useState<boolean>(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
+
+  const [openAddDialog, setOpenAddDialog] = useState<boolean>(false);
+  const [files, setFiles] = useState<File[]>([]);
+
   const [openDetailIndexDialog, setOpenDetailIndexDialog] = useState<number>(-1);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
 
   useEffect(() => {
     const getAllDate = async () => {
@@ -136,6 +141,51 @@ const MediaFile: React.FC = () => {
     };
     getPaginationMedia();
   }, [date, navigate, page, searchTerm, type, reload]);
+
+  useEffect(() => {
+    if (files.length > 0) {
+      // upload files
+      const formData = new FormData();
+      for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+      }
+
+      const uploadFiles = async () => {
+        try {
+          const res = await mediaApi.addAny(formData);
+
+          dispatch(
+            showToast({
+              page: 'mediaFile',
+              type: 'success',
+              message: res.message,
+              options: { theme: 'colored', toastId: 'mediaFileId' },
+            }),
+          );
+
+          setOpenAddDialog(false);
+          setReload(!reload);
+        } catch (error: any) {
+          const { data } = error.response;
+          if (data.code === 400) {
+            dispatch(
+              showToast({
+                page: 'mediaFile',
+                type: 'error',
+                message: data.message,
+                options: { theme: 'colored', toastId: 'mediaFileId' },
+              }),
+            );
+          } else if (data.code === 401 || data.code === 403 || data.code === 500) {
+            navigate(`/error/${data.code}`);
+          }
+        }
+      };
+
+      uploadFiles();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, navigate, files]);
 
   const handleTypeFilter = (e: SelectChangeEvent) => {
     setType(e.target.value);
@@ -207,6 +257,19 @@ const MediaFile: React.FC = () => {
       });
   };
 
+  const handleAddDialogClose = () => {
+    setOpenAddDialog(false);
+  };
+
+  const handleDragOver = (e: any) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (e: any) => {
+    e.preventDefault();
+    setFiles(e.dataTransfer.files);
+  };
+
   const handleDetailDialogClose = () => {
     setOpenDetailIndexDialog(-1);
   };
@@ -234,7 +297,7 @@ const MediaFile: React.FC = () => {
     } catch (error: any) {
       const { data } = error.response;
 
-      if (data.code === 404) {
+      if (data.code === 403 || data.code === 404) {
         dispatch(
           showToast({
             page: 'mediaFile',
@@ -243,7 +306,7 @@ const MediaFile: React.FC = () => {
             options: { theme: 'colored', toastId: 'mediaFileId' },
           }),
         );
-      } else if (data.code === 401 || data.code === 403 || data.code === 500) {
+      } else if (data.code === 401 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
     }
@@ -253,84 +316,6 @@ const MediaFile: React.FC = () => {
     <>
       <TitlePage title="Kho lưu trữ hình ảnh, video" />
       <ToastNotify name="mediaFile" />
-
-      {/* filter */}
-      <Box
-        padding="20px"
-        marginBottom="20px"
-        sx={{
-          bgcolor: theme.palette.neutral[1000],
-          boxShadow: `${theme.palette.neutral[700]} 0px 2px 10px 0px`,
-          borderRadius: '5px',
-
-          '& .MuiOutlinedInput-root': {
-            '&.Mui-focused fieldset': {
-              borderColor: theme.palette.primary[500],
-              fontSize: '16px',
-            },
-          },
-          '& label.Mui-focused': {
-            color: theme.palette.primary[500],
-            fontSize: '16px',
-          },
-        }}
-      >
-        <Typography variant="h4" marginBottom="20px">
-          Bộ lọc tìm kiếm
-        </Typography>
-        <Box display="flex" gap="40px">
-          {/* select */}
-          <FormControl fullWidth>
-            <InputLabel id="select-type" sx={{ fontSize: '15px' }}>
-              Chọn loại
-            </InputLabel>
-            <Select
-              labelId="select-type"
-              id="select"
-              value={type}
-              label="Chọn loại"
-              onChange={handleTypeFilter}
-              sx={{ fontSize: '15px' }}
-            >
-              <MenuItem value="">Chọn loại</MenuItem>
-              <MenuItem value="0">Hình ảnh</MenuItem>
-              <MenuItem value="1">Video</MenuItem>
-            </Select>
-          </FormControl>
-          {/* select */}
-
-          {/* select */}
-          <FormControl fullWidth>
-            <InputLabel id="select-date" sx={{ fontSize: '15px' }}>
-              Chọn ngày đăng
-            </InputLabel>
-            <Select
-              labelId="select-date"
-              id="select"
-              value={date}
-              label="Chọn ngày đăng"
-              onChange={handleDateFilter}
-              sx={{ fontSize: '15px' }}
-            >
-              <MenuItem value="">Chọn ngày đăng</MenuItem>
-              {dates.map((dateItem, index) => (
-                <MenuItem key={`date-item-${index}`} value={dateItem.value}>
-                  {dateItem.label}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          {/* select */}
-        </Box>
-
-        {(type !== '' || date !== '') && (
-          <Box textAlign="end" marginTop="20px">
-            <Button variant="outlined" color="error" startIcon={<BiTrashAltIcon />} onClick={handleResetFilterClick}>
-              Xóa bộ lọc
-            </Button>
-          </Box>
-        )}
-      </Box>
 
       <Box
         padding="20px"
@@ -356,6 +341,55 @@ const MediaFile: React.FC = () => {
         <Box display="flex" justifyContent="space-between">
           {/* left */}
           <Box display="flex" gap="10px">
+            {/* select */}
+            <FormControl size="small" sx={{ minWidth: '150px' }}>
+              <InputLabel id="select-type" sx={{ fontSize: '15px' }}>
+                Chọn loại
+              </InputLabel>
+              <Select
+                labelId="select-type"
+                id="select"
+                value={type}
+                label="Chọn loại"
+                onChange={handleTypeFilter}
+                sx={{ fontSize: '15px' }}
+              >
+                <MenuItem value="">Chọn loại</MenuItem>
+                <MenuItem value="0">Hình ảnh</MenuItem>
+                <MenuItem value="1">Video</MenuItem>
+              </Select>
+            </FormControl>
+            {/* select */}
+
+            {/* select */}
+            <FormControl size="small" sx={{ minWidth: '180px' }}>
+              <InputLabel id="select-date" sx={{ fontSize: '15px' }}>
+                Chọn ngày đăng
+              </InputLabel>
+              <Select
+                labelId="select-date"
+                id="select"
+                value={date}
+                label="Chọn ngày đăng"
+                onChange={handleDateFilter}
+                sx={{ fontSize: '15px' }}
+              >
+                <MenuItem value="">Chọn ngày đăng</MenuItem>
+                {dates.map((dateItem, index) => (
+                  <MenuItem key={`date-item-${index}`} value={dateItem.value}>
+                    {dateItem.label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {/* select */}
+
+            {(type !== '' || date !== '') && (
+              <Button variant="outlined" color="error" startIcon={<BiTrashAltIcon />} onClick={handleResetFilterClick}>
+                Xóa bộ lọc
+              </Button>
+            )}
+
             <Button variant="outlined" color="primary" onClick={handleModeSelectClick}>
               {modeSelect ? 'Hủy bỏ' : 'Chọn nhiều'}
             </Button>
@@ -377,7 +411,7 @@ const MediaFile: React.FC = () => {
           <Box display="flex" gap="10px" alignItems="center">
             <TextField
               id="outlined-basic"
-              label="Tìm kiếm tài khoản"
+              label="Tìm kiếm file media"
               variant="outlined"
               size="small"
               sx={{ width: '250px' }}
@@ -391,15 +425,14 @@ const MediaFile: React.FC = () => {
               onChange={handleSearchChange}
             />
 
-            <Link to="/quan-tri/kho-luu-tru/them-moi">
-              <Button
-                variant="contained"
-                startIcon={<FiPlusSquareIcon />}
-                sx={{ color: theme.palette.common.white, bgcolor: theme.palette.primary[500] }}
-              >
-                Thêm mới
-              </Button>
-            </Link>
+            <Button
+              variant="contained"
+              startIcon={<FiPlusSquareIcon />}
+              sx={{ color: theme.palette.common.white, bgcolor: theme.palette.primary[500] }}
+              onClick={() => setOpenAddDialog(true)}
+            >
+              Thêm mới
+            </Button>
           </Box>
           {/* right */}
         </Box>
@@ -413,7 +446,7 @@ const MediaFile: React.FC = () => {
             key={`media-${index}`}
             width="100%"
             sx={{
-              border: '1px solid #ccc',
+              border: selectedArr.includes(media.id) ? `2px solid ${theme.palette.secondary[500]}` : '1px solid #ccc',
               borderRadius: '2px',
               bgcolor: theme.palette.neutral[900],
               cursor: 'pointer',
@@ -440,7 +473,12 @@ const MediaFile: React.FC = () => {
               <BsFillCheckSquareFillIcon
                 color={theme.palette.secondary[500]}
                 fontSize="22px"
-                style={{ position: 'absolute', top: '-11px', right: '-8px' }}
+                style={{
+                  position: 'absolute',
+                  top: '-11px',
+                  right: '-8px',
+                  backgroundColor: theme.palette.neutral[1000],
+                }}
               />
             )}
           </Box>
@@ -466,6 +504,71 @@ const MediaFile: React.FC = () => {
           </LoadingButton>
         )}
       </Box>
+
+      {/* add dialog */}
+      <Dialog
+        open={openAddDialog}
+        onClose={handleAddDialogClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+        maxWidth="md"
+      >
+        <DialogTitle id="alert-dialog-title">
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Typography variant="h3">Thêm mới file media</Typography>
+
+            <IconButton onClick={handleAddDialogClose} color="error">
+              <BiXIcon fontSize="25px" />
+            </IconButton>
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          {/* upload */}
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            color={theme.palette.neutral[300]}
+            width="100%"
+            height="100%"
+          >
+            <Box
+              display="flex"
+              flexDirection="column"
+              justifyContent="center"
+              alignItems="center"
+              height="400px"
+              width="600px"
+              gap="20px"
+              sx={{ border: `2px dashed ${theme.palette.primary[500]}`, bgcolor: theme.palette.neutral[900] }}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+            >
+              <Typography variant="h3">Thả các tệp để tải lên</Typography>
+              <Typography variant="h5">Hoặc</Typography>
+              <LoadingButton
+                variant="contained"
+                loading={isLoading}
+                startIcon={<AiOutlineFileAddIcon />}
+                loadingPosition="start"
+                component="label"
+                sx={{ color: theme.palette.common.white, bgcolor: theme.palette.primary[500] }}
+              >
+                Chọn tập tin
+                <input
+                  hidden
+                  multiple
+                  accept="video/*,image/*"
+                  type="file"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFiles(e.target.files as any)}
+                />
+              </LoadingButton>
+            </Box>
+          </Box>
+          {/* upload */}
+        </DialogContent>
+      </Dialog>
+      {/* add dialog */}
 
       {/* detail dialog */}
       <Dialog
@@ -590,16 +693,15 @@ const MediaFile: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button
+            variant="outlined"
             onClick={() => {
               handleDeleteDialogClose();
               handleDeleteMedia();
             }}
-            autoFocus
-            sx={{ color: theme.palette.primary[400] }}
           >
             Xác nhận
           </Button>
-          <Button onClick={handleDeleteDialogClose} color="error">
+          <Button variant="outlined" onClick={handleDeleteDialogClose} color="error">
             Hủy
           </Button>
         </DialogActions>

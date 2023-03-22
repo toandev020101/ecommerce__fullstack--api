@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { RolePermission } from './RolePermission';
 import { User } from './User';
 
 @Entity()
@@ -15,13 +16,13 @@ export class Role extends BaseEntity {
   id!: number;
 
   @Column({ length: 65 })
-  code!: string;
-
-  @Column({ length: 65 })
   name!: string;
 
   @OneToMany(() => User, (user) => user.role)
   users: User[];
+
+  @OneToMany(() => RolePermission, (rolePermission) => rolePermission.role)
+  rolePermissions: RolePermission[];
 
   @CreateDateColumn()
   createdAt!: Date;

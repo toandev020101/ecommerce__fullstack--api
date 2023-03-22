@@ -10,17 +10,31 @@ interface Props {
   label: string;
   name: string;
   valueObjects: ValueObject[];
+  maxWidth?: string;
   required: boolean;
   [key: string]: any;
 }
 
-const SelectField: React.FC<Props> = ({ form, errorServers, label, name, valueObjects, required, ...props }) => {
+const SelectField: React.FC<Props> = ({
+  form,
+  errorServers,
+  label,
+  name,
+  valueObjects,
+  maxWidth,
+  required,
+  ...props
+}) => {
   return (
     <Controller
       name={name}
       control={form.control}
       render={({ field: { onChange, onBlur, value, name, ref }, fieldState: { invalid, error: errorClient } }) => (
-        <FormControl fullWidth error={invalid || !!errorServers.find((error) => error.field === name)}>
+        <FormControl
+          fullWidth
+          sx={{ maxWidth }}
+          error={invalid || !!errorServers.find((error) => error.field === name)}
+        >
           <InputLabel id={`demo-simple-select-${label}`}>
             {label}
             {required ? ' *' : ''}
@@ -31,7 +45,10 @@ const SelectField: React.FC<Props> = ({ form, errorServers, label, name, valueOb
             value={value}
             label={label}
             name={name}
-            onChange={onChange}
+            onChange={(e) => {
+              onChange(e);
+              errorServers = [];
+            }} // send value to hook form
             onBlur={onBlur}
             ref={ref}
             {...props}

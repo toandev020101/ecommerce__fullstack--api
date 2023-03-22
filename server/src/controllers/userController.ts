@@ -1,6 +1,3 @@
-import { removeFile, saveFile } from './../utils/file';
-import { FieldError } from './../interfaces/FieldError';
-import { UserInput } from './../interfaces/UserInput';
 import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import { Secret, verify } from 'jsonwebtoken';
@@ -8,9 +5,11 @@ import { Brackets } from 'typeorm';
 import AppDataSource from '../AppDataSource';
 import { AuthResponse } from '../interfaces/AuthResponse';
 import { CommonResponse, ListParams } from './../interfaces/common';
+import { FieldError } from './../interfaces/FieldError';
 import { LoginInput } from './../interfaces/LoginInput';
 import { RegisterInput } from './../interfaces/RegisterInput';
 import { UserAuthPayload } from './../interfaces/UserAuthPayload';
+import { UserInput } from './../interfaces/UserInput';
 import { Role } from './../models/Role';
 import { User } from './../models/User';
 import { createToken, sendRefreshToken } from './../utils/jwt';
@@ -37,7 +36,7 @@ export const register = async (req: Request<{}, {}, RegisterInput, {}>, res: Res
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // default role id
-    const role = await Role.findOneBy({ code: 'customer' });
+    const role = await Role.findOneBy({ name: 'Khách hàng' });
     if (!role) {
       // send error
       return res.status(500).json({
@@ -374,7 +373,7 @@ export const getOneAndRoleById = async (
       return res.status(404).json({
         code: 404,
         success: false,
-        message: 'Tài khoản không tồn tại',
+        message: 'Tài khoản không tồn tại!',
       });
     }
 
@@ -402,7 +401,7 @@ export const addAny = async (req: Request<{}, {}, UserInput[], {}>, res: Respons
   try {
     for (let i = 0; i < data.length; i++) {
       // check user
-      const { username, email, password, avatar } = data[i];
+      const { username, email, password } = data[i];
 
       const user = await User.findOne({ where: [{ username }, { email }] });
 
@@ -410,14 +409,8 @@ export const addAny = async (req: Request<{}, {}, UserInput[], {}>, res: Respons
         return res.status(400).json({
           code: 400,
           success: false,
-          message: 'Tên đăng nhập hoặc email đã tồn tại',
+          message: 'Tên đăng nhập hoặc email đã tồn tại!',
         });
-      }
-
-      if (avatar) {
-        const nameImage = `avatar_${username}`;
-        const pathImage = saveFile(avatar, nameImage);
-        data[i].avatar = pathImage;
       }
 
       // hash password
@@ -449,7 +442,7 @@ export const addAny = async (req: Request<{}, {}, UserInput[], {}>, res: Respons
 // add user
 export const addOne = async (req: Request<{}, {}, UserInput, {}>, res: Response<CommonResponse<null>>) => {
   const data = req.body;
-  const { username, email, password, avatar } = data;
+  const { username, email, password } = data;
   const errors: FieldError[] = [];
 
   try {
@@ -475,12 +468,6 @@ export const addOne = async (req: Request<{}, {}, UserInput, {}>, res: Response<
         message: 'Thêm tài khoản thất bại',
         errors,
       });
-    }
-
-    if (avatar) {
-      const nameImage = `avatar_${username}`;
-      const pathImage = saveFile(avatar, nameImage);
-      data.avatar = pathImage;
     }
 
     // hash password
@@ -509,7 +496,10 @@ export const addOne = async (req: Request<{}, {}, UserInput, {}>, res: Response<
 };
 
 // update one user
-export const updateOne = async (req: Request<{ id: number }, {}, User, {}>, res: Response<CommonResponse<null>>) => {
+export const updateOne = async (
+  req: Request<{ id: number }, {}, UserInput, {}>,
+  res: Response<CommonResponse<null>>,
+) => {
   const { id } = req.params;
   const data = req.body;
 
@@ -521,30 +511,8 @@ export const updateOne = async (req: Request<{ id: number }, {}, User, {}>, res:
       return res.status(404).json({
         code: 404,
         success: false,
-        message: 'Tài khoản không tồn tại',
+        message: 'Tài khoản không tồn tại!',
       });
-    }
-
-    if (data.username || data.email) {
-      user = await User.findOne({ where: [{ username: data.username }, { email: data.email }] });
-
-      if (user) {
-        return res.status(400).json({
-          code: 400,
-          success: false,
-          message: 'Tên đăng nhập hoặc email đã tồn tại',
-        });
-      }
-    }
-
-    if (data.avatar && data.avatar !== user?.avatar) {
-      if (user?.avatar) {
-        removeFile(user?.avatar);
-      }
-
-      const nameImage = `avatar_${user?.username}`;
-      const pathImage = saveFile(data.avatar, nameImage);
-      data.avatar = pathImage;
     }
 
     // update user
@@ -581,7 +549,7 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
         return res.status(404).json({
           code: 404,
           success: false,
-          message: 'Tài khoản không tồn tại',
+          message: 'Tài khoản không tồn tại!',
         });
       }
 
@@ -593,16 +561,11 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
     // delete user
     await User.delete(ids);
 
-    // delete avatar
-    for (let i = 0; i < avatars.length; i++) {
-      removeFile(avatars[i]);
-    }
-
     // send results
     return res.status(200).json({
       code: 200,
       success: true,
-      message: 'Xóa tài khoản thành công',
+      message: 'Xóa danh sách tài khoản thành công',
       data: null,
     });
   } catch (error) {
@@ -632,11 +595,6 @@ export const removeOne = async (req: Request<{ id: number }, {}, {}, {}>, res: R
 
     // delete user
     await User.delete(id);
-
-    // delete avatar image
-    if (user.avatar) {
-      removeFile(user.avatar);
-    }
 
     // send results
     return res.status(200).json({

@@ -21,11 +21,13 @@ const AdminLayout: React.FC<Props> = ({ children }) => {
       <Box minWidth="100vw" minHeight="100vh" sx={{ backgroundColor: theme.palette.neutral[950] }}>
         <Sidebar width={widthDrawer} />
 
-        <Box width="100%" paddingLeft={isOpenSidebar ? widthDrawer : '0'}>
+        <Box width="100%" height="100%" paddingLeft={isOpenSidebar ? widthDrawer : '0'}>
           <Header />
 
           {/* content */}
-          <Box padding="20px">{children}</Box>
+          <Box padding="20px" width="100%" height="100%">
+            {children}
+          </Box>
           {/* content */}
 
           <Footer />

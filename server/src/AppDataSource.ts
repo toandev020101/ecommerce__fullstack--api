@@ -1,6 +1,8 @@
 import { DataSource } from 'typeorm';
 import { Media } from './models/Media';
+import { Permission } from './models/Permission';
 import { Role } from './models/Role';
+import { RolePermission } from './models/RolePermission';
 import { User } from './models/User';
 
 const AppDataSource = new DataSource({
@@ -10,7 +12,7 @@ const AppDataSource = new DataSource({
   database: process.env.DB_NAME || '',
   synchronize: true,
   logging: false,
-  entities: [User, Role, Media],
+  entities: [User, Role, Permission, RolePermission, Media],
 });
 
 export default AppDataSource;

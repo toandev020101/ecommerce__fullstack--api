@@ -43,7 +43,14 @@ export const monthToString = (month: number) => {
 
 export const dateToString = (date: any) => {
   const newDate = new Date(date);
-  return `${newDate.getDay()} ${monthToString(newDate.getMonth())}, ${newDate.getFullYear()}`;
+  return `${newDate.getDate()} ${monthToString(newDate.getMonth())}, ${newDate.getFullYear()}`;
+};
+
+export const fullDateToString = (date: any) => {
+  const newDate = new Date(date);
+  return `${newDate.getHours() % 12}:${newDate.getMinutes()} ${
+    newDate.getHours() < 12 ? 'AM' : 'PM'
+  }, ${newDate.getDate()}/${newDate.getMonth() + 1}/${newDate.getFullYear()}`;
 };
 
 export const toDate = (date: any) => {

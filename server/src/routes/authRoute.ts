@@ -16,15 +16,14 @@ router.post('/register', validateYup(registerSchema), userController.register);
 // @desc Login user
 // @access Public
 router.post('/login', validateYup(loginSchema), userController.login);
-
 // @route GET api/v1/auth/refresh-token
 // @desc Refresh token user
-// @access private
+// @access Public
 router.get('/refresh-token', userController.refreshToken);
 
 // @route GET api/v1/auth/logout
 // @desc Logout user
-// @access private
+// @access Private
 router.get('/logout/:id', checkAuth, userController.logout);
 
 export default router;

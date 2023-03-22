@@ -55,7 +55,7 @@ const Header: React.FC = () => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const getUser = async () => {
+    const getOneUser = async () => {
       try {
         const res = await userApi.getOneAndRoleById(JWTManager.getUserId() as number);
         setUser(res.data as User);
@@ -67,7 +67,7 @@ const Header: React.FC = () => {
         }
       }
     };
-    getUser();
+    getOneUser();
   }, [navigate]);
 
   const handleLogout = async () => {

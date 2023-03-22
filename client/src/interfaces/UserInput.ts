@@ -5,7 +5,7 @@ export interface UserInput {
   gender: number;
   email?: string;
   phoneNumber?: string;
+  avatar?: string;
   isActive: number;
   roleId: number | string;
-  avatar?: string;
 }

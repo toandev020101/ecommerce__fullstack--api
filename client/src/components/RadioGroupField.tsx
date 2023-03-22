@@ -34,7 +34,7 @@ const RadioGroupField: React.FC<Props> = ({ form, title, name, valueObjects, row
           >
             {title}
           </FormLabel>
-          <RadioGroup aria-labelledby={name} name={name} value={value} row={row} defaultValue={valueObjects[0].value}>
+          <RadioGroup aria-labelledby={name} name={name} value={value} row={row}>
             {valueObjects.map((valueObject, index) => (
               <FormControlLabel
                 key={`radio-${index}`}

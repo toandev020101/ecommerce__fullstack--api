@@ -26,11 +26,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const checkPermission_1 = require("./../middlewares/checkPermission");
 const checkAuth_1 = require("./../middlewares/checkAuth");
 const express_1 = __importDefault(require("express"));
 const roleController = __importStar(require("../controllers/roleController"));
 const router = express_1.default.Router();
-router.get('/', checkAuth_1.checkAuth, roleController.getAll);
-router.get('/:id', checkAuth_1.checkAuth, roleController.getOneById);
+router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role', 'get'), roleController.getAll);
+router.get('/user', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/user', 'get'), roleController.getAllAndUser);
+router.get('/:id/permission', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/:id/permission', 'get'), roleController.getOneAndPermissionById);
+router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role', 'post'), roleController.addOne);
+router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/:id', 'put'), roleController.updateOne);
+router.delete('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/:id', 'delete'), roleController.removeOne);
 exports.default = router;
 //# sourceMappingURL=roleRoute.js.map

@@ -151,19 +151,15 @@ const Sidebar: React.FC<Props> = ({ width }) => {
       child: [
         {
           slug: 'danh-sach',
-          name: 'Tất cả tài khoản',
+          name: 'Danh sách tài khoản',
         },
         {
           slug: 'vai-tro',
           name: 'Vai trò',
         },
         {
-          slug: 'chuc-nang',
-          name: 'Chức năng',
-        },
-        {
-          slug: 'phan-quyen',
-          name: 'Phân quyền',
+          slug: 'quyen',
+          name: 'Quyền',
         },
       ],
     },

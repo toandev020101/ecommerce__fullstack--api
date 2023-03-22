@@ -3,43 +3,69 @@ import { LoadingButton } from '@mui/lab';
 import { Avatar, Box, Breadcrumbs, Button, Grid, Typography, useTheme } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { BiReset as BiResetIcon } from 'react-icons/bi';
+import { BiEdit as BiEditIcon, BiReset as BiResetIcon } from 'react-icons/bi';
 import { FiPlusSquare as FiPlusSquareIcon } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
-import * as roleApi from '../../../apis/roleApi';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import * as userApi from '../../../apis/userApi';
+import * as roleApi from '../../../apis/roleApi';
 import { useAppDispatch } from '../../../app/hook';
 import InputField from '../../../components/InputField';
+import MediaDialog from '../../../components/MediaDialog';
 import RadioGroupField from '../../../components/RadioGroupField';
 import SelectField from '../../../components/SelectField';
 import TitlePage from '../../../components/TitlePage';
 import ToastNotify from '../../../components/ToastNotify';
 import { FieldError } from '../../../interfaces/FieldError';
 import { UserInput } from '../../../interfaces/UserInput';
-import { ValueObject } from '../../../interfaces/ValueObject';
 import { Role } from '../../../models/Role';
+import { User } from '../../../models/User';
 import { showToast } from '../../../slices/toastSlice';
 import { Theme } from '../../../theme';
 import userSchema from '../../../validations/userSchema';
+import { ValueObject } from '../../../interfaces/ValueObject';
+import { BaseResponse } from '../../../interfaces/BaseResponse';
 
 const AddOrEditAccount: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme: Theme = useTheme();
+  const { id } = useParams();
+
+  const [roles, setRoles] = useState<ValueObject[]>([]);
+  const [avatar, setAvatar] = useState<string>('');
+  const [isOpenMediaDialog, setIsOpenMediaDialog] = useState<boolean>(false);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<FieldError[]>([]);
-  const [roles, setRoles] = useState<ValueObject[]>([]);
+
+  const form = useForm<UserInput>({
+    defaultValues: {
+      fullName: '',
+      username: '',
+      password: '',
+      gender: 0,
+      email: '',
+      avatar: '',
+      phoneNumber: '',
+      isActive: 1,
+      roleId: '',
+    },
+    resolver: yupResolver(userSchema),
+  });
 
   useEffect(() => {
     const getAllRole = async () => {
       try {
         const res = await roleApi.getAll();
-
-        const roleData = res.data as Role[];
+        const resData = res.data as Role[];
         let data: ValueObject[] = [];
-        for (let i = 0; i < roleData.length; i++) {
-          data.push({ label: roleData[i].name, value: roleData[i].id });
+
+        for (let i = 0; i < resData.length; i++) {
+          data.push({ label: resData[i].name, value: resData[i].id });
+          if (resData[i].name === 'Khách hàng') {
+            form.setValue('roleId', resData[i].id);
+          }
         }
         setRoles(data);
       } catch (error: any) {
@@ -51,28 +77,64 @@ const AddOrEditAccount: React.FC = () => {
     };
 
     getAllRole();
-  }, [navigate]);
+  }, [form, navigate]);
 
-  const form = useForm<UserInput>({
-    defaultValues: {
-      fullName: '',
-      username: '',
-      password: '',
-      gender: 0,
-      email: undefined,
-      avatar: undefined,
-      phoneNumber: undefined,
-      isActive: 1,
-      roleId: '',
-    },
-    resolver: yupResolver(userSchema),
-  });
+  useEffect(() => {
+    // check mode add or edit
+    const { pathname } = location;
+    const slugArr = pathname.split('/');
+    const mode = slugArr[slugArr.length - 2];
+
+    const getOneUser = async () => {
+      try {
+        const res = await userApi.getOneAndRoleById(parseInt(id as string));
+        const resData = res.data as User;
+
+        setAvatar(resData.avatar as string);
+        form.reset({
+          fullName: resData ? resData.fullName : '',
+          username: resData ? resData.username : '',
+          gender: resData ? resData.gender : 0,
+          email: resData.email ? resData.email : '',
+          avatar: resData.avatar ? resData.avatar : '',
+          phoneNumber: resData.phoneNumber ? resData.phoneNumber : '',
+          isActive: resData ? resData.isActive : 1,
+          roleId: resData ? resData.roleId?.toString() : (form.getValues('roleId') as string),
+        });
+      } catch (error: any) {
+        const { data } = error.response;
+        if (data.code === 404 || data.code === 401 || data.code === 403 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+
+    if (mode === 'chinh-sua') {
+      getOneUser();
+    }
+  }, [dispatch, form, id, location, navigate]);
+
+  const handleConfirmDialog = (newAvatar: string) => {
+    form.setValue('avatar', newAvatar);
+    setAvatar(newAvatar);
+  };
+
+  const handleDeleteAvatar = () => {
+    form.setValue('avatar', '');
+    setAvatar('');
+  };
 
   const handleAddOrEditSubmit = async (values: UserInput) => {
     setIsLoading(true);
 
     try {
-      const res = await userApi.addOne(values);
+      let res: BaseResponse;
+      if (id) {
+        res = await userApi.updateOne(parseInt(id), values);
+      } else {
+        res = await userApi.addOne(values);
+      }
+
       dispatch(
         showToast({
           page: 'account',
@@ -81,12 +143,13 @@ const AddOrEditAccount: React.FC = () => {
           options: { theme: 'colored', toastId: 'accountId' },
         }),
       );
+      setIsLoading(false);
       navigate('/quan-tri/tai-khoan/danh-sach');
     } catch (error: any) {
       setIsLoading(false);
 
       const { data } = error.response;
-      if (data.code === 400) {
+      if (data.code === 403 || data.code === 400) {
         setErrors(data.errors);
         dispatch(
           showToast({
@@ -98,19 +161,24 @@ const AddOrEditAccount: React.FC = () => {
         );
       }
 
-      if (data.code === 401 || data.code === 403 || data.code === 500) {
+      if (data.code === 401 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
     }
   };
 
+  const handleResetForm = () => {
+    form.reset();
+    setAvatar(form.getValues('avatar') as string);
+  };
+
   return (
     <>
-      <TitlePage title="Thêm mới tài khoản" />
+      <TitlePage title={`${id ? 'Chỉnh sửa' : 'Thêm mới'} tài khoản`} />
       <ToastNotify name="addOrEditAccount" />
       <Breadcrumbs aria-label="breadcrumb" sx={{ marginBottom: '20px' }}>
         <Link to="/quan-tri/tai-khoan/danh-sach">Danh sách</Link>
-        <Typography color="text.primary">Thêm mới</Typography>
+        <Typography color="text.primary">{id ? 'Chỉnh sửa' : 'Thêm mới'}</Typography>
       </Breadcrumbs>
 
       <Grid container spacing={2} component="form" onSubmit={form.handleSubmit(handleAddOrEditSubmit)}>
@@ -135,25 +203,50 @@ const AddOrEditAccount: React.FC = () => {
               },
             }}
           >
-            <Box display="flex" justifyContent="center" alignItems="center" flexDirection="column" gap="20px">
-              <Avatar src="" alt="no-avatar.png" sx={{ width: '150px', height: '150px' }} />
-              <Box display="flex" gap="10px" marginBottom="30px">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              flexDirection="column"
+              gap="20px"
+              marginBottom="20px"
+            >
+              <Avatar
+                src={avatar}
+                alt="avatar.png"
+                sx={{ width: '150px', height: '150px', border: '1px solid #ccc' }}
+              />
+
+              <InputField form={form} errorServers={errors} name="avatar" label="Ảnh đại diện" required hidden />
+
+              <Box display="flex" gap="20px">
                 <Button
                   variant="contained"
                   sx={{ color: theme.palette.common.white, bgcolor: theme.palette.primary[500] }}
-                  component="label"
+                  onClick={() => setIsOpenMediaDialog(true)}
                 >
                   Thay đổi hình ảnh
                 </Button>
-                <Button variant="contained" color="secondary">
-                  Làm lại
+
+                <Button variant="contained" color="error" onClick={handleDeleteAvatar}>
+                  Xóa hình ảnh
                 </Button>
               </Box>
             </Box>
 
             <InputField form={form} errorServers={errors} name="fullName" label="Họ và tên" required />
-            <InputField form={form} errorServers={errors} name="username" label="Tên đăng nhập" required />
-            <InputField form={form} errorServers={errors} name="password" label="Mật khẩu" type="password" required />
+            <InputField
+              form={form}
+              errorServers={errors}
+              name="username"
+              label="Tên đăng nhập"
+              disabled={!!id}
+              required
+            />
+
+            {!id && (
+              <InputField form={form} errorServers={errors} name="password" label="Mật khẩu" type="password" required />
+            )}
 
             <RadioGroupField
               form={form}
@@ -171,7 +264,7 @@ const AddOrEditAccount: React.FC = () => {
               <LoadingButton
                 variant="contained"
                 loading={isLoading}
-                startIcon={<FiPlusSquareIcon />}
+                startIcon={id ? <BiEditIcon /> : <FiPlusSquareIcon />}
                 loadingPosition="start"
                 type="submit"
                 sx={{
@@ -179,9 +272,9 @@ const AddOrEditAccount: React.FC = () => {
                   color: theme.palette.neutral[1000],
                 }}
               >
-                Thêm mới
+                {id ? 'Cập nhật' : 'Thêm mới'}
               </LoadingButton>
-              <Button variant="contained" startIcon={<BiResetIcon />} color="secondary" onClick={() => form.reset()}>
+              <Button variant="contained" startIcon={<BiResetIcon />} color="secondary" onClick={handleResetForm}>
                 Làm lại
               </Button>
             </Box>
@@ -243,6 +336,13 @@ const AddOrEditAccount: React.FC = () => {
           </Box>
         </Grid>
       </Grid>
+
+      <MediaDialog
+        title="Ảnh đại diện"
+        isOpen={isOpenMediaDialog}
+        handleClose={() => setIsOpenMediaDialog(false)}
+        handleConfirm={handleConfirmDialog}
+      />
     </>
   );
 };

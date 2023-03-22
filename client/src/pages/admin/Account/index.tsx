@@ -42,7 +42,6 @@ import {
   BiExport as BiExportIcon,
   BiImport as BiImportIcon,
   BiSearchAlt as BiSearchAltIcon,
-  BiShowAlt as BiShowAltIcon,
   BiTrashAlt as BiTrashAltIcon,
 } from 'react-icons/bi';
 import {
@@ -263,7 +262,13 @@ const Account: React.FC = () => {
           isActive,
           searchTerm,
         });
-        setRows(res.data as User[]);
+
+        const resData = res.data as User[];
+        if (resData.length === 0 && page > 0) {
+          setPage(page - 1);
+        }
+
+        setRows(resData);
         setTotal(res.pagination?._total as number);
         setIsLoading(false);
       } catch (error: any) {
@@ -366,7 +371,7 @@ const Account: React.FC = () => {
     } catch (error: any) {
       const { data } = error.response;
 
-      if (data.code === 404) {
+      if (data.code === 403 || data.code === 404) {
         dispatch(
           showToast({
             page: 'account',
@@ -375,7 +380,7 @@ const Account: React.FC = () => {
             options: { theme: 'colored', toastId: 'accountId' },
           }),
         );
-      } else if (data.code === 401 || data.code === 403 || data.code === 500) {
+      } else if (data.code === 401 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
     }
@@ -407,13 +412,12 @@ const Account: React.FC = () => {
   const handleImportDataUpload = (e: any) => {
     const file = e.target.files[0];
     Papa.parse(file, {
-      header: true,
-      skipEmptyLines: true,
       complete: async (results: any) => {
         setIsImportDataLoading(true);
+
         // Xử lý dữ liệu ở đây
         const data: UserInput[] = [];
-        for (let i = 1; i < results.data.length; i++) {
+        for (let i = 1; i < results.data.length - 1; i++) {
           let user: any = {};
           for (let j = 0; j < results.data[i].length; j++) {
             if (results.data[0][j] && results.data[0][j] !== '') {
@@ -425,7 +429,7 @@ const Account: React.FC = () => {
 
         for (let i = 0; i < data.length; i++) {
           for (let j = i + 1; j < data.length; j++) {
-            if (data[i].username === data[j].username || data[i].email === data[j].email) {
+            if (data[i].username === data[j].username || (data[i].email && data[i].email === data[j].email)) {
               dispatch(
                 showToast({
                   page: 'account',
@@ -472,16 +476,16 @@ const Account: React.FC = () => {
           const { data } = error.response;
           setIsImportDataLoading(false);
 
-          if (data.code === 400) {
+          if (data.code === 400 || data.code === 403) {
             dispatch(
               showToast({
                 page: 'account',
                 type: 'error',
-                message: 'Nhập file .csv thất bại',
+                message: data.code === 400 ? 'Nhập file .csv thất bại' : data.message,
                 options: { theme: 'colored', toastId: 'accountId' },
               }),
             );
-          } else if (data.code === 401 || data.code === 403 || data.code === 500) {
+          } else if (data.code === 401 || data.code === 500) {
             navigate(`/error/${data.code}`);
           }
         }
@@ -529,7 +533,16 @@ const Account: React.FC = () => {
     } catch (error: any) {
       const { data } = error.response;
       setIsExportDataLoading(false);
-      if (data.code === 401 || data.code === 403 || data.code === 500) {
+      if (data.code === 403) {
+        dispatch(
+          showToast({
+            page: 'account',
+            type: 'error',
+            message: data.message,
+            options: { theme: 'colored', toastId: 'accountId' },
+          }),
+        );
+      } else if (data.code === 401 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
     }
@@ -540,7 +553,7 @@ const Account: React.FC = () => {
     const isActive = e.target.checked;
 
     try {
-      const res = await userApi.updateOne(id, { isActive });
+      const res = await userApi.changeActive(id, { isActive: isActive ? 1 : 0 });
       dispatch(
         showToast({
           page: 'account',
@@ -554,7 +567,7 @@ const Account: React.FC = () => {
       setRows([...rows]);
     } catch (error: any) {
       const { data } = error.response;
-      if (data.code === 404) {
+      if (data.code === 403 || data.code === 404) {
         dispatch(
           showToast({
             page: 'account',
@@ -563,7 +576,7 @@ const Account: React.FC = () => {
             options: { theme: 'colored', toastId: 'accountId' },
           }),
         );
-      } else if (data.code === 401 || data.code === 403 || data.code === 500) {
+      } else if (data.code === 401 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
     }
@@ -924,12 +937,6 @@ const Account: React.FC = () => {
                           <Box display="flex" gap="10px">
                             <Skeleton animation="wave" variant="circular">
                               <IconButton>
-                                <BiShowAltIcon />
-                              </IconButton>
-                            </Skeleton>
-
-                            <Skeleton animation="wave" variant="circular">
-                              <IconButton>
                                 <BiEditIcon />
                               </IconButton>
                             </Skeleton>
@@ -1009,9 +1016,11 @@ const Account: React.FC = () => {
                         <TableCell sx={{ fontSize: '14px' }}>
                           <Box display="flex" gap="10px">
                             <Tooltip title="Sửa">
-                              <IconButton onClick={(e: any) => e.stopPropagation()}>
-                                <BiEditIcon style={{ color: theme.palette.warning.main }} />
-                              </IconButton>
+                              <Link to={`/quan-tri/tai-khoan/danh-sach/chinh-sua/${row.id}`}>
+                                <IconButton>
+                                  <BiEditIcon style={{ color: theme.palette.warning.main }} />
+                                </IconButton>
+                              </Link>
                             </Tooltip>
 
                             {row.id !== JWTManager.getUserId() && (
@@ -1035,7 +1044,7 @@ const Account: React.FC = () => {
                   {rows.length === 0 && (
                     <TableRow style={{ height: 53 }}>
                       <TableCell colSpan={headCells.length + 1} align="center" sx={{ fontSize: '14px' }}>
-                        Không có tài khoản nào!
+                        Không có dữ liệu nào!
                       </TableCell>
                     </TableRow>
                   )}
@@ -1087,16 +1096,15 @@ const Account: React.FC = () => {
           </DialogContent>
           <DialogActions>
             <Button
+              variant="outlined"
               onClick={() => {
                 handleDeleteDialogClose();
                 handleDeleteRow();
               }}
-              autoFocus
-              sx={{ color: theme.palette.primary[400] }}
             >
               Xác nhận
             </Button>
-            <Button onClick={handleDeleteDialogClose} color="error">
+            <Button variant="outlined" onClick={handleDeleteDialogClose} color="error">
               Hủy
             </Button>
           </DialogActions>

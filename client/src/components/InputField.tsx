@@ -33,11 +33,11 @@ const InputField: React.FC<Props> = ({ form, name, errorServers, hidden, label, 
             inputRef={ref}
             name={name}
             label={`${label}${required ? ' *' : ''}`}
+            fullWidth
             {...props}
             error={invalid || !!errorServers.find((error) => error.field === name)}
             helperText={errorClient?.message || errorServers.find((error) => error.field === name)?.message}
             type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
-            fullWidth
             sx={{
               '& .MuiOutlinedInput-root': {
                 '&.Mui-focused fieldset': {

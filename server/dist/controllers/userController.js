@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeOne = exports.removeAny = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
-const file_1 = require("./../utils/file");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("jsonwebtoken");
 const typeorm_1 = require("typeorm");
@@ -35,7 +34,7 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         const salt = yield bcrypt_1.default.genSalt(10);
         const hashedPassword = yield bcrypt_1.default.hash(password, salt);
-        const role = yield Role_1.Role.findOneBy({ code: 'customer' });
+        const role = yield Role_1.Role.findOneBy({ name: 'Khách hàng' });
         if (!role) {
             return res.status(500).json({
                 code: 500,
@@ -293,7 +292,7 @@ const getOneAndRoleById = (req, res) => __awaiter(void 0, void 0, void 0, functi
             return res.status(404).json({
                 code: 404,
                 success: false,
-                message: 'Tài khoản không tồn tại',
+                message: 'Tài khoản không tồn tại!',
             });
         }
         return res.status(200).json({
@@ -316,19 +315,14 @@ const addAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
     try {
         for (let i = 0; i < data.length; i++) {
-            const { username, email, password, avatar } = data[i];
+            const { username, email, password } = data[i];
             const user = yield User_1.User.findOne({ where: [{ username }, { email }] });
             if (user) {
                 return res.status(400).json({
                     code: 400,
                     success: false,
-                    message: 'Tên đăng nhập hoặc email đã tồn tại',
+                    message: 'Tên đăng nhập hoặc email đã tồn tại!',
                 });
-            }
-            if (avatar) {
-                const nameImage = `avatar_${username}`;
-                const pathImage = (0, file_1.saveFile)(avatar, nameImage);
-                data[i].avatar = pathImage;
             }
             const salt = yield bcrypt_1.default.genSalt(10);
             const hashedPassword = yield bcrypt_1.default.hash(password, salt);
@@ -353,7 +347,7 @@ const addAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.addAny = addAny;
 const addOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const data = req.body;
-    const { username, email, password, avatar } = data;
+    const { username, email, password } = data;
     const errors = [];
     try {
         let user = yield User_1.User.findOne({ where: { username } });
@@ -373,11 +367,6 @@ const addOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 message: 'Thêm tài khoản thất bại',
                 errors,
             });
-        }
-        if (avatar) {
-            const nameImage = `avatar_${username}`;
-            const pathImage = (0, file_1.saveFile)(avatar, nameImage);
-            data.avatar = pathImage;
         }
         const salt = yield bcrypt_1.default.genSalt(10);
         const hashedPassword = yield bcrypt_1.default.hash(password, salt);
@@ -408,26 +397,8 @@ const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return res.status(404).json({
                 code: 404,
                 success: false,
-                message: 'Tài khoản không tồn tại',
+                message: 'Tài khoản không tồn tại!',
             });
-        }
-        if (data.username || data.email) {
-            user = yield User_1.User.findOne({ where: [{ username: data.username }, { email: data.email }] });
-            if (user) {
-                return res.status(400).json({
-                    code: 400,
-                    success: false,
-                    message: 'Tên đăng nhập hoặc email đã tồn tại',
-                });
-            }
-        }
-        if (data.avatar && data.avatar !== (user === null || user === void 0 ? void 0 : user.avatar)) {
-            if (user === null || user === void 0 ? void 0 : user.avatar) {
-                (0, file_1.removeFile)(user === null || user === void 0 ? void 0 : user.avatar);
-            }
-            const nameImage = `avatar_${user === null || user === void 0 ? void 0 : user.username}`;
-            const pathImage = (0, file_1.saveFile)(data.avatar, nameImage);
-            data.avatar = pathImage;
         }
         yield User_1.User.update(id, data);
         return res.status(200).json({
@@ -456,7 +427,7 @@ const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 return res.status(404).json({
                     code: 404,
                     success: false,
-                    message: 'Tài khoản không tồn tại',
+                    message: 'Tài khoản không tồn tại!',
                 });
             }
             if (user.avatar) {
@@ -464,13 +435,10 @@ const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
         yield User_1.User.delete(ids);
-        for (let i = 0; i < avatars.length; i++) {
-            (0, file_1.removeFile)(avatars[i]);
-        }
         return res.status(200).json({
             code: 200,
             success: true,
-            message: 'Xóa tài khoản thành công',
+            message: 'Xóa danh sách tài khoản thành công',
             data: null,
         });
     }
@@ -495,9 +463,6 @@ const removeOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             });
         }
         yield User_1.User.delete(id);
-        if (user.avatar) {
-            (0, file_1.removeFile)(user.avatar);
-        }
         return res.status(200).json({
             code: 200,
             success: true,

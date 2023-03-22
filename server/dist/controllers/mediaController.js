@@ -20,8 +20,8 @@ const typeorm_1 = require("typeorm");
 const getPaginationAndUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _limit, _page, _sort, _order, type, date, searchTerm } = req.query;
     try {
-        const userRepository = AppDataSource_1.default.getRepository(Media_1.Media);
-        const queryBuilder = userRepository.createQueryBuilder('media');
+        const mediaRepository = AppDataSource_1.default.getRepository(Media_1.Media);
+        const queryBuilder = mediaRepository.createQueryBuilder('media');
         queryBuilder.select([
             'media.id',
             'media.fileUrl',
