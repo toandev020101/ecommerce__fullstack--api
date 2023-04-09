@@ -38,9 +38,9 @@ const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getAll = getAll;
 const getPaginationAndRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { _limit, _page, _sort, _order, searchTerm } = req.query;
+    const { _limit, _page, _sort, _order, method, searchTerm } = req.query;
     try {
-        const permissions = yield Permission_1.Permission.find({
+        const permissionRes = yield Permission_1.Permission.findAndCount({
             select: {
                 id: true,
                 name: true,
@@ -57,7 +57,12 @@ const getPaginationAndRole = (req, res) => __awaiter(void 0, void 0, void 0, fun
                     },
                 },
             },
-            where: { name: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+            where: method
+                ? [
+                    { method, name: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                    { method, slug: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                ]
+                : [{ name: (0, typeorm_1.Like)(`%${searchTerm}%`) }, { slug: (0, typeorm_1.Like)(`%${searchTerm}%`) }],
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },
@@ -65,16 +70,15 @@ const getPaginationAndRole = (req, res) => __awaiter(void 0, void 0, void 0, fun
                 rolePermissions: { role: true },
             },
         });
-        const total = yield Permission_1.Permission.count();
         return res.status(200).json({
             code: 200,
             success: true,
             message: 'Lấy danh sách quyền thành công',
-            data: permissions,
+            data: permissionRes[0],
             pagination: {
                 _limit,
                 _page,
-                _total: total,
+                _total: permissionRes[1],
             },
         });
     }

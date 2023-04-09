@@ -1,9 +1,14 @@
+import { Product } from './../models/Product';
+import { Category } from './../models/Category';
+import { User } from './../models/User';
 import { removeFile } from './../utils/file';
 import { Request, Response } from 'express';
 import AppDataSource from '../AppDataSource';
 import { CommonResponse, ListParams } from '../interfaces/common';
 import { Media } from './../models/Media';
 import { In } from 'typeorm';
+import { ProductItem } from '../models/ProductItem';
+import { ProductImage } from '../models/ProductImage';
 
 interface MediaItem {
   fileUrl: string;
@@ -184,8 +189,27 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
 
     const medias = await Media.findBy({ id: In(ids) });
 
-    // delete media
-    await Media.delete(ids);
+    await AppDataSource.transaction(async (transactionalEntityManager) => {
+      // delete media
+      await transactionalEntityManager.delete(Media, ids);
+
+      const mediaFileUrls = medias.map((media) => media.fileUrl);
+
+      // update user
+      await transactionalEntityManager.update(User, { avatar: In(mediaFileUrls) }, { avatar: undefined });
+
+      // update category
+      await transactionalEntityManager.update(Category, { imageUrl: In(mediaFileUrls) }, { imageUrl: '' });
+
+      // update product
+      await transactionalEntityManager.update(Product, { imageUrl: In(mediaFileUrls) }, { imageUrl: '' });
+
+      // update product item
+      await transactionalEntityManager.update(ProductItem, { imageUrl: In(mediaFileUrls) }, { imageUrl: '' });
+
+      // delete product images
+      await transactionalEntityManager.delete(ProductImage, { imageUrl: In(mediaFileUrls) });
+    });
 
     // delete file local
     for (let i = 0; i < medias.length; i++) {

@@ -13,10 +13,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeAny = exports.addAny = exports.getAllDate = exports.getPaginationAndUser = void 0;
+const Product_1 = require("./../models/Product");
+const Category_1 = require("./../models/Category");
+const User_1 = require("./../models/User");
 const file_1 = require("./../utils/file");
 const AppDataSource_1 = __importDefault(require("../AppDataSource"));
 const Media_1 = require("./../models/Media");
 const typeorm_1 = require("typeorm");
+const ProductItem_1 = require("../models/ProductItem");
+const ProductImage_1 = require("../models/ProductImage");
 const getPaginationAndUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _limit, _page, _sort, _order, type, date, searchTerm } = req.query;
     try {
@@ -149,7 +154,15 @@ const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
         const medias = yield Media_1.Media.findBy({ id: (0, typeorm_1.In)(ids) });
-        yield Media_1.Media.delete(ids);
+        yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
+            yield transactionalEntityManager.delete(Media_1.Media, ids);
+            const mediaFileUrls = medias.map((media) => media.fileUrl);
+            yield transactionalEntityManager.update(User_1.User, { avatar: (0, typeorm_1.In)(mediaFileUrls) }, { avatar: undefined });
+            yield transactionalEntityManager.update(Category_1.Category, { imageUrl: (0, typeorm_1.In)(mediaFileUrls) }, { imageUrl: '' });
+            yield transactionalEntityManager.update(Product_1.Product, { imageUrl: (0, typeorm_1.In)(mediaFileUrls) }, { imageUrl: '' });
+            yield transactionalEntityManager.update(ProductItem_1.ProductItem, { imageUrl: (0, typeorm_1.In)(mediaFileUrls) }, { imageUrl: '' });
+            yield transactionalEntityManager.delete(ProductImage_1.ProductImage, { imageUrl: (0, typeorm_1.In)(mediaFileUrls) });
+        }));
         for (let i = 0; i < medias.length; i++) {
             (0, file_1.removeFile)(medias[i].path);
         }

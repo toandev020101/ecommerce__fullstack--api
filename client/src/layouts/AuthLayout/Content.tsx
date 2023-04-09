@@ -13,7 +13,16 @@ const Content: React.FC<Props> = ({ children }) => {
   return (
     <Box bgcolor={theme.palette.primary.main} height="calc(100vh - 80px)">
       <Container maxWidth="lg">
-        <Grid container spacing="30px" margin="0">
+        <Grid
+          container
+          spacing="30px"
+          margin="0"
+          sx={{
+            '& .MuiGrid-item': {
+              padding: 0,
+            },
+          }}
+        >
           <Grid item md={6} sm={0}>
             <Box
               display="flex"

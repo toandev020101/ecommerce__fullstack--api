@@ -47,12 +47,12 @@ router.post('', checkAuth, checkPermission('/user', 'post'), validateYup(userSch
 // @route PUT api/v1/user/:id
 // @desc put one user
 // @access Private
-router.put('/:id', checkAuth, checkPermission('/user/:id', 'put'), userController.updateOne);
+router.put('/:id', checkAuth, checkPermission('/user/:id', 'put'), validateYup(userSchema), userController.updateOne);
 
 // @route PATCH api/v1/user/:id
 // @desc Patch one user (isActive, ...)
 // @access Private
-router.patch('/:id', checkAuth, checkPermission('/user/:id', 'patch'), userController.updateOne);
+router.patch('/:id', checkAuth, checkPermission('/user/:id', 'patch'), userController.changeActive);
 
 // @route DELETE api/v1/user
 // @desc Delete any user

@@ -445,6 +445,7 @@ const MediaFile: React.FC = () => {
           <Box
             key={`media-${index}`}
             width="100%"
+            paddingTop="100%"
             sx={{
               border: selectedArr.includes(media.id) ? `2px solid ${theme.palette.secondary[500]}` : '1px solid #ccc',
               borderRadius: '2px',
@@ -455,7 +456,15 @@ const MediaFile: React.FC = () => {
             onClick={() => handleMediaClick(media.id)}
           >
             {isLoading ? (
-              <Skeleton variant="rectangular" width="100%" sx={{ paddingBottom: '100%' }} />
+              <Skeleton
+                variant="rectangular"
+                sx={{
+                  width: '100%',
+                  height: '100%',
+                  position: 'absolute',
+                  top: 0,
+                }}
+              />
             ) : (
               <img
                 src={media.fileUrl}
@@ -465,6 +474,8 @@ const MediaFile: React.FC = () => {
                   height: '100%',
                   objectFit: 'cover',
                   opacity: modeSelect ? 0.6 : 1,
+                  position: 'absolute',
+                  top: 0,
                 }}
               />
             )}

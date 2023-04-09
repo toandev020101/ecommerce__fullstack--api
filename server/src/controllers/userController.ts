@@ -535,6 +535,46 @@ export const updateOne = async (
   }
 };
 
+// update active one user
+export const changeActive = async (
+  req: Request<{ id: number }, {}, UserInput, {}>,
+  res: Response<CommonResponse<null>>,
+) => {
+  const { id } = req.params;
+  const data = req.body;
+
+  try {
+    // check user
+    let user = await User.findOneBy({ id });
+
+    if (!user) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Tài khoản không tồn tại!',
+      });
+    }
+
+    // update user
+    await User.update(id, data);
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Cập nhật tài khoản thành công',
+      data: null,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
 // delete any user
 export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res: Response<CommonResponse<null>>) => {
   const { ids } = req.body;

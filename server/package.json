@@ -9,10 +9,7 @@
     "server": "nodemon dist/index.js",
     "start-ts": "ts-node src/index.ts",
     "server-ts": "nodemon --exec ts-node src/index.ts",
-    "watch": "tsc -w",
-    "seed:generate": "ts-node typeorm migration:generate -c seed -n ",
-    "seed:run": "ts-node typeorm migration:run -c seed",
-    "seed:revert": "ts-node typeorm migration:revert -c seed"
+    "watch": "tsc -w"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

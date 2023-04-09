@@ -14,20 +14,18 @@ interface Props {
 const AdminLayout: React.FC<Props> = ({ children }) => {
   const isOpenSidebar = useAppSelector(selectIsOpenSidebar);
   const theme: Theme = useTheme();
-  const widthDrawer = '250px';
+  const widthDrawer = '260px';
 
   return (
     <>
-      <Box minWidth="100vw" minHeight="100vh" sx={{ backgroundColor: theme.palette.neutral[950] }}>
+      <Box minHeight="100vh" sx={{ backgroundColor: theme.palette.neutral[950] }}>
         <Sidebar width={widthDrawer} />
 
-        <Box width="100%" height="100%" paddingLeft={isOpenSidebar ? widthDrawer : '0'}>
+        <Box paddingLeft={isOpenSidebar ? widthDrawer : '0'}>
           <Header />
 
           {/* content */}
-          <Box padding="20px" width="100%" height="100%">
-            {children}
-          </Box>
+          <Box padding="20px">{children}</Box>
           {/* content */}
 
           <Footer />

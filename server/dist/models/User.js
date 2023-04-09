@@ -11,8 +11,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
+const Cart_1 = require("./Cart");
+const District_1 = require("./District");
 const Media_1 = require("./Media");
+const Order_1 = require("./Order");
+const Province_1 = require("./Province");
+const Review_1 = require("./Review");
 const Role_1 = require("./Role");
+const Ward_1 = require("./Ward");
 let User = class User extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -48,6 +54,37 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "phoneNumber", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], User.prototype, "street", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], User.prototype, "wardId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Ward_1.Ward, (ward) => ward.users),
+    (0, typeorm_1.JoinColumn)({ name: 'wardId' }),
+    __metadata("design:type", Ward_1.Ward)
+], User.prototype, "ward", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], User.prototype, "districtId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => District_1.District, (district) => district.users),
+    (0, typeorm_1.JoinColumn)({ name: 'districtId' }),
+    __metadata("design:type", District_1.District)
+], User.prototype, "district", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", Number)
+], User.prototype, "provinceId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => Province_1.Province, (province) => province.users),
+    (0, typeorm_1.JoinColumn)({ name: 'provinceId' }),
+    __metadata("design:type", Province_1.Province)
+], User.prototype, "province", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 1, comment: '0: bị khóa, 1: đang hoạt động', type: 'tinyint' }),
     __metadata("design:type", Number)
 ], User.prototype, "isActive", void 0);
@@ -68,6 +105,18 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'roleId' }),
     __metadata("design:type", Role_1.Role)
 ], User.prototype, "role", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Cart_1.Cart, (cart) => cart.user),
+    __metadata("design:type", Array)
+], User.prototype, "carts", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Order_1.Order, (order) => order.user),
+    __metadata("design:type", Array)
+], User.prototype, "orders", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Review_1.Review, (review) => review.user),
+    __metadata("design:type", Array)
+], User.prototype, "reviews", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

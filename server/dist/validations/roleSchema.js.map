@@ -1,0 +1,1 @@
+{"version":3,"file":"roleSchema.js","sourceRoot":"","sources":["../../src/validations/roleSchema.ts"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;AAAA,yCAA2B;AAE3B,MAAM,UAAU,GAAG,GAAG,CAAC,MAAM,EAAE,CAAC,KAAK,CAAC;IACpC,IAAI,EAAE,GAAG,CAAC,MAAM,EAAE,CAAC,GAAG,CAAC,CAAC,EAAE,sCAAsC,CAAC,CAAC,GAAG,CAAC,EAAE,EAAE,kCAAkC,CAAC;CAC9G,CAAC,CAAC;AAEH,kBAAe,UAAU,CAAC"}

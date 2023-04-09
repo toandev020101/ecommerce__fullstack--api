@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeOne = exports.removeAny = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
+exports.removeOne = exports.removeAny = exports.changeActive = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("jsonwebtoken");
 const typeorm_1 = require("typeorm");
@@ -417,6 +417,35 @@ const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.updateOne = updateOne;
+const changeActive = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const data = req.body;
+    try {
+        let user = yield User_1.User.findOneBy({ id });
+        if (!user) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: 'Tài khoản không tồn tại!',
+            });
+        }
+        yield User_1.User.update(id, data);
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Cập nhật tài khoản thành công',
+            data: null,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.changeActive = changeActive;
 const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { ids } = req.body;
     try {

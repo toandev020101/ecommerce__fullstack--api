@@ -35,11 +35,11 @@ export const getPaginationAndRole = async (
   req: Request<{}, {}, {}, ListParams>,
   res: Response<CommonResponse<Permission>>,
 ) => {
-  const { _limit, _page, _sort, _order, searchTerm } = req.query;
+  const { _limit, _page, _sort, _order, method, searchTerm } = req.query;
 
   try {
     // find permissions
-    const permissions = await Permission.find({
+    const permissionRes = await Permission.findAndCount({
       select: {
         id: true,
         name: true,
@@ -56,7 +56,12 @@ export const getPaginationAndRole = async (
           },
         },
       },
-      where: { name: Like(`%${searchTerm}%`) },
+      where: method
+        ? [
+            { method, name: Like(`%${searchTerm}%`) },
+            { method, slug: Like(`%${searchTerm}%`) },
+          ]
+        : [{ name: Like(`%${searchTerm}%`) }, { slug: Like(`%${searchTerm}%`) }],
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },
@@ -65,18 +70,16 @@ export const getPaginationAndRole = async (
       },
     });
 
-    const total = await Permission.count();
-
     // send results
     return res.status(200).json({
       code: 200,
       success: true,
       message: 'Lấy danh sách quyền thành công',
-      data: permissions,
+      data: permissionRes[0],
       pagination: {
         _limit,
         _page,
-        _total: total,
+        _total: permissionRes[1],
       },
     });
   } catch (error) {

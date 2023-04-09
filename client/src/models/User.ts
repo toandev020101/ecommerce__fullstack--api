@@ -6,6 +6,10 @@ export interface User {
   gender: number;
   email: string;
   phoneNumber?: string;
+  street?: string;
+  provinceId?: number;
+  districtId?: number;
+  wardId?: number;
   isActive: number;
   tokenVersion?: number;
   roleId?: number;

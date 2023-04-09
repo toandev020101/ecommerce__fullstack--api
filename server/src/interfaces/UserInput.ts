@@ -6,6 +6,10 @@ export interface UserInput {
   email?: string;
   phoneNumber?: string;
   avatar?: string;
-  roleId: number;
+  street?: string;
+  provinceId?: number;
+  districtId?: number;
+  wardId?: number;
   isActive: number;
+  roleId: number;
 }

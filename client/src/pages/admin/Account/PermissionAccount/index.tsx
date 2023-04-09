@@ -8,9 +8,14 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControl,
   IconButton,
   InputAdornment,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
+  SelectChangeEvent,
   Skeleton,
   Table,
   TableBody,
@@ -48,7 +53,6 @@ import { Permission } from '../../../../models/Permission';
 import { showToast } from '../../../../slices/toastSlice';
 import { Theme } from '../../../../theme';
 import { fullDateToString } from '../../../../utils/date';
-import JWTManager from '../../../../utils/jwt';
 import permissionSchema from '../../../../validations/permissionSchema';
 
 const PermissionAccount: React.FC = () => {
@@ -65,6 +69,7 @@ const PermissionAccount: React.FC = () => {
   const [total, setTotal] = useState<number>(0);
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [sort, setSort] = useState<string>('id');
+  const [method, setMethod] = useState<string>('');
 
   const [openAddOrEditIndexDialog, setOpenAddOrEditIndexDialog] = useState<number>(-2);
   const [errors, setErrors] = useState<FieldError[]>([]);
@@ -99,7 +104,6 @@ const PermissionAccount: React.FC = () => {
     },
     {
       label: 'Phân quyền',
-      key: 'role',
       numeric: false,
       width: 300,
     },
@@ -144,6 +148,7 @@ const PermissionAccount: React.FC = () => {
           _page: page,
           _sort: sort,
           _order: order,
+          method,
           searchTerm,
         });
 
@@ -165,7 +170,12 @@ const PermissionAccount: React.FC = () => {
     };
 
     getPaginationRole();
-  }, [dispatch, navigate, order, page, rowsPerPage, sort, reload, searchTerm]);
+  }, [dispatch, navigate, order, page, rowsPerPage, sort, reload, method, searchTerm]);
+
+  const handleMethodFilter = (e: SelectChangeEvent) => {
+    setMethod(e.target.value as string);
+    setPage(0);
+  };
 
   const handleSortClick = (key: string, type?: 'asc' | 'desc') => {
     setSort(key);
@@ -174,7 +184,7 @@ const PermissionAccount: React.FC = () => {
 
   const handleSelectAllClick = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.checked) {
-      const newSelectedArr = rows.filter((row) => row.id !== JWTManager.getUserId()).map((row) => row.id);
+      const newSelectedArr = rows.map((row) => row.id);
       setSelectedArr(newSelectedArr);
       return;
     }
@@ -182,8 +192,6 @@ const PermissionAccount: React.FC = () => {
   };
 
   const handleRowClick = (_event: React.MouseEvent<unknown>, id: number) => {
-    if (id === JWTManager.getUserId()) return;
-
     const selectedIndex = selectedArr.indexOf(id);
     let newSelectedArr: number[] = [];
 
@@ -377,6 +385,29 @@ const PermissionAccount: React.FC = () => {
               onChange={handleSearchChange}
             />
 
+            {/* select */}
+            <FormControl size="small" sx={{ minWidth: '180px' }}>
+              <InputLabel id="select-method" sx={{ fontSize: '15px' }}>
+                Chọn phương thức
+              </InputLabel>
+              <Select
+                labelId="select-method"
+                id="select"
+                value={method}
+                label="Chọn phương thức"
+                onChange={handleMethodFilter}
+                sx={{ fontSize: '15px' }}
+              >
+                <MenuItem value="">Chọn phương thức</MenuItem>
+                <MenuItem value="0">Get</MenuItem>
+                <MenuItem value="1">Post</MenuItem>
+                <MenuItem value="2">Put</MenuItem>
+                <MenuItem value="3">Patch</MenuItem>
+                <MenuItem value="4">Delete</MenuItem>
+              </Select>
+            </FormControl>
+            {/* select */}
+
             {selectedArr.length > 0 && (
               <Button
                 variant="outlined"
@@ -414,16 +445,8 @@ const PermissionAccount: React.FC = () => {
               <TableRow>
                 <TableCell padding="checkbox">
                   <Checkbox
-                    indeterminate={
-                      selectedArr.length > (!!rows.find((row) => row.id === JWTManager.getUserId()) ? 1 : 0) &&
-                      selectedArr.length <
-                        (!!rows.find((row) => row.id === JWTManager.getUserId()) ? rows.length - 1 : rows.length)
-                    }
-                    checked={
-                      rows.length > (!!rows.find((row) => row.id === JWTManager.getUserId()) ? 1 : 0) &&
-                      selectedArr.length ===
-                        (!!rows.find((row) => row.id === JWTManager.getUserId()) ? rows.length - 1 : rows.length)
-                    }
+                    indeterminate={selectedArr.length > 0 && selectedArr.length < rows.length}
+                    checked={rows.length > 0 && selectedArr.length === rows.length}
                     onChange={handleSelectAllClick}
                     inputProps={{
                       'aria-label': 'select all desserts',
@@ -516,7 +539,16 @@ const PermissionAccount: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <Skeleton animation="wave" width="100%">
-                            <Typography>Phân quyền</Typography>
+                            <Box
+                              display="inline-block"
+                              padding="3px 10px"
+                              sx={{
+                                borderRadius: '20px',
+                                fontSize: '12px',
+                              }}
+                            >
+                              <Typography>Phân quyền</Typography>
+                            </Box>
                           </Skeleton>
                         </TableCell>
                         <TableCell>
@@ -561,20 +593,18 @@ const PermissionAccount: React.FC = () => {
                         tabIndex={-1}
                       >
                         <TableCell padding="checkbox">
-                          {row.id !== JWTManager.getUserId() && (
-                            <Checkbox
-                              checked={isItemSelected}
-                              inputProps={{
-                                'aria-labelledby': labelId,
-                              }}
-                              sx={{
-                                color: theme.palette.primary[500],
-                                '&.Mui-checked': {
-                                  color: theme.palette.primary[400],
-                                },
-                              }}
-                            />
-                          )}
+                          <Checkbox
+                            checked={isItemSelected}
+                            inputProps={{
+                              'aria-labelledby': labelId,
+                            }}
+                            sx={{
+                              color: theme.palette.primary[500],
+                              '&.Mui-checked': {
+                                color: theme.palette.primary[400],
+                              },
+                            }}
+                          />
                         </TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>{row.name}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>{row.slug}</TableCell>

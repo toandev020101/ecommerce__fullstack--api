@@ -9,10 +9,20 @@ interface Props {
   form: any;
   name: string;
   errorServers: FieldError[];
+  onHandleChange?: Function;
   [key: string]: any;
 }
 
-const InputField: React.FC<Props> = ({ form, name, errorServers, hidden, label, required, ...props }) => {
+const InputField: React.FC<Props> = ({
+  form,
+  name,
+  errorServers,
+  hidden,
+  label,
+  required,
+  onHandleChange,
+  ...props
+}) => {
   const theme: Theme = useTheme();
   const [showPassword, setShowPassword] = useState(false);
   const type = props.type;
@@ -28,6 +38,9 @@ const InputField: React.FC<Props> = ({ form, name, errorServers, hidden, label, 
             onChange={(e) => {
               onChange(e);
               errorServers = [];
+              if (onHandleChange) {
+                onHandleChange(e);
+              }
             }} // send value to hook form
             value={value}
             inputRef={ref}

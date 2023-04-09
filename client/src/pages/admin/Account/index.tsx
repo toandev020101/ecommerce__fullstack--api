@@ -54,6 +54,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 import * as roleApi from '../../../apis/roleApi';
 import * as userApi from '../../../apis/userApi';
+import * as wardApi from '../../../apis/wardApi';
+import * as districtApi from '../../../apis/districtApi';
+import * as provinceApi from '../../../apis/provinceApi';
 import TitlePage from '../../../components/TitlePage';
 import ToastNotify from '../../../components/ToastNotify';
 import { BaseResponse } from '../../../interfaces/BaseResponse';
@@ -66,6 +69,9 @@ import { showToast } from '../../../slices/toastSlice';
 import { Theme } from '../../../theme';
 import JWTManager from '../../../utils/jwt';
 import userSchema from '../../../validations/userSchema';
+import { Ward } from '../../../models/Ward';
+import { District } from '../../../models/District';
+import { Province } from '../../../models/Province';
 
 const Account: React.FC = () => {
   const dispatch = useDispatch();
@@ -131,6 +137,22 @@ const Account: React.FC = () => {
     {
       label: 'Trạng thái',
       key: 'isActive',
+    },
+    {
+      label: 'Đường',
+      key: 'street',
+    },
+    {
+      label: 'Phường, xã',
+      key: 'ward',
+    },
+    {
+      label: 'Quận, huyện',
+      key: 'district',
+    },
+    {
+      label: 'Tỉnh, thành phố',
+      key: 'province',
     },
     {
       label: 'Ngày tạo',
@@ -251,6 +273,7 @@ const Account: React.FC = () => {
     }
 
     const getPaginationUser = async () => {
+      setIsLoading(true);
       try {
         const res = await userApi.getPaginationAndRole({
           _limit: rowsPerPage,
@@ -501,6 +524,19 @@ const Account: React.FC = () => {
 
       let data: any = [];
       for (let i = 0; i < users.length; i++) {
+        let ward;
+        let district;
+        let province;
+
+        if (users[i].wardId) {
+          const wardRes = await wardApi.getOneById(users[i].wardId as number);
+          ward = wardRes.data as Ward;
+          const districtRes = await districtApi.getOneById(users[i].districtId as number);
+          district = districtRes.data as District;
+          const provinceRes = await provinceApi.getOneById(users[i].provinceId as number);
+          province = provinceRes.data as Province;
+        }
+
         data.push({
           fullName: users[i].fullName,
           username: users[i].username,
@@ -510,6 +546,10 @@ const Account: React.FC = () => {
           role: users[i].role?.name,
           avatar: users[i].avatar,
           isActive: users[i].isActive === 0 ? 'Hoạt động' : 'Khóa',
+          street: users[i].street,
+          ward: ward ? ward.name : '',
+          district: district ? district.name : '',
+          province: province ? province.name : '',
           createdAt: users[i].createdAt,
         });
       }
@@ -533,12 +573,12 @@ const Account: React.FC = () => {
     } catch (error: any) {
       const { data } = error.response;
       setIsExportDataLoading(false);
-      if (data.code === 403) {
+      if (data.code === 403 || data.code === 404) {
         dispatch(
           showToast({
             page: 'account',
             type: 'error',
-            message: data.message,
+            message: data.code === 403 ? data.message : 'Xuất file .csv thất bại',
             options: { theme: 'colored', toastId: 'accountId' },
           }),
         );
@@ -998,7 +1038,7 @@ const Account: React.FC = () => {
                             </Box>
                           </Box>
                         </TableCell>
-                        <TableCell sx={{ fontSize: '14px' }}>{row.email}</TableCell>
+                        <TableCell sx={{ fontSize: '14px' }}>{row.email ? row.email : '--'}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>{row.gender ? 'Nữ' : 'Nam'}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>{row.role?.name}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>

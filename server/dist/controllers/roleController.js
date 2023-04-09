@@ -102,14 +102,6 @@ const getOneAndPermissionById = (req, res) => __awaiter(void 0, void 0, void 0, 
 exports.getOneAndPermissionById = getOneAndPermissionById;
 const addOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, permissionIds } = req.body;
-    if (name === '') {
-        return res.status(400).json({
-            code: 400,
-            success: false,
-            message: 'Thêm mới thất bại',
-            errors: [{ field: 'name', message: 'Tên vai trò không thể để trống!' }],
-        });
-    }
     try {
         const role = yield Role_1.Role.findOneBy({ name });
         if (role) {
@@ -122,14 +114,16 @@ const addOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
             const insertedRole = yield transactionalEntityManager.insert(Role_1.Role, { name });
-            let rolePermissionData = [];
-            for (let i = 0; i < permissionIds.length; i++) {
-                rolePermissionData.push({
-                    roleId: insertedRole.raw.insertId,
-                    permissionId: permissionIds[i],
-                });
+            if (permissionIds.length > 0) {
+                let rolePermissionData = [];
+                for (let i = 0; i < permissionIds.length; i++) {
+                    rolePermissionData.push({
+                        roleId: insertedRole.raw.insertId,
+                        permissionId: permissionIds[i],
+                    });
+                }
+                yield transactionalEntityManager.insert(RolePermission_1.RolePermission, rolePermissionData);
             }
-            yield transactionalEntityManager.insert(RolePermission_1.RolePermission, rolePermissionData);
         }));
         return res.status(200).json({
             code: 200,
@@ -150,14 +144,6 @@ exports.addOne = addOne;
 const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     const { name, permissionIds } = req.body;
-    if (name === '') {
-        return res.status(400).json({
-            code: 400,
-            success: false,
-            message: 'Cập nhật vai trò thất bại',
-            errors: [{ field: 'name', message: 'Tên vai trò không thể để trống!' }],
-        });
-    }
     try {
         let role = yield Role_1.Role.findOneBy({ id });
         if (!role) {

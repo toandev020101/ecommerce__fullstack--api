@@ -30,12 +30,14 @@ const checkPermission_1 = require("./../middlewares/checkPermission");
 const checkAuth_1 = require("./../middlewares/checkAuth");
 const express_1 = __importDefault(require("express"));
 const roleController = __importStar(require("../controllers/roleController"));
+const validateYup_1 = __importDefault(require("../middlewares/validateYup"));
+const roleSchema_1 = __importDefault(require("../validations/roleSchema"));
 const router = express_1.default.Router();
 router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role', 'get'), roleController.getAll);
 router.get('/user', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/user', 'get'), roleController.getAllAndUser);
 router.get('/:id/permission', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/:id/permission', 'get'), roleController.getOneAndPermissionById);
-router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role', 'post'), roleController.addOne);
-router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/:id', 'put'), roleController.updateOne);
+router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role', 'post'), (0, validateYup_1.default)(roleSchema_1.default), roleController.addOne);
+router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/:id', 'put'), (0, validateYup_1.default)(roleSchema_1.default), roleController.updateOne);
 router.delete('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/role/:id', 'delete'), roleController.removeOne);
 exports.default = router;
 //# sourceMappingURL=roleRoute.js.map

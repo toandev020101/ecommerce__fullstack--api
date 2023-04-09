@@ -2,6 +2,8 @@ import { checkPermission } from './../middlewares/checkPermission';
 import { checkAuth } from './../middlewares/checkAuth';
 import express from 'express';
 import * as roleController from '../controllers/roleController';
+import validateYup from '../middlewares/validateYup';
+import roleSchema from '../validations/roleSchema';
 
 const router = express.Router();
 
@@ -28,12 +30,12 @@ router.get(
 // @route POST api/v1/role
 // @desc Post one role
 // @access Private
-router.post('', checkAuth, checkPermission('/role', 'post'), roleController.addOne);
+router.post('', checkAuth, checkPermission('/role', 'post'), validateYup(roleSchema), roleController.addOne);
 
 // @route PUT api/v1/role/:id
 // @desc put one role
 // @access Private
-router.put('/:id', checkAuth, checkPermission('/role/:id', 'put'), roleController.updateOne);
+router.put('/:id', checkAuth, checkPermission('/role/:id', 'put'), validateYup(roleSchema), roleController.updateOne);
 
 // @route DELETE api/v1/role/:id
 // @desc Delete one role

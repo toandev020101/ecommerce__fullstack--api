@@ -36,7 +36,7 @@ const router = express_1.default.Router();
 router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/permission', 'get'), permissionController.getAll);
 router.get('/pagination/role', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/permission/pagination/role', 'get'), permissionController.getPaginationAndRole);
 router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/permission', 'post'), (0, validateYup_1.default)(permissionSchema_1.default), permissionController.addOne);
-router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/permission/:id', 'put'), permissionController.updateOne);
+router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/permission/:id', 'put'), (0, validateYup_1.default)(permissionSchema_1.default), permissionController.updateOne);
 router.delete('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/permission', 'delete'), permissionController.removeAny);
 router.delete('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/permission/:id', 'delete'), permissionController.removeOne);
 exports.default = router;

@@ -23,5 +23,5 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true
   },
-  "include": ["src", "src/interfaces/.ts"]
+  "include": ["src"]
 }

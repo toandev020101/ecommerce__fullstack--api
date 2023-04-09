@@ -20,3 +20,7 @@ a {
 a:hover {
   color: unset;
 }
+
+ul.MuiList-root.MuiList-padding.MuiMenu-list {
+  max-height: 300px;
+}

@@ -2,7 +2,7 @@ import { FieldError } from './../interfaces/FieldError';
 import { NextFunction, Request, Response } from 'express';
 import { BaseResponse } from '../interfaces/BaseResponse';
 
-const validateYup = (schema: any) => async (req: Request, res: Response<void | BaseResponse>, next: NextFunction) => {
+const validateYup = (schema: any) => async (req: Request<any, any,any, any>, res: Response<void | BaseResponse>, next: NextFunction) => {
   const body = req.body;
 
   try {

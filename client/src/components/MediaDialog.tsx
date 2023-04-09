@@ -41,6 +41,7 @@ interface Props {
   handleClose: Function;
   handleConfirm: Function;
   multiple?: boolean;
+  selectedValues?: string[];
 }
 
 interface TabPanelProps {
@@ -80,7 +81,7 @@ const a11yProps = (index: number) => {
   };
 };
 
-const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfirm, multiple }) => {
+const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfirm, multiple, selectedValues }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme: Theme = useTheme();
@@ -103,6 +104,23 @@ const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfir
   const [selectedArr, setSelectedArr] = useState<number[]>([]);
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [mediaDetail, setMediaDetail] = useState<Media>();
+
+  useEffect(() => {
+    const newSelectedArr = selectedValues
+      ? medias
+          .filter((media) => !!selectedValues.find((selectedValue) => selectedValue === media.fileUrl))
+          .map((media) => media.id)
+      : [];
+
+    setSelectedArr(newSelectedArr);
+
+    const newMediaDetail = selectedValues
+      ? medias.find((media) => media.fileUrl === selectedValues[multiple ? selectedValues.length - 1 : 0])
+      : undefined;
+
+    setMediaDetail(newMediaDetail);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedValues]);
 
   const handleTabActiveChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabActive(newValue);
@@ -133,6 +151,7 @@ const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfir
           );
 
           setTabActive(1);
+          setReload(!reload);
         } catch (error: any) {
           setIsFileLoading(false);
           const { data } = error.response;
@@ -153,6 +172,7 @@ const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfir
 
       uploadFiles();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, navigate, files]);
 
   const handleDragOver = (e: any) => {
@@ -537,6 +557,7 @@ const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfir
                       <Box
                         key={`media-${index}`}
                         width="100%"
+                        paddingTop="100%"
                         sx={{
                           border: selectedArr.includes(media.id)
                             ? `2px solid ${theme.palette.secondary[500]}`
@@ -549,7 +570,15 @@ const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfir
                         onClick={() => handleMediaClick(media.id)}
                       >
                         {isMediaLoading ? (
-                          <Skeleton variant="rectangular" width="100%" sx={{ paddingBottom: '100%' }} />
+                          <Skeleton
+                            variant="rectangular"
+                            sx={{
+                              width: '100%',
+                              height: '100%',
+                              position: 'absolute',
+                              top: 0,
+                            }}
+                          />
                         ) : (
                           <img
                             src={media.fileUrl}
@@ -558,6 +587,8 @@ const MediaDialog: React.FC<Props> = ({ title, isOpen, handleClose, handleConfir
                               width: '100%',
                               height: '100%',
                               objectFit: 'cover',
+                              position: 'absolute',
+                              top: 0,
                             }}
                           />
                         )}

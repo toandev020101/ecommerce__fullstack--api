@@ -39,8 +39,8 @@ router.get('/role', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission
 router.get('/:id/role', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user/:id/role', 'get'), userController.getOneAndRoleById);
 router.post('/any', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user/any', 'post'), (0, validateYup_1.default)(yup.array().of(userSchema_1.default)), userController.addAny);
 router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user', 'post'), (0, validateYup_1.default)(userSchema_1.default), userController.addOne);
-router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user/:id', 'put'), userController.updateOne);
-router.patch('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user/:id', 'patch'), userController.updateOne);
+router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user/:id', 'put'), (0, validateYup_1.default)(userSchema_1.default), userController.updateOne);
+router.patch('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user/:id', 'patch'), userController.changeActive);
 router.delete('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user', 'delete'), userController.removeAny);
 router.delete('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/user/:id', 'delete'), userController.removeOne);
 exports.default = router;

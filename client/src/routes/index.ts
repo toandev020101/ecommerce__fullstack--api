@@ -7,6 +7,13 @@ import RoleAccount from '../pages/admin/Account/RoleAccount';
 import AddOrEditRoleAccount from '../pages/admin/Account/RoleAccount/AddOrEditRoleAccount';
 import Dashboard from '../pages/admin/Dashboard';
 import MediaFile from '../pages/admin/MediaFile';
+import ProductManager from '../pages/admin/ProductManager';
+import AddOrEditProduct from '../pages/admin/ProductManager/AddOrEditProduct';
+import CategoryProduct from '../pages/admin/ProductManager/CategoryProduct';
+import AddOrEditCategoryProduct from '../pages/admin/ProductManager/CategoryProduct/AddOrEditCategoryProduct';
+import TagProduct from '../pages/admin/ProductManager/TagProduct';
+import VariationProduct from '../pages/admin/ProductManager/VariationProduct';
+import VariationOptionProduct from '../pages/admin/ProductManager/VariationProduct/VariationOptionProduct';
 import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
@@ -38,4 +45,21 @@ export const privateRoutes: Route[] = [
   { path: '/quan-tri/tai-khoan/vai-tro/chinh-sua/:id', component: AddOrEditRoleAccount, layout: AdminLayout },
 
   { path: '/quan-tri/tai-khoan/quyen', component: PermissionAccount, layout: AdminLayout },
+
+  { path: '/quan-tri/san-pham/danh-sach', component: ProductManager, layout: AdminLayout },
+  { path: '/quan-tri/san-pham/danh-sach/them-moi', component: AddOrEditProduct, layout: AdminLayout },
+  { path: '/quan-tri/san-pham/danh-sach/chinh-sua/:id', component: AddOrEditProduct, layout: AdminLayout },
+
+  { path: '/quan-tri/san-pham/danh-muc', component: CategoryProduct, layout: AdminLayout },
+  { path: '/quan-tri/san-pham/danh-muc/them-moi', component: AddOrEditCategoryProduct, layout: AdminLayout },
+  { path: '/quan-tri/san-pham/danh-muc/chinh-sua/:id', component: AddOrEditCategoryProduct, layout: AdminLayout },
+
+  { path: '/quan-tri/san-pham/tu-khoa', component: TagProduct, layout: AdminLayout },
+
+  { path: '/quan-tri/san-pham/thuoc-tinh', component: VariationProduct, layout: AdminLayout },
+  {
+    path: '/quan-tri/san-pham/thuoc-tinh/:variationId/chung-loai',
+    component: VariationOptionProduct,
+    layout: AdminLayout,
+  },
 ];

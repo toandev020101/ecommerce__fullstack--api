@@ -81,7 +81,7 @@ const Sidebar: React.FC<Props> = ({ width }) => {
       child: [
         {
           slug: 'danh-sach',
-          name: 'Tất cả sản phẩm',
+          name: 'Danh sách sản phẩm',
         },
         {
           slug: 'danh-muc',

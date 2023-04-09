@@ -36,7 +36,13 @@ router.post(
 // @route PUT api/v1/permission/:id
 // @desc put one permission
 // @access Private
-router.put('/:id', checkAuth, checkPermission('/permission/:id', 'put'), permissionController.updateOne);
+router.put(
+  '/:id',
+  checkAuth,
+  checkPermission('/permission/:id', 'put'),
+  validateYup(permissionSchema),
+  permissionController.updateOne,
+);
 
 // @route DELETE api/v1/permission
 // @desc Delete any permission

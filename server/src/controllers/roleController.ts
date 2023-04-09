@@ -109,15 +109,6 @@ export const getOneAndPermissionById = async (
 export const addOne = async (req: Request<{}, {}, RolePermissionInput, {}>, res: Response<CommonResponse<null>>) => {
   const { name, permissionIds } = req.body;
 
-  if (name === '') {
-    return res.status(400).json({
-      code: 400,
-      success: false,
-      message: 'Thêm mới thất bại',
-      errors: [{ field: 'name', message: 'Tên vai trò không thể để trống!' }],
-    });
-  }
-
   try {
     // check role
     const role = await Role.findOneBy({ name });
@@ -135,17 +126,19 @@ export const addOne = async (req: Request<{}, {}, RolePermissionInput, {}>, res:
       // add role
       const insertedRole = await transactionalEntityManager.insert(Role, { name });
 
-      // handle data
-      let rolePermissionData = [];
-      for (let i = 0; i < permissionIds.length; i++) {
-        rolePermissionData.push({
-          roleId: insertedRole.raw.insertId,
-          permissionId: permissionIds[i],
-        });
-      }
+      if (permissionIds.length > 0) {
+        // handle data
+        let rolePermissionData = [];
+        for (let i = 0; i < permissionIds.length; i++) {
+          rolePermissionData.push({
+            roleId: insertedRole.raw.insertId,
+            permissionId: permissionIds[i],
+          });
+        }
 
-      // add role permission
-      await transactionalEntityManager.insert(RolePermission, rolePermissionData);
+        // add role permission
+        await transactionalEntityManager.insert(RolePermission, rolePermissionData);
+      }
     });
 
     // send results
@@ -172,15 +165,6 @@ export const updateOne = async (
 ) => {
   const { id } = req.params;
   const { name, permissionIds } = req.body;
-
-  if (name === '') {
-    return res.status(400).json({
-      code: 400,
-      success: false,
-      message: 'Cập nhật vai trò thất bại',
-      errors: [{ field: 'name', message: 'Tên vai trò không thể để trống!' }],
-    });
-  }
 
   try {
     // check role
