@@ -316,7 +316,15 @@ const AddOrEditAccount: React.FC = () => {
                 sx={{ width: '150px', height: '150px', border: '1px solid #ccc' }}
               />
 
-              <InputField form={form} errorServers={errors} name="avatar" label="Ảnh đại diện" required hidden />
+              <InputField
+                form={form}
+                errorServers={errors}
+                setErrorServers={setErrors}
+                name="avatar"
+                label="Ảnh đại diện"
+                required
+                hidden
+              />
 
               <Box display="flex" gap="20px">
                 <Button
@@ -333,10 +341,18 @@ const AddOrEditAccount: React.FC = () => {
               </Box>
             </Box>
 
-            <InputField form={form} errorServers={errors} name="fullName" label="Họ và tên" required />
             <InputField
               form={form}
               errorServers={errors}
+              setErrorServers={setErrors}
+              name="fullName"
+              label="Họ và tên"
+              required
+            />
+            <InputField
+              form={form}
+              errorServers={errors}
+              setErrorServers={setErrors}
               name="username"
               label="Tên đăng nhập"
               disabled={!!id}
@@ -344,7 +360,15 @@ const AddOrEditAccount: React.FC = () => {
             />
 
             {!id && (
-              <InputField form={form} errorServers={errors} name="password" label="Mật khẩu" type="password" required />
+              <InputField
+                form={form}
+                errorServers={errors}
+                setErrorServers={setErrors}
+                name="password"
+                label="Mật khẩu"
+                type="password"
+                required
+              />
             )}
 
             <RadioGroupField
@@ -402,18 +426,25 @@ const AddOrEditAccount: React.FC = () => {
           >
             <Box display="flex" gap="10px" marginBottom="10px">
               <Box width="100%">
-                <InputField form={form} errorServers={errors} name="email" label="Email" />
+                <InputField form={form} errorServers={errors} setErrorServers={setErrors} name="email" label="Email" />
                 <Typography sx={{ color: theme.palette.neutral[400] }}>
                   Chúng tôi sẽ gửi email xác nhận đến địa chỉ email.
                 </Typography>
               </Box>
-              <InputField form={form} errorServers={errors} name="phoneNumber" label="Số điện thoại" />
+              <InputField
+                form={form}
+                errorServers={errors}
+                setErrorServers={setErrors}
+                name="phoneNumber"
+                label="Số điện thoại"
+              />
             </Box>
 
             <Box display="flex" gap="10px" marginBottom="10px">
               <SelectField
                 form={form}
                 errorServers={errors}
+                setErrorServers={setErrors}
                 name="roleId"
                 label="Vai trò"
                 valueObjects={roles}
@@ -423,6 +454,7 @@ const AddOrEditAccount: React.FC = () => {
               <SelectField
                 form={form}
                 errorServers={errors}
+                setErrorServers={setErrors}
                 name="isActive"
                 label="Trạng thái"
                 valueObjects={[
@@ -437,6 +469,7 @@ const AddOrEditAccount: React.FC = () => {
               <SelectField
                 form={form}
                 errorServers={errors}
+                setErrorServers={setErrors}
                 name="provinceId"
                 label="Tỉnh/thành phố"
                 valueObjects={provinces}
@@ -447,6 +480,7 @@ const AddOrEditAccount: React.FC = () => {
               <SelectField
                 form={form}
                 errorServers={errors}
+                setErrorServers={setErrors}
                 name="districtId"
                 label="Quận/huyện"
                 valueObjects={districts}
@@ -460,6 +494,7 @@ const AddOrEditAccount: React.FC = () => {
               <SelectField
                 form={form}
                 errorServers={errors}
+                setErrorServers={setErrors}
                 name="wardId"
                 label="Phường/xã"
                 valueObjects={wards}
@@ -467,7 +502,13 @@ const AddOrEditAccount: React.FC = () => {
                 search
               />
 
-              <InputField form={form} errorServers={errors} name="street" label="Đường,số nhà" />
+              <InputField
+                form={form}
+                errorServers={errors}
+                setErrorServers={setErrors}
+                name="street"
+                label="Đường,số nhà"
+              />
             </Box>
           </Box>
         </Grid>

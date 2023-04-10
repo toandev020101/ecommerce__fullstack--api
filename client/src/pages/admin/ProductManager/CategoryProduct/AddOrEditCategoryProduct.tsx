@@ -242,7 +242,15 @@ const AddOrEditCategoryProduct: React.FC = () => {
               </Box>
             )}
 
-            <InputField form={form} errorServers={errors} name="imageUrl" label="Hình ảnh danh mục" required hidden />
+            <InputField
+              form={form}
+              errorServers={errors}
+              setErrorServers={setErrors}
+              name="imageUrl"
+              label="Hình ảnh danh mục"
+              required
+              hidden
+            />
 
             <Box display="flex" gap="20px">
               <Button
@@ -262,6 +270,7 @@ const AddOrEditCategoryProduct: React.FC = () => {
           <InputField
             form={form}
             errorServers={errors}
+            setErrorServers={setErrors}
             name="name"
             label="Tên danh mục"
             onHandleChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -269,11 +278,19 @@ const AddOrEditCategoryProduct: React.FC = () => {
             }
             required
           />
-          <InputField form={form} errorServers={errors} name="slug" label="Đường dẫn" required />
+          <InputField
+            form={form}
+            errorServers={errors}
+            setErrorServers={setErrors}
+            name="slug"
+            label="Đường dẫn"
+            required
+          />
           <Box display="flex" gap="10px">
             <InputField
               form={form}
               errorServers={errors}
+              setErrorServers={setErrors}
               name="level"
               label="Vị trí"
               type="number"
@@ -287,6 +304,7 @@ const AddOrEditCategoryProduct: React.FC = () => {
             <SelectField
               form={form}
               errorServers={errors}
+              setErrorServers={setErrors}
               name="isActive"
               label="Trạng thái"
               valueObjects={[
@@ -297,7 +315,14 @@ const AddOrEditCategoryProduct: React.FC = () => {
             />
           </Box>
 
-          <SelectField form={form} errorServers={errors} name="parentId" label="Danh mục cha" valueObjects={parents} />
+          <SelectField
+            form={form}
+            errorServers={errors}
+            setErrorServers={setErrors}
+            name="parentId"
+            label="Danh mục cha"
+            valueObjects={parents}
+          />
 
           <Box display="flex" gap="10px" marginTop="30px">
             <LoadingButton

@@ -166,6 +166,7 @@ const Header: React.FC = () => {
                 open={openMenu}
                 onClose={handleClose}
                 onClick={handleClose}
+                autoFocus={false}
                 PaperProps={{
                   elevation: 0,
                   sx: {

@@ -207,7 +207,14 @@ const AddOrEditRoleAccount: React.FC = () => {
         >
           <Box display="flex" justifyContent="center">
             <Box width="500px">
-              <InputField form={form} errorServers={errors} name="name" label="Tên vai trò" required />
+              <InputField
+                form={form}
+                errorServers={errors}
+                setErrorServers={setErrors}
+                name="name"
+                label="Tên vai trò"
+                required
+              />
             </Box>
           </Box>
           <Typography variant="h4" margin="20px 0">

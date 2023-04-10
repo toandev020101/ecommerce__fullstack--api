@@ -622,6 +622,7 @@ const TagProduct: React.FC = () => {
             <InputField
               form={form}
               errorServers={errors}
+              setErrorServers={setErrors}
               name="name"
               label="Tên từ khóa"
               onHandleChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -629,7 +630,14 @@ const TagProduct: React.FC = () => {
               }
               required
             />
-            <InputField form={form} errorServers={errors} name="slug" label="Đường dẫn" required />
+            <InputField
+              form={form}
+              errorServers={errors}
+              setErrorServers={setErrors}
+              name="slug"
+              label="Đường dẫn"
+              required
+            />
 
             <Box display="flex" justifyContent="flex-end" gap="10px" marginTop="20px">
               <Button variant="outlined" type="submit">

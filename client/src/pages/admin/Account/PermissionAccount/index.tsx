@@ -736,11 +736,26 @@ const PermissionAccount: React.FC = () => {
         </DialogTitle>
         <DialogContent sx={{ width: '400px' }}>
           <Box component="form" onSubmit={form.handleSubmit(handleAddOrEditSubmit)} margin="10px 0">
-            <InputField form={form} errorServers={errors} name="name" label="Tên quyền" required />
-            <InputField form={form} errorServers={errors} name="slug" label="Đường dẫn" required />
+            <InputField
+              form={form}
+              errorServers={errors}
+              setErrorServers={setErrors}
+              name="name"
+              label="Tên quyền"
+              required
+            />
+            <InputField
+              form={form}
+              errorServers={errors}
+              setErrorServers={setErrors}
+              name="slug"
+              label="Đường dẫn"
+              required
+            />
             <SelectField
               form={form}
               errorServers={errors}
+              setErrorServers={setErrors}
               name="method"
               label="Chọn hành động"
               valueObjects={methods}

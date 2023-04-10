@@ -634,6 +634,7 @@ const AddOrEditProduct: React.FC = () => {
             <InputField
               form={form}
               errorServers={errors}
+              setErrorServers={setErrors}
               name="name"
               label="Tên sản phẩm"
               onHandleChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -641,7 +642,14 @@ const AddOrEditProduct: React.FC = () => {
               }
               required
             />
-            <InputField form={form} errorServers={errors} name="slug" label="Đường dẫn" required />
+            <InputField
+              form={form}
+              errorServers={errors}
+              setErrorServers={setErrors}
+              name="slug"
+              label="Đường dẫn"
+              required
+            />
 
             <Box marginTop="20px">
               <Typography>Dữ liệu sản phẩm *</Typography>
@@ -662,6 +670,7 @@ const AddOrEditProduct: React.FC = () => {
                   <InputField
                     form={form}
                     errorServers={errors}
+                    setErrorServers={setErrors}
                     name="weight"
                     label="Trọng lượng"
                     type="number"
@@ -677,6 +686,7 @@ const AddOrEditProduct: React.FC = () => {
                     <InputField
                       form={form}
                       errorServers={errors}
+                      setErrorServers={setErrors}
                       name="length"
                       label="Chiều dài"
                       type="number"
@@ -691,6 +701,7 @@ const AddOrEditProduct: React.FC = () => {
                     <InputField
                       form={form}
                       errorServers={errors}
+                      setErrorServers={setErrors}
                       name="width"
                       label="Chiều rộng"
                       type="number"
@@ -705,6 +716,7 @@ const AddOrEditProduct: React.FC = () => {
                     <InputField
                       form={form}
                       errorServers={errors}
+                      setErrorServers={setErrors}
                       name="height"
                       label="Chiều cao"
                       type="number"
@@ -918,6 +930,7 @@ const AddOrEditProduct: React.FC = () => {
                               <InputField
                                 form={form}
                                 errorServers={errors}
+                                setErrorServers={setErrors}
                                 name={`items[${index}].price`}
                                 label="Giá"
                                 type="number"
@@ -932,6 +945,7 @@ const AddOrEditProduct: React.FC = () => {
                               <InputField
                                 form={form}
                                 errorServers={errors}
+                                setErrorServers={setErrors}
                                 name={`items[${index}].discount`}
                                 label="Giá ưu đãi"
                                 type="number"
@@ -947,6 +961,7 @@ const AddOrEditProduct: React.FC = () => {
                               <InputField
                                 form={form}
                                 errorServers={errors}
+                                setErrorServers={setErrors}
                                 name={`items[${index}].discountStartDate`}
                                 label="Ngày bắt đầu ưu đãi"
                                 type="date"
@@ -955,6 +970,7 @@ const AddOrEditProduct: React.FC = () => {
                               <InputField
                                 form={form}
                                 errorServers={errors}
+                                setErrorServers={setErrors}
                                 name={`items[${index}].discountEndDate`}
                                 label="Ngày kết thúc ưu đãi"
                                 type="date"
@@ -964,6 +980,7 @@ const AddOrEditProduct: React.FC = () => {
                               <InputField
                                 form={form}
                                 errorServers={errors}
+                                setErrorServers={setErrors}
                                 name={`items[${index}].inventory.quantity`}
                                 label="Số lượng trong kho"
                                 type="number"
@@ -977,6 +994,7 @@ const AddOrEditProduct: React.FC = () => {
                               <InputField
                                 form={form}
                                 errorServers={errors}
+                                setErrorServers={setErrors}
                                 name={`items[${index}].inventory.priceEntry`}
                                 label="Giá nhập một sản phẩm"
                                 type="number"
@@ -992,6 +1010,7 @@ const AddOrEditProduct: React.FC = () => {
                             <InputField
                               form={form}
                               errorServers={errors}
+                              setErrorServers={setErrors}
                               name={`items[${index}].inventory.locationCode`}
                               label="Mã vị trí"
                               required
@@ -1124,6 +1143,7 @@ const AddOrEditProduct: React.FC = () => {
               <SelectField
                 form={form}
                 errorServers={errors}
+                setErrorServers={setErrors}
                 name="categoryId"
                 label="Danh mục sản phẩm"
                 valueObjects={categoryOptions}
@@ -1149,6 +1169,7 @@ const AddOrEditProduct: React.FC = () => {
               <SelectField
                 form={form}
                 errorServers={errors}
+                setErrorServers={setErrors}
                 name="isActive"
                 label="Trạng thái"
                 valueObjects={[

@@ -59,6 +59,7 @@ const RegisterForm: React.FC = () => {
       form.reset();
     } catch (error: any) {
       const { data } = error.response;
+      dispatch(authFai());
 
       if (data.code === 400) {
         setErrors(data.errors);
@@ -73,8 +74,6 @@ const RegisterForm: React.FC = () => {
       } else if (data.code === 401 || data.code === 403 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
-
-      dispatch(authFai());
     }
   };
 
@@ -88,7 +87,14 @@ const RegisterForm: React.FC = () => {
         width="100%"
         marginTop="20px"
       >
-        <InputField form={form} errorServers={errors} name="fullName" label="Họ và tên" required />
+        <InputField
+          form={form}
+          errorServers={errors}
+          setErrorServers={setErrors}
+          name="fullName"
+          label="Họ và tên"
+          required
+        />
 
         <RadioGroupField
           form={form}
@@ -102,11 +108,27 @@ const RegisterForm: React.FC = () => {
           required
         />
 
-        <InputField form={form} errorServers={errors} name="username" label="Tên đăng nhập" required />
-        <InputField form={form} errorServers={errors} name="password" label="Mật khẩu" type="password" required />
         <InputField
           form={form}
           errorServers={errors}
+          setErrorServers={setErrors}
+          name="username"
+          label="Tên đăng nhập"
+          required
+        />
+        <InputField
+          form={form}
+          errorServers={errors}
+          setErrorServers={setErrors}
+          name="password"
+          label="Mật khẩu"
+          type="password"
+          required
+        />
+        <InputField
+          form={form}
+          errorServers={errors}
+          setErrorServers={setErrors}
           name="confirmPassword"
           label="Nhập lại mật khẩu"
           type="password"

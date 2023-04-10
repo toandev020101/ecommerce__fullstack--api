@@ -1,6 +1,6 @@
 import { createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import { Fragment, useEffect, useMemo, useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from './app/hook';
 import AuthRoute from './components/AuthRoute';
 import Error from './components/Error';
@@ -8,14 +8,13 @@ import LoadingPage from './components/LoadingPage';
 import PrivateRoute from './components/PrivateRoute';
 import ClientLayout from './layouts/ClientLayout';
 import { authRoutes, privateRoutes, publicRoutes } from './routes';
-import { authFai, authPending, authSuccess, selectIsLoading } from './slices/authSlice';
+import { authFai, authPending, authSuccess } from './slices/authSlice';
 import { selectMode } from './slices/globalSlice';
 import { themeSettings } from './theme';
 import JWTManager from './utils/jwt';
 
 const App: React.FC = () => {
   const dispatch = useAppDispatch();
-  const isLoading = useAppSelector(selectIsLoading);
   const mode = useAppSelector(selectMode);
   const theme = useMemo(() => createTheme(themeSettings(mode) as any), [mode]);
   const [loadingPage, setLoadingPage] = useState<boolean>(true);
@@ -49,7 +48,7 @@ const App: React.FC = () => {
     authenticate();
   }, [dispatch]);
 
-  if (loadingPage || isLoading) {
+  if (loadingPage) {
     return <LoadingPage />;
   }
 

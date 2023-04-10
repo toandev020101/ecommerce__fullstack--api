@@ -14,6 +14,11 @@ export const getPaginationAndRole = (params: ListParams): Promise<Response<User>
   return axiosCLient.get(url, { params });
 };
 
+export const getOneAndRolePublicById = (id: number): Promise<Response<User>> => {
+  const url = `/user/public/${id}/role`;
+  return axiosCLient.get(url);
+};
+
 export const getOneAndRoleById = (id: number): Promise<Response<User>> => {
   const url = `/user/${id}/role`;
   return axiosCLient.get(url);

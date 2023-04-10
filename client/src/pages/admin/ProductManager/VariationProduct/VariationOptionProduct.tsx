@@ -652,6 +652,7 @@ const VariationOptionProduct: React.FC = () => {
             <InputField
               form={form}
               errorServers={errors}
+              setErrorServers={setErrors}
               name="value"
               label="Tên chủng loại"
               onHandleChange={(e: ChangeEvent<HTMLInputElement>) =>
@@ -659,7 +660,14 @@ const VariationOptionProduct: React.FC = () => {
               }
               required
             />
-            <InputField form={form} errorServers={errors} name="slug" label="Đường dẫn" required />
+            <InputField
+              form={form}
+              errorServers={errors}
+              setErrorServers={setErrors}
+              name="slug"
+              label="Đường dẫn"
+              required
+            />
 
             <Box display="flex" justifyContent="flex-end" gap="10px" marginTop="20px">
               <Button variant="outlined" type="submit">

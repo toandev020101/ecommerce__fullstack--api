@@ -8,6 +8,7 @@ import { ValueObject } from '../interfaces/ValueObject';
 interface Props {
   form: any;
   errorServers: FieldError[];
+  setErrorServers: Function;
   label: string;
   name: string;
   valueObjects: ValueObject[];
@@ -21,6 +22,7 @@ interface Props {
 const SelectField: React.FC<Props> = ({
   form,
   errorServers,
+  setErrorServers,
   label,
   name,
   valueObjects,
@@ -56,11 +58,16 @@ const SelectField: React.FC<Props> = ({
             label={label}
             name={name}
             onChange={(e) => {
+              // delete error on change
+              const newErrorServers = errorServers;
+              const newErrorServerIndex = newErrorServers.findIndex((error) => error.field === name);
+              newErrorServers.splice(newErrorServerIndex, 1);
+              setErrorServers(newErrorServers);
+
               onChange(e);
               if (onHandleChange) {
                 onHandleChange(e);
               }
-              errorServers = [];
               setSearchTerm('');
             }} // send value to hook form
             onBlur={onBlur}

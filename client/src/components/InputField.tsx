@@ -9,6 +9,7 @@ interface Props {
   form: any;
   name: string;
   errorServers: FieldError[];
+  setErrorServers: Function;
   onHandleChange?: Function;
   [key: string]: any;
 }
@@ -17,6 +18,7 @@ const InputField: React.FC<Props> = ({
   form,
   name,
   errorServers,
+  setErrorServers,
   hidden,
   label,
   required,
@@ -36,8 +38,13 @@ const InputField: React.FC<Props> = ({
           <TextField
             onBlur={onBlur} // notify when input is touched
             onChange={(e) => {
+              // delete error on change
+              const newErrorServers = errorServers;
+              const newErrorServerIndex = newErrorServers.findIndex((error) => error.field === name);
+              newErrorServers.splice(newErrorServerIndex, 1);
+              setErrorServers(newErrorServers);
+
               onChange(e);
-              errorServers = [];
               if (onHandleChange) {
                 onHandleChange(e);
               }

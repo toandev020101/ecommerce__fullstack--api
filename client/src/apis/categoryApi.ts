@@ -4,6 +4,11 @@ import { Response } from '../interfaces/common';
 import { Category } from '../models/Category';
 import axiosCLient from './axiosClient';
 
+export const getAllPublic = (): Promise<Response<Category>> => {
+  const url = '/category/public';
+  return axiosCLient.get(url);
+};
+
 export const getAll = (): Promise<Response<Category>> => {
   const url = '/category';
   return axiosCLient.get(url);

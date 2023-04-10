@@ -51,9 +51,11 @@ const LoginForm: React.FC = () => {
       form.reset();
     } catch (error: any) {
       const { data } = error.response;
+      dispatch(authFai());
 
       if (data.code === 400) {
         setErrors(data.errors);
+
         dispatch(
           showToast({
             page: 'login',
@@ -65,8 +67,6 @@ const LoginForm: React.FC = () => {
       } else if (data.code === 401 || data.code === 403 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
-
-      dispatch(authFai());
     }
   };
 
@@ -80,8 +80,23 @@ const LoginForm: React.FC = () => {
         width="100%"
         marginTop="20px"
       >
-        <InputField form={form} errorServers={errors} name="username" label="Tên đăng nhập" required />
-        <InputField form={form} errorServers={errors} name="password" label="Mật khẩu" type="password" required />
+        <InputField
+          form={form}
+          errorServers={errors}
+          setErrorServers={setErrors}
+          name="username"
+          label="Tên đăng nhập"
+          required
+        />
+        <InputField
+          form={form}
+          errorServers={errors}
+          setErrorServers={setErrors}
+          name="password"
+          label="Mật khẩu"
+          type="password"
+          required
+        />
 
         <LoadingButton
           variant="contained"

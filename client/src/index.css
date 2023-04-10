@@ -13,12 +13,18 @@ body {
 }
 
 a {
+  display: inherit;
   text-decoration: none;
   color: unset;
 }
 
 a:hover {
   color: unset;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
 }
 
 ul.MuiList-root.MuiList-padding.MuiMenu-list {
