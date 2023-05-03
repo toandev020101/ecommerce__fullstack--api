@@ -26,7 +26,13 @@ export interface ProductItem {
       variationOption: {
         id: number;
         value: string;
+        slug: string;
         variationId: number;
+        variation?: {
+          id: number;
+          name: string;
+          slug: string;
+        };
       };
     },
   ];
@@ -39,6 +45,7 @@ export interface Product {
   shortDescription?: string;
   description?: string;
   imageUrl: string;
+  isHot: number;
   isActive: number;
   weight?: number;
   length?: number;

@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const typeorm_1 = require("typeorm");
-const Cart_1 = require("./models/Cart");
 const CartItem_1 = require("./models/CartItem");
 const Category_1 = require("./models/Category");
 const Coupon_1 = require("./models/Coupon");
@@ -15,6 +14,7 @@ const Permission_1 = require("./models/Permission");
 const Product_1 = require("./models/Product");
 const ProductConfiguration_1 = require("./models/ProductConfiguration");
 const ProductConnect_1 = require("./models/ProductConnect");
+const ProductImage_1 = require("./models/ProductImage");
 const ProductItem_1 = require("./models/ProductItem");
 const ProductTag_1 = require("./models/ProductTag");
 const Province_1 = require("./models/Province");
@@ -24,9 +24,12 @@ const RolePermission_1 = require("./models/RolePermission");
 const Tag_1 = require("./models/Tag");
 const User_1 = require("./models/User");
 const Variation_1 = require("./models/Variation");
+const VariationCategory_1 = require("./models/VariationCategory");
 const VariationOption_1 = require("./models/VariationOption");
 const Ward_1 = require("./models/Ward");
-const ProductImage_1 = require("./models/ProductImage");
+const OrderStatus_1 = require("./models/OrderStatus");
+const ShipMethod_1 = require("./models/ShipMethod");
+const PaymentMethod_1 = require("./models/PaymentMethod");
 const AppDataSource = new typeorm_1.DataSource({
     type: (process.env.DB_TYPE || 'postgres'),
     username: process.env.DB_USERNAME || 'postgres',
@@ -40,7 +43,6 @@ const AppDataSource = new typeorm_1.DataSource({
         Permission_1.Permission,
         RolePermission_1.RolePermission,
         Media_1.Media,
-        Cart_1.Cart,
         CartItem_1.CartItem,
         Category_1.Category,
         Ward_1.Ward,
@@ -50,6 +52,9 @@ const AppDataSource = new typeorm_1.DataSource({
         Order_1.Order,
         OrderCoupon_1.OrderCoupon,
         OrderLine_1.OrderLine,
+        OrderStatus_1.OrderStatus,
+        ShipMethod_1.ShipMethod,
+        PaymentMethod_1.PaymentMethod,
         Product_1.Product,
         ProductConfiguration_1.ProductConfiguration,
         ProductItem_1.ProductItem,
@@ -61,6 +66,7 @@ const AppDataSource = new typeorm_1.DataSource({
         Review_1.Review,
         Variation_1.Variation,
         VariationOption_1.VariationOption,
+        VariationCategory_1.VariationCategory,
     ],
 });
 exports.default = AppDataSource;

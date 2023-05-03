@@ -13,6 +13,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Category = void 0;
 const typeorm_1 = require("typeorm");
 const Product_1 = require("./Product");
+const VariationCategory_1 = require("./VariationCategory");
 let Category = Category_1 = class Category extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -20,7 +21,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Category.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], Category.prototype, "imageUrl", void 0);
 __decorate([
@@ -56,6 +57,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => Product_1.Product, (product) => product.category),
     __metadata("design:type", Array)
 ], Category.prototype, "products", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => VariationCategory_1.VariationCategory, (variationCategory) => variationCategory.category),
+    __metadata("design:type", Array)
+], Category.prototype, "variationCategories", void 0);
 Category = Category_1 = __decorate([
     (0, typeorm_1.Entity)()
 ], Category);

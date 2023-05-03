@@ -24,7 +24,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const yup = __importStar(require("yup"));
-const tagSchema = yup.object().shape({
+const productSchema = yup.object().shape({
     imageUrl: yup.string().required('Ảnh sản phẩm không thể để trống!'),
     name: yup.string().min(4, 'Tên sản phẩm phải có ít nhất 4 ký tự!').max(255, 'Tên sản phẩm chỉ tối đa 255 ký tự!'),
     slug: yup.string().min(4, 'Đường dẫn phải có ít nhất 4 ký tự!').max(255, 'Đường dẫn chỉ tối đa 255 ký tự!'),
@@ -46,5 +46,5 @@ const tagSchema = yup.object().shape({
         }),
     })),
 });
-exports.default = tagSchema;
+exports.default = productSchema;
 //# sourceMappingURL=productSchema.js.map

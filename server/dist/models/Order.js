@@ -17,6 +17,9 @@ const OrderLine_1 = require("./OrderLine");
 const Province_1 = require("./Province");
 const User_1 = require("./User");
 const Ward_1 = require("./Ward");
+const OrderStatus_1 = require("./OrderStatus");
+const ShipMethod_1 = require("./ShipMethod");
+const PaymentMethod_1 = require("./PaymentMethod");
 let Order = class Order extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -24,29 +27,17 @@ __decorate([
     __metadata("design:type", Number)
 ], Order.prototype, "id", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
-], Order.prototype, "userId", void 0);
+    (0, typeorm_1.Column)({ length: 45 }),
+    __metadata("design:type", String)
+], Order.prototype, "fullName", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.orders),
-    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
-    __metadata("design:type", User_1.User)
-], Order.prototype, "user", void 0);
-__decorate([
-    (0, typeorm_1.CreateDateColumn)(),
-    __metadata("design:type", Date)
-], Order.prototype, "createdAt", void 0);
+    (0, typeorm_1.Column)({ length: 15 }),
+    __metadata("design:type", String)
+], Order.prototype, "phoneNumber", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => OrderLine_1.OrderLine, (orderLine) => orderLine.order),
     __metadata("design:type", Array)
 ], Order.prototype, "orderLines", void 0);
-__decorate([
-    (0, typeorm_1.Column)({
-        default: 0,
-        comment: '0: Chờ thanh toán, 1: Đang xử lý, 2: Đã xử lý, 3: Chờ giao hàng, 4: Đang giao hàng, 5: Đã hoàn thành, 6: Đã hủy, 7: Đã hoàn tiền',
-    }),
-    __metadata("design:type", Number)
-], Order.prototype, "status", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => OrderCoupon_1.OrderCoupon, (orderCoupon) => orderCoupon.order),
     __metadata("design:type", Array)
@@ -54,7 +45,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], Order.prototype, "total_price", void 0);
+], Order.prototype, "totalQuantity", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Order.prototype, "totalPrice", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
@@ -86,6 +81,54 @@ __decorate([
     (0, typeorm_1.JoinColumn)({ name: 'provinceId' }),
     __metadata("design:type", Province_1.Province)
 ], Order.prototype, "province", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ nullable: true, length: 300 }),
+    __metadata("design:type", String)
+], Order.prototype, "note", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Order.prototype, "orderStatusId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => OrderStatus_1.OrderStatus, (orderStatus) => orderStatus.orders),
+    (0, typeorm_1.JoinColumn)({ name: 'orderStatusId' }),
+    __metadata("design:type", OrderStatus_1.OrderStatus)
+], Order.prototype, "orderStatus", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Order.prototype, "shipMethodId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => ShipMethod_1.ShipMethod, (shipMethod) => shipMethod.orders),
+    (0, typeorm_1.JoinColumn)({ name: 'shipMethodId' }),
+    __metadata("design:type", ShipMethod_1.ShipMethod)
+], Order.prototype, "shipMethod", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Order.prototype, "paymentMethodId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => PaymentMethod_1.PaymentMethod, (paymentMethod) => paymentMethod.orders),
+    (0, typeorm_1.JoinColumn)({ name: 'paymentMethodId' }),
+    __metadata("design:type", PaymentMethod_1.PaymentMethod)
+], Order.prototype, "paymentMethod", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Order.prototype, "userId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.orders),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", User_1.User)
+], Order.prototype, "user", void 0);
+__decorate([
+    (0, typeorm_1.CreateDateColumn)(),
+    __metadata("design:type", Date)
+], Order.prototype, "createdAt", void 0);
+__decorate([
+    (0, typeorm_1.UpdateDateColumn)(),
+    __metadata("design:type", Date)
+], Order.prototype, "updatedAt", void 0);
 Order = __decorate([
     (0, typeorm_1.Entity)()
 ], Order);

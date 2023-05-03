@@ -38,9 +38,9 @@ import {
   FiChevronUp as FiChevronUpIcon,
   FiPlusSquare as FiPlusSquareIcon,
 } from 'react-icons/fi';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import * as permissionApi from '../../../../apis/permissionApi';
+import { useAppDispatch } from '../../../../app/hook';
 import InputField from '../../../../components/InputField';
 import SelectField from '../../../../components/SelectField';
 import TitlePage from '../../../../components/TitlePage';
@@ -56,7 +56,7 @@ import { fullDateToString } from '../../../../utils/date';
 import permissionSchema from '../../../../validations/permissionSchema';
 
 const PermissionAccount: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const theme: Theme = useTheme();

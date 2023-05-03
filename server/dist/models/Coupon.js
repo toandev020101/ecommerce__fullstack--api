@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Coupon = void 0;
 const typeorm_1 = require("typeorm");
-const OrderCoupon_1 = require("./OrderCoupon");
+const User_1 = require("./User");
 let Coupon = class Coupon extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -25,23 +25,19 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
-], Coupon.prototype, "description", void 0);
-__decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", String)
 ], Coupon.prototype, "code", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], Coupon.prototype, "discountValue", void 0);
 __decorate([
-    (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
-], Coupon.prototype, "quantity", void 0);
-__decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", Number)
 ], Coupon.prototype, "priceMax", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0, type: 'tinyint', comment: '0: vnđ, 1: %' }),
+    __metadata("design:type", Number)
+], Coupon.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Date)
@@ -51,9 +47,14 @@ __decorate([
     __metadata("design:type", Date)
 ], Coupon.prototype, "endDate", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => OrderCoupon_1.OrderCoupon, (orderCoupon) => orderCoupon.coupon),
-    __metadata("design:type", Array)
-], Coupon.prototype, "orderCoupons", void 0);
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], Coupon.prototype, "userId", void 0);
+__decorate([
+    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.coupons),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", User_1.User)
+], Coupon.prototype, "user", void 0);
 Coupon = __decorate([
     (0, typeorm_1.Entity)()
 ], Coupon);

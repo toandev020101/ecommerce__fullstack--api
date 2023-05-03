@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderCoupon = void 0;
 const typeorm_1 = require("typeorm");
-const Coupon_1 = require("./Coupon");
 const Order_1 = require("./Order");
 let OrderCoupon = class OrderCoupon extends typeorm_1.BaseEntity {
 };
@@ -30,13 +29,12 @@ __decorate([
 ], OrderCoupon.prototype, "order", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
-    __metadata("design:type", Number)
-], OrderCoupon.prototype, "couponId", void 0);
+    __metadata("design:type", String)
+], OrderCoupon.prototype, "code", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Coupon_1.Coupon, (coupon) => coupon.orderCoupons),
-    (0, typeorm_1.JoinColumn)({ name: 'couponId' }),
-    __metadata("design:type", Coupon_1.Coupon)
-], OrderCoupon.prototype, "coupon", void 0);
+    (0, typeorm_1.Column)(),
+    __metadata("design:type", Number)
+], OrderCoupon.prototype, "price", void 0);
 OrderCoupon = __decorate([
     (0, typeorm_1.Entity)()
 ], OrderCoupon);

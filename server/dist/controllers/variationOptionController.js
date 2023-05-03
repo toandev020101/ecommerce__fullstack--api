@@ -68,7 +68,10 @@ const getPaginationByVariationId = (req, res) => __awaiter(void 0, void 0, void 
                 value: true,
                 slug: true,
             },
-            where: { variationId, value: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+            where: [
+                { variationId, value: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                { variationId, slug: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+            ],
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },

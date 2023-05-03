@@ -2,16 +2,17 @@ import { Request, Response } from 'express';
 import { In, Like } from 'typeorm';
 import AppDataSource from '../AppDataSource';
 import { CommonResponse, ListParams } from '../interfaces/common';
+import { Category } from '../models/Category';
 import { Inventory } from '../models/Inventory';
 import { ProductConfiguration } from '../models/ProductConfiguration';
 import { ProductConnect } from '../models/ProductConnect';
 import { ProductImage } from '../models/ProductImage';
 import { ProductItem } from '../models/ProductItem';
 import { ProductTag } from '../models/ProductTag';
+import { Tag } from '../models/Tag';
+import { VariationOption } from '../models/VariationOption';
 import { ProductInput } from './../interfaces/ProductInput';
 import { Product } from './../models/Product';
-import { Category } from '../models/Category';
-import { Tag } from '../models/Tag';
 
 // get all products
 export const getAll = async (_req: Request, res: Response<CommonResponse<Product>>) => {
@@ -75,79 +76,473 @@ export const getListBySearchTerm = async (
   }
 };
 
-// get pagination product
-export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: Response<CommonResponse<Product>>) => {
-  const { _limit, _page, _sort, _order, categoryId, inventoryStatus, isActive, searchTerm } = req.query;
-
+// get list products
+export const getListByIds = async (
+  req: Request<{}, {}, {}, { ids: number[] }>,
+  res: Response<CommonResponse<Product>>,
+) => {
+  const { ids } = req.query;
   try {
-    let whereOptions: any = [
-      { name: Like(`%${searchTerm}%`), deleted: 0 },
-      { slug: Like(`%${searchTerm}%`), deleted: 0 },
-    ];
-
-    if (categoryId && categoryId !== '') {
-      whereOptions = whereOptions.map((option: any) => ({ ...option, categoryId }));
-    }
-
-    if (isActive && isActive !== '') {
-      whereOptions = whereOptions.map((option: any) => ({ ...option, isActive }));
-    }
-
     // find products
-    const productRes = await Product.findAndCount({
-      select: {
-        id: true,
-        name: true,
-        slug: true,
-        imageUrl: true,
-        isActive: true,
-        category: {
-          id: true,
-          name: true,
-          slug: true,
-        },
-        productTags: {
-          id: true,
-          productId: true,
-          tagId: true,
-          tag: {
-            id: true,
-            name: true,
-          },
-        },
-        productItems: {
-          id: true,
-          productId: true,
-          inventoryId: true,
-          price: true,
-          discount: true,
-          discountStartDate: true,
-          discountEndDate: true,
-          inventory: {
-            id: true,
-            quantity: true,
-          },
-        },
-      },
-      where: whereOptions,
-      skip: _page * _limit,
-      take: _limit,
-      order: _sort === 'price' ? {} : { [_sort]: _order },
+    const products = await Product.find({
+      where: { id: In(ids) },
       relations: {
-        category: true,
-        productTags: { tag: true },
         productItems: {
           inventory: true,
         },
       },
     });
 
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy danh sách sản phẩm thành công',
+      data: products,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// get pagination product by category slug public
+export const getPaginationByCategorySlugPublic = async (
+  req: Request<{}, {}, {}, ListParams>,
+  res: Response<CommonResponse<Product>>,
+) => {
+  const { _limit, _page, _sort, _order, categorySlug, price, categoryFilters, variationFilters, statusFilters } =
+    req.query;
+
+  try {
+    // check category slug
+    const category = await Category.findOneBy({ slug: categorySlug });
+    if (!category) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Danh mục không tồn tại !',
+      });
+    }
+
+    // find products
+    const productRepository = AppDataSource.getRepository(Product);
+    const queryBuilder = productRepository.createQueryBuilder('product');
+    queryBuilder
+      .select([
+        'product.id',
+        'product.name',
+        'product.slug',
+        'product.imageUrl',
+        'product.isHot',
+        'product.isActive',
+        'product.createdAt',
+        'category.id',
+        'category.name',
+        'category.slug',
+        'productItems.id',
+        'productItems.productId',
+        'productItems.inventoryId',
+        'productItems.price',
+        'productItems.discount',
+        'productItems.discountStartDate',
+        'productItems.discountEndDate',
+        'inventory.id',
+        'inventory.quantity',
+        'productConfigurations.id',
+        'productConfigurations.variationOptionId',
+        'variationOption.id',
+        'variationOption.value',
+        'variationOption.variationId',
+      ])
+      .leftJoin('product.category', 'category')
+      .leftJoin('product.productItems', 'productItems')
+      .leftJoin('productItems.inventory', 'inventory')
+      .leftJoin(
+        'productItems.productConfigurations',
+        'productConfigurations',
+        'productConfigurations.productItemId = productItems.id',
+      )
+      .leftJoin('productConfigurations.variationOption', 'variationOption')
+      .where('category.slug = :categorySlug', { categorySlug })
+      .andWhere('product.deleted = :deleted', { deleted: 0 })
+      .andWhere('product.isActive = :isActive', { isActive: 1 });
+
+    if (categoryFilters) {
+      let queryString = '(';
+      categoryFilters.forEach((categoryFilter: number, index: number) => {
+        queryString += `category.id = ${categoryFilter}`;
+        if (index !== categoryFilters.length - 1) {
+          queryString += ' or ';
+        }
+      });
+      queryString += ')';
+      queryBuilder.andWhere(queryString);
+    }
+
+    if (statusFilters) {
+      statusFilters.forEach((statusFilter: string) => {
+        if (statusFilter === 'isHot') {
+          queryBuilder.andWhere('product.isHot = :isHot', { isHot: 1 });
+        }
+      });
+    }
+
+    if (_sort === 'price') {
+      queryBuilder.orderBy('productItems.price', _order.toUpperCase() as 'ASC' | 'DESC');
+    } else {
+      queryBuilder.orderBy(`product.${_sort}`, _order.toUpperCase() as 'ASC' | 'DESC');
+    }
+
+    // raw data
+    const products: any[] = await queryBuilder.getRawMany();
+
+    // handle data
+    let data: any[] = [];
+    products.forEach((product: any) => {
+      const dataIndex = data.findIndex((dataItem) => dataItem.id === product.product_id);
+      if (dataIndex === -1) {
+        data.push({
+          id: product.product_id,
+          name: product.product_name,
+          slug: product.product_slug,
+          imageUrl: product.product_imageUrl,
+          isHot: product.product_isHot,
+          isActive: product.product_isActive,
+          createdAt: product.product_createdAt,
+          category: {
+            id: product.category_id,
+            name: product.category_name,
+            slug: product.category_slug,
+          },
+          productItems: [
+            {
+              id: product.productItems_id,
+              price: product.productItems_price,
+              discount: product.productItems_discount,
+              discountStartDate: product.productItems_discountStartDate,
+              discountEndDate: product.productItems_discountEndDate,
+              inventoryId: product.productItems_inventoryId,
+              productId: product.productItems_productId,
+              inventory: {
+                id: product.inventory_id,
+                quantity: product.inventory_quantity,
+              },
+              productConfigurations: [
+                {
+                  id: product.productConfigurations_id,
+                  variationOptionId: product.productConfigurations_variationOptionId,
+                  variationOption: {
+                    id: product.variationOption_id,
+                    value: product.variationOption_value,
+                    variationId: product.variationOption_variationId,
+                  },
+                },
+              ],
+            },
+          ],
+        });
+      } else {
+        const productItemIndex = data[dataIndex].productItems.findIndex(
+          (productItem: any) => productItem.id === product.productItems_id,
+        );
+
+        if (productItemIndex === -1) {
+          data[dataIndex].productItems.push({
+            id: product.productItems_id,
+            price: product.productItems_price,
+            discount: product.productItems_discount,
+            discountStartDate: product.productItems_discountStartDate,
+            discountEndDate: product.productItems_discountEndDate,
+            inventoryId: product.productItems_inventoryId,
+            productId: product.productItems_productId,
+            inventory: {
+              id: product.inventory_id,
+              quantity: product.inventory_quantity,
+            },
+            productConfigurations: [
+              {
+                id: product.productConfigurations_id,
+                variationOptionId: product.productConfigurations_variationOptionId,
+                variationOption: {
+                  id: product.variationOption_id,
+                  value: product.variationOption_value,
+                  variationId: product.variationOption_variationId,
+                },
+              },
+            ],
+          });
+        } else {
+          data[dataIndex].productItems[data[dataIndex].productItems.length - 1].productConfigurations.push({
+            id: product.productConfigurations_id,
+            variationOptionId: product.productConfigurations_variationOptionId,
+            variationOption: {
+              id: product.variationOption_id,
+              value: product.variationOption_value,
+              variationId: product.variationOption_variationId,
+            },
+          });
+        }
+      }
+    });
+
+    if (price) {
+      const currentDate = new Date();
+      const newData: any[] = [];
+
+      data.forEach((product) => {
+        const priceArr = product.productItems.map((productItem: any) => {
+          const discountStartDate = new Date(productItem.discountStartDate);
+          const discountEndDate = new Date(productItem.discountEndDate);
+
+          if (discountStartDate <= currentDate && discountEndDate >= currentDate) {
+            return productItem.discount;
+          }
+
+          return productItem.price;
+        });
+
+        // max -> min
+        priceArr.sort((price1: number, price2: number) => price2 - price1);
+
+        if (priceArr[0] >= price.priceFrom && priceArr[0] <= price.priceTo) {
+          newData.push(product);
+        }
+      });
+
+      data = newData;
+    }
+
+    // filter by variation Option
+    if (variationFilters) {
+      const newData: any[] = [];
+      data.forEach((product) => {
+        product.productItems.forEach((productItem: any) => {
+          productItem.productConfigurations.forEach((productConfiguration: any) => {
+            variationFilters.forEach((variationFilter: any) => {
+              if (
+                productConfiguration.variationOption.variationId === parseInt(variationFilter.id) &&
+                variationFilter.values.includes(productConfiguration.variationOptionId.toString())
+              ) {
+                const newDataIndex = newData.findIndex((productData) => productData.id === product.id);
+                if (newDataIndex === -1) {
+                  newData.push(product);
+                }
+              }
+            });
+          });
+        });
+      });
+      data = newData;
+    }
+
     // filter by inventory status
-    let data: any[] = productRes[0];
+    if (statusFilters) {
+      statusFilters.forEach((statusFilter: string) => {
+        if (statusFilter === 'inStock') {
+          const dataFilter = data.map((product) => {
+            let quantityTotal = 0;
+            product.productItems.forEach((productItem: any) => {
+              quantityTotal += productItem.inventory.quantity;
+            });
+
+            if (quantityTotal > 0) return product;
+            return null;
+          });
+          data = dataFilter.filter((dataItem) => dataItem !== null);
+        }
+      });
+    }
+
+    // handle pagination data
+    const dataPagination: any[] = [];
+    data.forEach((dataItem, index) => {
+      const skip = _page * _limit;
+      if (index >= skip && dataPagination.length < _limit) {
+        dataPagination.push(dataItem);
+      }
+    });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy danh sách sản phẩm thành công',
+      data: dataPagination,
+      pagination: {
+        _limit,
+        _page,
+        _total: data.length,
+      },
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// get pagination product
+export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: Response<CommonResponse<Product>>) => {
+  const { _limit, _page, _sort, _order, categoryId, inventoryStatus, isActive, searchTerm } = req.query;
+
+  try {
+    // find products
+    const productRepository = AppDataSource.getRepository(Product);
+    const queryBuilder = productRepository.createQueryBuilder('product');
+    queryBuilder
+      .select([
+        'product.id',
+        'product.name',
+        'product.slug',
+        'product.imageUrl',
+        'product.isHot',
+        'product.isActive',
+        'category.id',
+        'category.name',
+        'category.slug',
+        'productTags.id',
+        'productTags.productId',
+        'productTags.tagId',
+        'tag.id',
+        'tag.name',
+        'productItems.id',
+        'productItems.productId',
+        'productItems.inventoryId',
+        'productItems.price',
+        'productItems.discount',
+        'productItems.discountStartDate',
+        'productItems.discountEndDate',
+        'inventory.id',
+        'inventory.quantity',
+      ])
+      .leftJoin('product.category', 'category')
+      .leftJoin('product.productTags', 'productTags')
+      .leftJoin('productTags.tag', 'tag')
+      .leftJoin('product.productItems', 'productItems', 'productItems.productId = product.id')
+      .leftJoin('productItems.inventory', 'inventory')
+      .where('product.deleted = :deleted', { deleted: 0 });
+
+    if (categoryId && categoryId !== '') {
+      queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });
+    }
+
+    if (isActive && isActive !== '') {
+      queryBuilder.andWhere('product.isActive = :isActive', { isActive });
+    }
+
+    if (searchTerm && searchTerm !== '') {
+      queryBuilder.andWhere('product.name like :searchTerm OR product.slug like :searchTerm', { searchTerm });
+    }
+
+    if (_sort === 'price') {
+      queryBuilder.orderBy('productItems.price', _order.toUpperCase() as 'ASC' | 'DESC');
+    } else {
+      queryBuilder.orderBy(`product.${_sort}`, _order.toUpperCase() as 'ASC' | 'DESC');
+    }
+
+    const products: any[] = await queryBuilder.getRawMany();
+
+    // handle data
+    let data: any[] = [];
+    products.forEach((product: any) => {
+      const dataIndex = data.findIndex((dataItem) => dataItem.id === product.product_id);
+      if (dataIndex === -1) {
+        data.push({
+          id: product.product_id,
+          name: product.product_name,
+          slug: product.product_slug,
+          imageUrl: product.product_imageUrl,
+          isHot: product.product_isHot,
+          isActive: product.product_isActive,
+          category: {
+            id: product.category_id,
+            name: product.category_name,
+            slug: product.category_slug,
+          },
+          productTags: product.productTags_tagId
+            ? [
+                {
+                  id: product.productTags_id,
+                  productId: product.productTags_productId,
+                  tagId: product.productTags_tagId,
+                  tag: {
+                    id: product.tag_id,
+                    name: product.tag_name,
+                  },
+                },
+              ]
+            : [],
+
+          productItems: [
+            {
+              id: product.productItems_id,
+              price: product.productItems_price,
+              discount: product.productItems_discount,
+              discountStartDate: product.productItems_discountStartDate,
+              discountEndDate: product.productItems_discountEndDate,
+              inventoryId: product.productItems_inventoryId,
+              productId: product.productItems_productId,
+              inventory: {
+                id: product.inventory_id,
+                quantity: product.inventory_quantity,
+              },
+            },
+          ],
+        });
+      } else {
+        if (product.productTags_tagId) {
+          const productTagIndex = data[dataIndex].productTags.findIndex(
+            (productTag: any) => productTag.tagId === product.productTags_tagId,
+          );
+
+          if (productTagIndex === -1) {
+            data[dataIndex].productTags.push({
+              id: product.productTags_id,
+              productId: product.productTags_productId,
+              tagId: product.productTags_tagId,
+              tag: {
+                id: product.tag_id,
+                name: product.tag_name,
+              },
+            });
+          }
+        }
+
+        const productItemIndex = data[dataIndex].productItems.findIndex(
+          (productItem: any) => productItem.id === product.productItems_id,
+        );
+
+        if (productItemIndex === -1) {
+          data[dataIndex].productItems.push({
+            id: product.productItems_id,
+            price: product.productItems_price,
+            discount: product.productItems_discount,
+            discountStartDate: product.productItems_discountStartDate,
+            discountEndDate: product.productItems_discountEndDate,
+            inventoryId: product.productItems_inventoryId,
+            productId: product.productItems_productId,
+            inventory: {
+              id: product.inventory_id,
+              quantity: product.inventory_quantity,
+            },
+          });
+        }
+      }
+    });
+
+    // filter by inventory status
     if (inventoryStatus && inventoryStatus !== '') {
-      data = productRes[0].map((product) => {
+      const dataFilter = data.map((product) => {
         let quantityTotal = 0;
-        product.productItems.forEach((productItem) => {
+        product.productItems.forEach((productItem: any) => {
           quantityTotal += productItem.inventory.quantity;
         });
 
@@ -158,37 +553,80 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
           return product;
         return null;
       });
-      data = data.filter((dataItem) => dataItem !== null);
+      data = dataFilter.filter((dataItem) => dataItem !== null);
     }
 
-    // sort by price
-    if (_sort === 'price') {
-      data.sort(
-        (data1, data2) =>
-          (_order === 'asc' ? data1 : data2).productItems.sort(
-            (productItem1: any, productItem2: any) =>
-              (_order === 'asc' ? productItem1 : productItem2).price -
-              (_order === 'asc' ? productItem2 : productItem1).price,
-          )[0].price -
-          (_order === 'asc' ? data2 : data1).productItems.sort(
-            (productItem1: any, productItem2: any) =>
-              (_order === 'asc' ? productItem1 : productItem2).price -
-              (_order === 'asc' ? productItem2 : productItem1).price,
-          )[0].price,
-      );
-    }
+    // handle pagination data
+    const dataPagination: any[] = [];
+    data.forEach((dataItem, index) => {
+      const skip = _page * _limit;
+      if (index >= skip && dataPagination.length < _limit) {
+        dataPagination.push(dataItem);
+      }
+    });
 
     // send results
     return res.status(200).json({
       code: 200,
       success: true,
       message: 'Lấy danh sách sản phẩm thành công',
-      data,
+      data: dataPagination,
       pagination: {
         _limit,
         _page,
-        _total: productRes[1],
+        _total: data.length,
       },
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// get one product by slug public
+export const getOneBySlugPublic = async (
+  req: Request<{ slug: string }, {}, {}, {}>,
+  res: Response<CommonResponse<Product>>,
+) => {
+  const { slug } = req.params;
+  try {
+    // find product
+    const product = await Product.findOne({
+      where: { slug, deleted: 0 },
+      relations: {
+        category: true,
+        productTags: { tag: true },
+        productItems: {
+          inventory: true,
+          productConfigurations: {
+            variationOption: {
+              variation: true,
+            },
+          },
+          productImages: true,
+        },
+        productConnects: { connect: true },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Sản phẩm không tồn tại!',
+      });
+    }
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy sản phẩm thành công',
+      data: product,
     });
   } catch (error) {
     // send error
@@ -246,7 +684,7 @@ export const getOneById = async (req: Request<{ id: number }, {}, {}, {}>, res: 
   }
 };
 
-// add any user
+// add any product
 export const addAny = async (req: Request<{}, {}, ProductInput[], {}>, res: Response<CommonResponse<null>>) => {
   const data = req.body;
 
@@ -344,6 +782,15 @@ export const addAny = async (req: Request<{}, {}, ProductInput[], {}>, res: Resp
           let productConfigurationData = [];
 
           for (let j = 0; j < variationOptionIds.length; j++) {
+            const variationOption = await VariationOption.findOneBy({ id: parseInt(variationOptionIds[j]) });
+            if (!variationOption) {
+              return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Thêm danh sách sản phẩm thất bại!',
+              });
+            }
+
             productConfigurationData.push({
               productItemId: insertedProductItem.raw.insertId,
               variationOptionId: parseInt(variationOptionIds[j]),
@@ -413,6 +860,15 @@ export const addOne = async (req: Request<{}, {}, ProductInput, {}>, res: Respon
         // handle data
         let productConnectData = [];
         for (let i = 0; i < connectIds.length; i++) {
+          const product = await Product.findOneBy({ id: connectIds[i] });
+          if (!product) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Thêm sản phẩm thất bại!',
+            });
+          }
+
           productConnectData.push({
             productId: insertedProduct.raw.insertId,
             connectId: connectIds[i],
@@ -427,6 +883,15 @@ export const addOne = async (req: Request<{}, {}, ProductInput, {}>, res: Respon
         // handle data
         let tagData = [];
         for (let i = 0; i < tagIds.length; i++) {
+          const tag = await Tag.findOneBy({ id: tagIds[i] });
+          if (!tag) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Thêm sản phẩm thất bại!',
+            });
+          }
+
           tagData.push({
             productId: insertedProduct.raw.insertId,
             tagId: tagIds[i],
@@ -455,6 +920,15 @@ export const addOne = async (req: Request<{}, {}, ProductInput, {}>, res: Respon
         let productConfigurationData = [];
 
         for (let j = 0; j < variationOptionIds.length; j++) {
+          const variationOption = await VariationOption.findOneBy({ id: parseInt(variationOptionIds[j]) });
+          if (!variationOption) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Thêm sản phẩm thất bại!',
+            });
+          }
+
           productConfigurationData.push({
             productItemId: insertedProductItem.raw.insertId,
             variationOptionId: parseInt(variationOptionIds[j]),
@@ -476,6 +950,7 @@ export const addOne = async (req: Request<{}, {}, ProductInput, {}>, res: Respon
         // add product image
         await transactionalEntityManager.insert(ProductImage, productImageData);
       }
+      return;
     });
 
     // send results
@@ -504,8 +979,6 @@ export const updateOne = async (
   const data = req.body;
   const { items, connectIds, tagIds, ...others } = data;
 
-  console.log(data);
-
   try {
     // check product
     const product = await Product.findOneBy({ id });
@@ -526,6 +999,15 @@ export const updateOne = async (
         // handle data
         let productConnectData = [];
         for (let i = 0; i < connectIds.length; i++) {
+          const product = await Product.findOneBy({ id: connectIds[i] });
+          if (!product) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Cập nhật sản phẩm thất bại!',
+            });
+          }
+
           productConnectData.push({
             productId: id,
             connectId: connectIds[i],
@@ -543,6 +1025,15 @@ export const updateOne = async (
         // handle data
         let tagData = [];
         for (let i = 0; i < tagIds.length; i++) {
+          const tag = await Tag.findOneBy({ id: tagIds[i] });
+          if (!tag) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Cập nhật sản phẩm thất bại!',
+            });
+          }
+
           tagData.push({
             productId: id,
             tagId: tagIds[i],
@@ -595,6 +1086,15 @@ export const updateOne = async (
         let productConfigurationData = [];
 
         for (let j = 0; j < variationOptionIds.length; j++) {
+          const variationOption = await VariationOption.findOneBy({ id: parseInt(variationOptionIds[j]) });
+          if (!variationOption) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Cập nhật sản phẩm thất bại!',
+            });
+          }
+
           productConfigurationData.push({
             productItemId: insertedProductItem.raw.insertId,
             variationOptionId: parseInt(variationOptionIds[j]),
@@ -616,6 +1116,7 @@ export const updateOne = async (
         // add product image
         await transactionalEntityManager.insert(ProductImage, productImageData);
       }
+      return;
     });
 
     // send results
@@ -635,8 +1136,8 @@ export const updateOne = async (
   }
 };
 
-// update active one product
-export const changeActive = async (
+// update attribute one product
+export const changeAttribute = async (
   req: Request<{ id: number }, {}, ProductInput, {}>,
   res: Response<CommonResponse<null>>,
 ) => {

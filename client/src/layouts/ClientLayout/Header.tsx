@@ -30,9 +30,9 @@ import { MdOutlineAdminPanelSettings as MdOutlineAdminPanelSettingsIcon } from '
 import { Link, useNavigate } from 'react-router-dom';
 import * as authApi from '../../apis/authApi';
 import * as userApi from '../../apis/userApi';
-import { useAppDispatch } from '../../app/hook';
+import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { User } from '../../models/User';
-import { authFai, authPending, authSuccess, logout } from '../../slices/authSlice';
+import { authFai, authPending, authSuccess, logout, selectIsAuthenticated } from '../../slices/authSlice';
 import { showToast } from '../../slices/toastSlice';
 import { Theme } from '../../theme';
 import JWTManager from '../../utils/jwt';
@@ -41,6 +41,7 @@ const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme: Theme = useTheme();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   const [user, setUser] = useState<User>();
 
@@ -58,7 +59,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const getOneUser = async () => {
       try {
-        const res = await userApi.getOneAndRolePublicById(JWTManager.getUserId() as number);
+        const res = await userApi.getOneAndRoleByIdPublic(JWTManager.getUserId() as number);
         setUser(res.data as User);
       } catch (error: any) {
         const { data } = error.response;
@@ -68,8 +69,13 @@ const Header: React.FC = () => {
         }
       }
     };
-    getOneUser();
-  }, [navigate]);
+
+    if (isAuthenticated) {
+      getOneUser();
+    } else {
+      setUser(undefined);
+    }
+  }, [navigate, isAuthenticated]);
 
   const handleLogout = async () => {
     dispatch(authPending());
@@ -95,7 +101,17 @@ const Header: React.FC = () => {
       const { data } = error.response;
       dispatch(authFai());
 
-      if (data.code === 401 || data.code === 403 || data.code === 500) {
+      if (data.code === 400) {
+        dispatch(
+          showToast({
+            page: 'login',
+            type: 'error',
+            message: data.message,
+            options: { theme: 'colored', toastId: 'loginId' },
+          }),
+        );
+        navigate('/dang-nhap');
+      } else if (data.code === 401 || data.code === 403 || data.code === 500) {
         navigate(`/error/${data.code}`);
       }
     }
@@ -211,9 +227,9 @@ const Header: React.FC = () => {
                   transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                   anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
                 >
-                  {user.role?.name !== 'Khách hàng' && (
+                  {user?.role?.name !== 'Khách hàng' && (
                     <MenuItem onClick={handleCloseMenuUser}>
-                      <Link to="/quan-tri" style={{ width: '100%' }}>
+                      <Link to="/quan-tri" target="_blank" style={{ width: '100%' }}>
                         <MdOutlineAdminPanelSettingsIcon fontSize="20px" style={{ marginRight: '10px' }} /> Quản trị
                       </Link>
                     </MenuItem>
@@ -256,8 +272,8 @@ const Header: React.FC = () => {
         {/* logo */}
         <Link to="/">
           <Box display="flex" alignItems="center" gap="5px" color={theme.palette.primary[1000]}>
-            <RiShoppingBag3FillIcon size="45px" />
-            <Typography variant="h2" paddingTop="5px">
+            <RiShoppingBag3FillIcon size="40px" />
+            <Typography variant="h3" paddingTop="5px">
               Ecomshop
             </Typography>
           </Box>
@@ -273,11 +289,13 @@ const Header: React.FC = () => {
                 <BiSearchAltIcon fontSize="24px" />
               </InputAdornment>
             ),
+            style: { height: '40px' },
           }}
           sx={{
             bgcolor: theme.palette.common.white,
             borderRadius: '3px',
             width: '700px',
+            height: '40px',
           }}
         />
         {/* search */}
@@ -295,7 +313,7 @@ const Header: React.FC = () => {
               },
             }}
           >
-            <BiCartIcon fontSize="50px" />
+            <BiCartIcon fontSize="40px" />
           </Badge>
         </Link>
         {/* cart */}

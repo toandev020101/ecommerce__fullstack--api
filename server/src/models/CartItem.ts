@@ -1,6 +1,6 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Cart } from './Cart';
 import { ProductItem } from './ProductItem';
+import { User } from './User';
 
 @Entity()
 export class CartItem extends BaseEntity {
@@ -11,10 +11,10 @@ export class CartItem extends BaseEntity {
   quantity!: number;
 
   @Column()
-  cartId!: number;
-  @ManyToOne(() => Cart, (cart) => cart.cartItems)
-  @JoinColumn({ name: 'cartId' })
-  cart: Cart;
+  userId!: number;
+  @ManyToOne(() => User, (user) => user.cartItems)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
   @Column()
   productItemId!: number;

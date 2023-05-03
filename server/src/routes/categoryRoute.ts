@@ -17,6 +17,21 @@ router.get(
   categoryController.getPaginationAndParent,
 );
 
+// @route GET api/v1/category/any/public
+// @desc Get list category by parent slug
+// @access Public
+router.get('/any/public', categoryController.getListByParentSlugPublic);
+
+// @route GET api/v1/category/search
+// @desc Get list category by search term
+// @access Private
+router.get('/search', checkAuth, checkPermission('/category/search', 'get'), categoryController.getListBySearchTerm);
+
+// @route GET api/v1/category/public
+// @desc Get all category
+// @access Public
+router.get('/public', categoryController.getAllPublic);
+
 // @route GET api/v1/category
 // @desc Get all category
 // @access Private

@@ -9,12 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOneById = exports.getListByDistrictId = void 0;
+exports.getListByDistrictIdAndSearchTerm = void 0;
 const Ward_1 = require("./../models/Ward");
-const getListByDistrictId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const typeorm_1 = require("typeorm");
+const getListByDistrictIdAndSearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { districtId } = req.params;
+    const { searchTerm } = req.query;
     try {
-        const wards = yield Ward_1.Ward.find({ where: { districtId } });
+        const wards = yield Ward_1.Ward.find({
+            where: searchTerm ? { districtId, name: (0, typeorm_1.Like)(`%${searchTerm}%`) } : { districtId },
+        });
         return res.status(200).json({
             code: 200,
             success: true,
@@ -30,32 +34,5 @@ const getListByDistrictId = (req, res) => __awaiter(void 0, void 0, void 0, func
         });
     }
 });
-exports.getListByDistrictId = getListByDistrictId;
-const getOneById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    try {
-        const ward = yield Ward_1.Ward.findOneBy({ id });
-        if (!ward) {
-            return res.status(404).json({
-                code: 404,
-                success: false,
-                message: 'Phường, xã không tồn tại',
-            });
-        }
-        return res.status(200).json({
-            code: 200,
-            success: true,
-            message: 'Lấy phường, xã thành công',
-            data: ward,
-        });
-    }
-    catch (error) {
-        return res.status(500).json({
-            code: 500,
-            success: false,
-            message: `Lỗi server :: ${error.message}`,
-        });
-    }
-});
-exports.getOneById = getOneById;
+exports.getListByDistrictIdAndSearchTerm = getListByDistrictIdAndSearchTerm;
 //# sourceMappingURL=wardController.js.map

@@ -1,7 +1,6 @@
-import { FormControl, FormHelperText, InputAdornment, InputLabel, MenuItem, Select, TextField } from '@mui/material';
-import React, { ChangeEvent, useState } from 'react';
+import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
+import React, { useState } from 'react';
 import { Controller } from 'react-hook-form';
-import { BiSearchAlt as BiSearchAltIcon } from 'react-icons/bi';
 import { FieldError } from '../interfaces/FieldError';
 import { ValueObject } from '../interfaces/ValueObject';
 
@@ -15,7 +14,6 @@ interface Props {
   maxWidth?: string;
   onHandleChange?: Function;
   required?: boolean;
-  search?: boolean;
   [key: string]: any;
 }
 
@@ -29,7 +27,6 @@ const SelectField: React.FC<Props> = ({
   maxWidth,
   onHandleChange,
   required,
-  search,
   ...props
 }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -74,31 +71,6 @@ const SelectField: React.FC<Props> = ({
             ref={ref}
             {...props}
           >
-            {search && (
-              <TextField
-                id="outlined-basic"
-                label="Tìm kiếm ..."
-                variant="outlined"
-                size="small"
-                fullWidth
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <BiSearchAltIcon fontSize="20px" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{
-                  padding: '0 15px 10px',
-                  '& label': {
-                    paddingLeft: '15px',
-                  },
-                }}
-                value={searchTerm}
-                onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
-                onClick={(e: any) => e.stopPropagation()}
-              />
-            )}
             {valueObjects
               .filter((valueObject) => valueObject.label.toLowerCase().includes(searchTerm.toLowerCase()))
               .map((valueObject, index) => (

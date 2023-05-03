@@ -41,9 +41,17 @@ export const monthToString = (month: number) => {
   }
 };
 
-export const dateToString = (date: any) => {
+export const dateToString = (date: any, type: number = 0) => {
   const newDate = new Date(date);
-  return `${newDate.getDate()} ${monthToString(newDate.getMonth())}, ${newDate.getFullYear()}`;
+  if (type === 0) {
+    return `${newDate.getDate()} ${monthToString(newDate.getMonth())}, ${newDate.getFullYear()}`;
+  }
+
+  if (type === 1) {
+    return `${newDate.getDate()}/${newDate.getMonth() + 1}/${newDate.getFullYear()}`;
+  }
+
+  return `Ngày ${newDate.getDate()} tháng ${newDate.getMonth() + 1} năm ${newDate.getFullYear()}`;
 };
 
 export const fullDateToString = (date: any) => {
@@ -55,4 +63,9 @@ export const fullDateToString = (date: any) => {
 
 export const toDate = (date: any) => {
   return new Date(date);
+};
+
+export const toDateString = (date: any) => {
+  const newDate = new Date(date);
+  return `${newDate.getFullYear()}-${newDate.getMonth() + 1}-${newDate.getDate()}`;
 };

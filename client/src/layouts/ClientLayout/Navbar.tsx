@@ -27,14 +27,16 @@ const Navbar: React.FC = () => {
 
   return (
     <ul style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px', padding: '10px 0' }}>
-      {categories.map((category, index) => (
-        <li key={`category-item-${index}`}>
-          <Link to={category.slug} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-            <img src={category.imageUrl} alt={category.name} style={{ width: '25px', height: '25px' }} />
-            <Typography>{category.name}</Typography>
-          </Link>
-        </li>
-      ))}
+      {categories
+        .filter((category) => category.parentId !== undefined)
+        .map((category, index) => (
+          <li key={`category-item-${index}`}>
+            <Link to={`/${category.slug}`} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+              <img src={category.imageUrl} alt={category.name} style={{ width: '25px', height: '25px' }} />
+              <Typography>{category.name}</Typography>
+            </Link>
+          </li>
+        ))}
     </ul>
   );
 };

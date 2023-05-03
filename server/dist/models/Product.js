@@ -30,7 +30,7 @@ __decorate([
     __metadata("design:type", String)
 ], Product.prototype, "slug", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 300, nullable: true }),
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], Product.prototype, "shortDescription", void 0);
 __decorate([
@@ -57,6 +57,10 @@ __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     __metadata("design:type", Number)
 ], Product.prototype, "height", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    __metadata("design:type", Number)
+], Product.prototype, "isHot", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 1 }),
     __metadata("design:type", Number)

@@ -50,26 +50,26 @@ import {
   FiPlusSquare as FiPlusSquareIcon,
 } from 'react-icons/fi';
 import { IoMdImages as IoMdImagesIcon } from 'react-icons/io';
-import { useDispatch } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
-import * as productApi from '../../../apis/productApi';
 import * as categoryApi from '../../../apis/categoryApi';
+import * as productApi from '../../../apis/productApi';
+import { useAppDispatch } from '../../../app/hook';
 import TitlePage from '../../../components/TitlePage';
 import ToastNotify from '../../../components/ToastNotify';
 import { BaseResponse } from '../../../interfaces/BaseResponse';
 import { HeadCell } from '../../../interfaces/HeadCell';
 import { HeadFileCSV } from '../../../interfaces/HeadFileCSV';
+import { ProductInput } from '../../../interfaces/ProductInput';
+import { Category } from '../../../models/Category';
 import { Product, ProductItem } from '../../../models/Product';
 import { showToast } from '../../../slices/toastSlice';
 import { Theme } from '../../../theme';
 import { priceFormat } from '../../../utils/format';
-import { Category } from '../../../models/Category';
-import { ProductInput } from '../../../interfaces/ProductInput';
 import productSchema from '../../../validations/productSchema';
 
 const ProductManager: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -182,6 +182,10 @@ const ProductManager: React.FC = () => {
       key: 'connects',
     },
     {
+      label: 'Nổi bật',
+      key: 'isHot',
+    },
+    {
       label: 'Trạng thái',
       key: 'isActive',
     },
@@ -211,7 +215,7 @@ const ProductManager: React.FC = () => {
       label: 'Giá',
       key: 'price',
       numeric: false,
-      width: 200,
+      width: 100,
     },
     {
       label: 'Danh mục',
@@ -222,6 +226,12 @@ const ProductManager: React.FC = () => {
       label: 'Từ khóa',
       numeric: false,
       width: 200,
+    },
+    {
+      label: 'Nổi bật',
+      key: 'isHot',
+      numeric: false,
+      width: 120,
     },
     {
       label: 'Trạng thái',
@@ -524,6 +534,7 @@ const ProductManager: React.FC = () => {
             width: fileData[i].width as number,
             height: fileData[i].height as number,
             categoryId: fileData[i].categoryId as number,
+            isHot: fileData[i].isHot as number,
             isActive: fileData[i].isActive as number,
             shortDescription: '',
             description: '',
@@ -635,7 +646,8 @@ const ProductManager: React.FC = () => {
           width: products[i].width,
           height: products[i].height,
           category: products[i].category.name,
-          isActive: products[i].isActive === 0 ? 'Hiện' : 'Ẩn',
+          isHot: products[i].isHot === 1 ? 'Có' : 'Không',
+          isActive: products[i].isActive === 1 ? 'Hiện' : 'Ẩn',
           createdAt: products[i].createdAt,
           updatedAt: products[i].updatedAt,
         };
@@ -693,6 +705,40 @@ const ProductManager: React.FC = () => {
             page: 'product',
             type: 'error',
             message: data.code === 403 ? data.message : 'Xuất file .csv thất bại',
+            options: { theme: 'colored', toastId: 'productId' },
+          }),
+        );
+      } else if (data.code === 401 || data.code === 500) {
+        navigate(`/error/${data.code}`);
+      }
+    }
+  };
+
+  const handleHotChange = async (e: React.ChangeEvent<HTMLInputElement>, index: number) => {
+    const id = rows[index].id;
+    const isHot = e.target.checked;
+
+    try {
+      const res = await productApi.changeHot(id, { isHot: isHot ? 1 : 0 });
+      dispatch(
+        showToast({
+          page: 'product',
+          type: 'success',
+          message: res.message,
+          options: { theme: 'colored', toastId: 'productId' },
+        }),
+      );
+
+      rows[index].isHot = isHot ? 1 : 0;
+      setRows([...rows]);
+    } catch (error: any) {
+      const { data } = error.response;
+      if (data.code === 403 || data.code === 404) {
+        dispatch(
+          showToast({
+            page: 'product',
+            type: 'error',
+            message: data.message,
             options: { theme: 'colored', toastId: 'productId' },
           }),
         );
@@ -876,7 +922,7 @@ const ProductManager: React.FC = () => {
         {/* header list */}
         <Box display="flex" justifyContent="space-between" marginBottom="20px">
           {/* left */}
-          <Box display="flex" alignItems="center" gap="20px">
+          <Box display="flex" alignItems="center" gap="10px">
             <LoadingButton
               variant="outlined"
               color="secondary"
@@ -1093,6 +1139,11 @@ const ProductManager: React.FC = () => {
                           </Skeleton>
                         </TableCell>
                         <TableCell>
+                          <Skeleton animation="wave" width="100%">
+                            <FormControlLabel control={<Switch />} label={'Trạng thái'} />
+                          </Skeleton>
+                        </TableCell>
+                        <TableCell>
                           <Box display="flex" gap="10px">
                             <Skeleton animation="wave" variant="circular">
                               <IconButton>
@@ -1194,13 +1245,25 @@ const ProductManager: React.FC = () => {
                         <TableCell sx={{ fontSize: '14px' }}>{handlePrice(row.productItems)}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>{row.category.name}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>
-                          {(row.productTags?.length as number) > 0
-                            ? row.productTags?.map((productTag, index) =>
+                          {row.productTags && row.productTags.length > 0
+                            ? row.productTags.map((productTag, index) =>
                                 index !== (row.productTags?.length as number) - 1
                                   ? productTag.tag.name + ', '
                                   : productTag.tag.name,
                               )
                             : '--'}
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '14px' }}>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                defaultChecked={row.isHot === 1}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleHotChange(e, index)}
+                              />
+                            }
+                            label=""
+                            onClick={(e: any) => e.stopPropagation()}
+                          />
                         </TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>
                           <FormControlLabel
@@ -1216,8 +1279,8 @@ const ProductManager: React.FC = () => {
                         </TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>
                           <Box display="flex" gap="10px">
-                            <Tooltip title="Xem">
-                              <Link to={`/san-pham/${row.category.slug}/${row.slug}`} target="_blank">
+                            <Tooltip title="Xem chi tiết">
+                              <Link to={`/${row.category.slug}/${row.slug}`} target="_blank">
                                 <IconButton
                                   onClick={(e: any) => {
                                     e.stopPropagation();

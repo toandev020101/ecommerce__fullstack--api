@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Cart } from './Cart';
+import { CartItem } from './CartItem';
 import { District } from './District';
 import { Media } from './Media';
 import { Order } from './Order';
@@ -17,6 +17,7 @@ import { Province } from './Province';
 import { Review } from './Review';
 import { Role } from './Role';
 import { Ward } from './Ward';
+import { Coupon } from './Coupon';
 
 @Entity()
 export class User extends BaseEntity {
@@ -80,11 +81,14 @@ export class User extends BaseEntity {
   @JoinColumn({ name: 'roleId' })
   role: Role;
 
-  @OneToMany(() => Cart, (cart) => cart.user)
-  carts: Cart[];
+  @OneToMany(() => CartItem, (cartItem) => cartItem.user)
+  cartItems: CartItem[];
 
   @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
+
+  @OneToMany(() => Coupon, (coupon) => coupon.user)
+  coupons: Coupon[];
 
   @OneToMany(() => Review, (review) => review.user)
   reviews: Review[];

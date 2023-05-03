@@ -1,10 +1,33 @@
 import { Request, Response } from 'express';
-import { In } from 'typeorm';
+import { In, IsNull, Like } from 'typeorm';
 import AppDataSource from '../AppDataSource';
 import { CommonResponse, ListParams } from '../interfaces/common';
 import { CategoryInput } from './../interfaces/CategoryInput';
 import { Category } from './../models/Category';
 import { Product } from './../models/Product';
+
+// get all categories public
+export const getAllPublic = async (_req: Request, res: Response<CommonResponse<Category>>) => {
+  try {
+    // find categories
+    const categories = await Category.find({ where: { isActive: 1, parentId: IsNull() }, order: { level: 'ASC' } });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy tất cả danh mục thành công',
+      data: categories,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
 
 // get all categories
 export const getAll = async (_req: Request, res: Response<CommonResponse<Category>>) => {
@@ -17,6 +40,75 @@ export const getAll = async (_req: Request, res: Response<CommonResponse<Categor
       code: 200,
       success: true,
       message: 'Lấy tất cả danh mục thành công',
+      data: categories,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// get list categories
+export const getListByParentSlugPublic = async (
+  req: Request<{}, {}, {}, { parentSlug: string }>,
+  res: Response<CommonResponse<Category>>,
+) => {
+  const { parentSlug } = req.query;
+
+  try {
+    // check category slug
+    const category = await Category.findOneBy({ slug: parentSlug });
+    if (!category) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Danh mục không tồn tại !',
+      });
+    }
+
+    // find categories
+    const categories = await Category.find({
+      where: { parent: { slug: parentSlug } },
+      relations: { parent: true },
+    });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy danh sách danh mục thành công',
+      data: categories,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// get list categories
+export const getListBySearchTerm = async (
+  req: Request<{}, {}, {}, { searchTerm: string }>,
+  res: Response<CommonResponse<Category>>,
+) => {
+  const { searchTerm } = req.query;
+
+  try {
+    // find categories
+    const categories = await Category.findBy({ name: Like(`%${searchTerm}%`) });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy danh sách danh mục thành công',
       data: categories,
     });
   } catch (error) {

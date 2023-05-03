@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeOne = exports.removeAny = exports.changeActive = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
+exports.removeOne = exports.removeAny = exports.changeActive = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getOneAndRoleByIdPublic = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("jsonwebtoken");
 const typeorm_1 = require("typeorm");
@@ -99,8 +99,8 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 success: false,
                 message: 'Đăng nhập thất bại',
                 errors: [
-                    { field: 'username', message: 'Tài khoản đang bị khóa!' },
-                    { field: 'password', message: 'Tài khoản đang bị khóa!' },
+                    { field: 'username', message: 'Tài khoản đã bị khóa!' },
+                    { field: 'password', message: 'Tài khoản đã bị khóa!' },
                 ],
             });
         }
@@ -261,6 +261,9 @@ const getAllAndRole = (_req, res) => __awaiter(void 0, void 0, void 0, function*
         const users = yield User_1.User.find({
             relations: {
                 role: true,
+                ward: true,
+                district: true,
+                province: true,
             },
         });
         return res.status(200).json({
@@ -279,6 +282,52 @@ const getAllAndRole = (_req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getAllAndRole = getAllAndRole;
+const getOneAndRoleByIdPublic = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    try {
+        const user = yield User_1.User.findOne({
+            where: { id },
+            relations: {
+                role: true,
+                ward: true,
+                district: true,
+                province: true,
+            },
+        });
+        if (!user) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: 'Tài khoản không tồn tại!',
+            });
+        }
+        if (!user.isActive) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Đăng nhập thất bại',
+                errors: [
+                    { field: 'username', message: 'Tài khoản đã bị khóa!' },
+                    { field: 'password', message: 'Tài khoản đã bị khóa!' },
+                ],
+            });
+        }
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Lấy tài khoản thành công',
+            data: user,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.getOneAndRoleByIdPublic = getOneAndRoleByIdPublic;
 const getOneAndRoleById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
@@ -286,6 +335,9 @@ const getOneAndRoleById = (req, res) => __awaiter(void 0, void 0, void 0, functi
             where: { id },
             relations: {
                 role: true,
+                ward: true,
+                district: true,
+                province: true,
             },
         });
         if (!user) {

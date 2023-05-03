@@ -12,11 +12,30 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeOne = exports.removeAny = exports.updateOne = exports.addOne = exports.getOneAndParentById = exports.getPaginationAndParent = exports.getAll = void 0;
+exports.removeOne = exports.removeAny = exports.updateOne = exports.addOne = exports.getOneAndParentById = exports.getPaginationAndParent = exports.getListBySearchTerm = exports.getListByParentSlugPublic = exports.getAll = exports.getAllPublic = void 0;
 const typeorm_1 = require("typeorm");
 const AppDataSource_1 = __importDefault(require("../AppDataSource"));
 const Category_1 = require("./../models/Category");
 const Product_1 = require("./../models/Product");
+const getAllPublic = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const categories = yield Category_1.Category.find({ where: { isActive: 1, parentId: (0, typeorm_1.IsNull)() }, order: { level: 'ASC' } });
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Lấy tất cả danh mục thành công',
+            data: categories,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.getAllPublic = getAllPublic;
 const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const categories = yield Category_1.Category.find();
@@ -36,6 +55,57 @@ const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getAll = getAll;
+const getListByParentSlugPublic = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { parentSlug } = req.query;
+    try {
+        const category = yield Category_1.Category.findOneBy({ slug: parentSlug });
+        if (!category) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: 'Danh mục không tồn tại !',
+            });
+        }
+        const categories = yield Category_1.Category.find({
+            where: { parent: { slug: parentSlug } },
+            relations: { parent: true },
+        });
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Lấy danh sách danh mục thành công',
+            data: categories,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.getListByParentSlugPublic = getListByParentSlugPublic;
+const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { searchTerm } = req.query;
+    try {
+        const categories = yield Category_1.Category.findBy({ name: (0, typeorm_1.Like)(`%${searchTerm}%`) });
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Lấy danh sách danh mục thành công',
+            data: categories,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.getListBySearchTerm = getListBySearchTerm;
 const getPaginationAndParent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { _limit, _page, _sort, _order, searchTerm } = req.query;
     try {

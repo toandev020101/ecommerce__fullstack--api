@@ -33,10 +33,10 @@ import {
   FiChevronUp as FiChevronUpIcon,
   FiPlusSquare as FiPlusSquareIcon,
 } from 'react-icons/fi';
-import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import slugify from 'slugify';
 import * as variationApi from '../../../../apis/variationApi';
+import * as categoryApi from '../../../../apis/categoryApi';
 import InputField from '../../../../components/InputField';
 import TitlePage from '../../../../components/TitlePage';
 import ToastNotify from '../../../../components/ToastNotify';
@@ -48,9 +48,13 @@ import { Variation } from '../../../../models/Variation';
 import { showToast } from '../../../../slices/toastSlice';
 import { Theme } from '../../../../theme';
 import variationSchema from '../../../../validations/variationSchema';
+import SearchMultipleField from '../../../../components/SearchMultipleField';
+import { ValueObject } from '../../../../interfaces/ValueObject';
+import { Category } from '../../../../models/Category';
+import { useAppDispatch } from '../../../../app/hook';
 
 const VariationProduct: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const theme: Theme = useTheme();
@@ -62,6 +66,9 @@ const VariationProduct: React.FC = () => {
 
   const [openAddOrEditIndexDialog, setOpenAddOrEditIndexDialog] = useState<number>(-2);
   const [errors, setErrors] = useState<FieldError[]>([]);
+
+  const [categorySearchValues, setCategorySearchValues] = useState<ValueObject[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<ValueObject[]>([]);
 
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [deleteRowIndex, setDeleteRowIndex] = useState<number>(-1);
@@ -77,14 +84,20 @@ const VariationProduct: React.FC = () => {
       label: 'Tên thuộc tính',
       key: 'name',
       numeric: false,
+      width: 150,
     },
     {
       label: 'Đường dẫn',
       key: 'slug',
       numeric: false,
+      width: 150,
     },
     {
       label: 'Tên chủng loại',
+      numeric: false,
+    },
+    {
+      label: 'Danh mục',
       numeric: false,
     },
     {
@@ -98,6 +111,7 @@ const VariationProduct: React.FC = () => {
     defaultValues: {
       name: '',
       slug: '',
+      categoryIds: [],
     },
     resolver: yupResolver(variationSchema),
   });
@@ -178,6 +192,25 @@ const VariationProduct: React.FC = () => {
     setPage(0);
   };
 
+  const handleSearchTermCategoryChange = async (categorySearchTerm: string) => {
+    try {
+      const res = await categoryApi.getListBySearchTerm(categorySearchTerm);
+      const resData = res.data as Category[];
+      let data: ValueObject[] = [];
+
+      for (let i = 0; i < resData.length; i++) {
+        data.push({ label: resData[i].name, value: resData[i].id });
+      }
+
+      setCategoryOptions(data);
+    } catch (error: any) {
+      const { data } = error.response;
+      if (data.code === 401 || data.code === 403 || data.code === 500) {
+        navigate(`/error/${data.code}`);
+      }
+    }
+  };
+
   const handleOpenAddDialog = () => {
     setOpenAddOrEditIndexDialog(-1);
     form.setValue('name', '');
@@ -189,6 +222,15 @@ const VariationProduct: React.FC = () => {
     setOpenAddOrEditIndexDialog(index);
     form.setValue('name', rows[index].name);
     form.setValue('slug', rows[index].slug);
+
+    let defaultCategoryOptions: ValueObject[] | undefined = rows[index].variationCategories?.map(
+      (variationCategory) => ({
+        label: variationCategory.category.name,
+        value: variationCategory.category.id,
+      }),
+    );
+
+    setCategorySearchValues(defaultCategoryOptions ? defaultCategoryOptions : []);
   };
 
   const handleAddOrEditDialogClose = () => {
@@ -472,6 +514,11 @@ const VariationProduct: React.FC = () => {
                           </Skeleton>
                         </TableCell>
                         <TableCell>
+                          <Skeleton animation="wave" width="100%">
+                            <Typography>Danh mục</Typography>
+                          </Skeleton>
+                        </TableCell>
+                        <TableCell>
                           <Box display="flex" gap="10px">
                             <Skeleton animation="wave" variant="circular">
                               <IconButton>
@@ -540,6 +587,15 @@ const VariationProduct: React.FC = () => {
                               Cấu hình chủng loại của thuộc tính sản phẩm
                             </Link>
                           </Box>
+                        </TableCell>
+                        <TableCell sx={{ fontSize: '14px' }}>
+                          {(row.variationCategories?.length as number) > 0
+                            ? row.variationCategories?.map((variationCategory, index) =>
+                                index !== (row.variationCategories?.length as number) - 1
+                                  ? variationCategory.category.name + ', '
+                                  : variationCategory.category.name,
+                              )
+                            : '--'}
                         </TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>
                           <Box display="flex" gap="10px">
@@ -666,6 +722,15 @@ const VariationProduct: React.FC = () => {
               name="slug"
               label="Đường dẫn"
               required
+            />
+
+            <SearchMultipleField
+              form={form}
+              name="categoryIds"
+              options={categoryOptions}
+              searchValues={categorySearchValues}
+              label="Tìm kiếm danh mục"
+              onHandleChange={(e: ChangeEvent<HTMLInputElement>) => handleSearchTermCategoryChange(e.target.value)}
             />
 
             <Box display="flex" justifyContent="flex-end" gap="10px" marginTop="20px">

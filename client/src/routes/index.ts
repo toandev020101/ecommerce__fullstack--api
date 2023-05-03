@@ -1,3 +1,5 @@
+import ProductCategory from '../components/ProductCategory';
+import ProductDetail from '../components/ProductDetail';
 import AdminLayout from '../layouts/AdminLayout';
 import AuthLayout from '../layouts/AuthLayout';
 import Account from '../pages/admin/Account';
@@ -7,6 +9,8 @@ import RoleAccount from '../pages/admin/Account/RoleAccount';
 import AddOrEditRoleAccount from '../pages/admin/Account/RoleAccount/AddOrEditRoleAccount';
 import Dashboard from '../pages/admin/Dashboard';
 import MediaFile from '../pages/admin/MediaFile';
+import OrderManager from '../pages/admin/OrderManager';
+import AddOrEditOrder from '../pages/admin/OrderManager/AddOrEditOrder';
 import ProductManager from '../pages/admin/ProductManager';
 import AddOrEditProduct from '../pages/admin/ProductManager/AddOrEditProduct';
 import CategoryProduct from '../pages/admin/ProductManager/CategoryProduct';
@@ -14,9 +18,11 @@ import AddOrEditCategoryProduct from '../pages/admin/ProductManager/CategoryProd
 import TagProduct from '../pages/admin/ProductManager/TagProduct';
 import VariationProduct from '../pages/admin/ProductManager/VariationProduct';
 import VariationOptionProduct from '../pages/admin/ProductManager/VariationProduct/VariationOptionProduct';
-import Home from '../pages/Home';
-import Login from '../pages/Login';
-import Register from '../pages/Register';
+import Login from '../pages/auth/Login';
+import Register from '../pages/auth/Register';
+import Cart from '../pages/web/Cart';
+import Checkout from '../pages/web/Checkout';
+import Home from '../pages/web/Home';
 
 interface Route {
   path: string;
@@ -29,9 +35,18 @@ export const authRoutes: Route[] = [
   { path: '/dang-ky', component: Register, layout: AuthLayout },
 ];
 
-export const publicRoutes: Route[] = [{ path: '/', component: Home }];
+export const publicRoutes: Route[] = [
+  { path: '/', component: Home },
+  { path: '/:categorySlug/:productSlug', component: ProductDetail },
+  { path: '/:categorySlug', component: ProductCategory },
+];
 
 export const privateRoutes: Route[] = [
+  // user
+  { path: '/gio-hang', component: Cart },
+  { path: '/thanh-toan', component: Checkout },
+
+  // admin
   { path: '/quan-tri', component: Dashboard, layout: AdminLayout },
 
   { path: '/quan-tri/kho-luu-tru', component: MediaFile, layout: AdminLayout },
@@ -62,4 +77,8 @@ export const privateRoutes: Route[] = [
     component: VariationOptionProduct,
     layout: AdminLayout,
   },
+
+  { path: '/quan-tri/don-hang/danh-sach', component: OrderManager, layout: AdminLayout },
+  { path: '/quan-tri/don-hang/danh-sach/them-moi', component: AddOrEditOrder, layout: AdminLayout },
+  { path: '/quan-tri/don-hang/danh-sach/chinh-sua/:id', component: AddOrEditOrder, layout: AdminLayout },
 ];

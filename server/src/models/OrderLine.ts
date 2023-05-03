@@ -9,6 +9,9 @@ export class OrderLine extends BaseEntity {
   id!: number;
 
   @Column()
+  variation!: string;
+
+  @Column()
   quantity!: number;
 
   @Column()

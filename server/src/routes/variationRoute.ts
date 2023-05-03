@@ -17,6 +17,11 @@ router.get(
   variationController.getPagination,
 );
 
+// @route GET api/v1/variation/any/public
+// @desc Get list variation by category slug
+// @access Public
+router.get('/any/public', variationController.getListByCategorySlugPublic);
+
 // @route GET api/v1/variation
 // @desc Get all variation
 // @access Private

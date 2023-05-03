@@ -1,5 +1,5 @@
-import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { OrderCoupon } from './OrderCoupon';
+import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from './User';
 
 @Entity()
 export class Coupon extends BaseEntity {
@@ -10,19 +10,16 @@ export class Coupon extends BaseEntity {
   name!: string;
 
   @Column()
-  description!: string;
-
-  @Column()
   code!: string;
 
   @Column()
   discountValue!: number;
 
-  @Column()
-  quantity!: number;
-
   @Column({ nullable: true })
   priceMax: number;
+
+  @Column({ default: 0, type: 'tinyint', comment: '0: vnđ, 1: %' })
+  type: number;
 
   @Column()
   startDate!: Date;
@@ -30,6 +27,9 @@ export class Coupon extends BaseEntity {
   @Column()
   endDate!: Date;
 
-  @OneToMany(() => OrderCoupon, (orderCoupon) => orderCoupon.coupon)
-  orderCoupons: OrderCoupon[];
+  @Column()
+  userId!: number;
+  @ManyToOne(() => User, (user) => user.coupons)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 }

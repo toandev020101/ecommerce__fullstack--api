@@ -5,12 +5,55 @@ import { CommonResponse, ListParams } from '../interfaces/common';
 import { VariationInput } from '../interfaces/VariationInput';
 import { Variation } from '../models/Variation';
 import { VariationOption } from './../models/VariationOption';
+import { Category } from '../models/Category';
+import { VariationCategory } from '../models/VariationCategory';
 
-// get all variations
+// get list variation by category slug
+export const getListByCategorySlugPublic = async (
+  req: Request<{}, {}, {}, { categorySlug: string }>,
+  res: Response<CommonResponse<Variation>>,
+) => {
+  const { categorySlug } = req.query;
+
+  try {
+    // check category slug
+    const category = await Category.findOneBy({ slug: categorySlug });
+    if (!category) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Danh mục không tồn tại !',
+      });
+    }
+
+    // find variations
+    const variations = await Variation.find({
+      where: { variationCategories: { category: { slug: categorySlug } } },
+      relations: { variationOptions: true },
+    });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy tất cả thuộc tính thành công',
+      data: variations,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// get all variation
 export const getAll = async (_req: Request, res: Response<CommonResponse<Variation>>) => {
   try {
     // find variations
-    const variations = await Variation.find();
+    const variations = await Variation.find({ relations: { variationOptions: true } });
 
     // send results
     return res.status(200).json({
@@ -45,12 +88,13 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
           value: true,
         },
       },
-      where: { name: Like(`%${searchTerm}%`) },
+      where: [{ name: Like(`%${searchTerm}%`) }, { slug: Like(`%${searchTerm}%`) }],
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },
       relations: {
         variationOptions: true,
+        variationCategories: { category: true },
       },
     });
 
@@ -114,7 +158,8 @@ export const getOneById = async (
 // add variation
 export const addOne = async (req: Request<{}, {}, VariationInput, {}>, res: Response<CommonResponse<null>>) => {
   const data = req.body;
-  const { slug } = data;
+  const { categoryIds, ...others } = data;
+  const { slug } = others;
 
   try {
     // check variation
@@ -129,7 +174,34 @@ export const addOne = async (req: Request<{}, {}, VariationInput, {}>, res: Resp
       });
     }
 
-    await Variation.insert(data);
+    await AppDataSource.transaction(async (transactionalEntityManager) => {
+      // add variation
+      const insertedVariation = await transactionalEntityManager.insert(Variation, others);
+
+      if (categoryIds.length > 0) {
+        // handle data
+        let variationCategoryData = [];
+        for (let i = 0; i < categoryIds.length; i++) {
+          const category = await Category.findOneBy({ id: categoryIds[i] });
+          if (!category) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Thêm thuộc tính thất bại!',
+            });
+          }
+
+          variationCategoryData.push({
+            variationId: insertedVariation.raw.insertId,
+            categoryId: categoryIds[i],
+          });
+        }
+
+        // add variation category
+        await transactionalEntityManager.insert(VariationCategory, variationCategoryData);
+      }
+      return;
+    });
 
     // send results
     return res.status(200).json({
@@ -154,7 +226,7 @@ export const updateOne = async (
   res: Response<CommonResponse<null>>,
 ) => {
   const { id } = req.params;
-  const data = req.body;
+  const { categoryIds, ...others } = req.body;
 
   try {
     // check variation
@@ -168,8 +240,37 @@ export const updateOne = async (
       });
     }
 
-    // update variation
-    await Variation.update(id, data);
+    await AppDataSource.transaction(async (transactionalEntityManager) => {
+      // update variation
+      await transactionalEntityManager.update(Variation, id, others);
+
+      if (categoryIds.length > 0) {
+        // handle data
+        let variationCategoryData = [];
+        for (let i = 0; i < categoryIds.length; i++) {
+          const category = await Category.findOneBy({ id: categoryIds[i] });
+          if (!category) {
+            return res.status(400).json({
+              code: 400,
+              success: false,
+              message: 'Cập nhật thuộc tính thất bại!',
+            });
+          }
+
+          variationCategoryData.push({
+            variationId: id,
+            categoryId: categoryIds[i],
+          });
+        }
+
+        // delete variation category
+        await transactionalEntityManager.delete(VariationCategory, { variationId: id });
+
+        // add variation category
+        await transactionalEntityManager.insert(VariationCategory, variationCategoryData);
+      }
+      return;
+    });
 
     // send results
     return res.status(200).json({

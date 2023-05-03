@@ -5,14 +5,9 @@ import * as provinceController from '../controllers/provinceController';
 
 const router = express.Router();
 
-// @route GET api/v1/province
-// @desc Get all province
+// @route GET api/v1/province/search
+// @desc Get list province by search term
 // @access Private
-router.get('', checkAuth, checkPermission('/province', 'get'), provinceController.getAll);
-
-// @route GET api/v1/province/:id
-// @desc Get one province by id
-// @access Private
-router.get('/:id', checkAuth, checkPermission('/province/:id', 'get'), provinceController.getOneById);
+router.get('/search', checkAuth, checkPermission('/province/search', 'get'), provinceController.getListBySearchTerm);
 
 export default router;

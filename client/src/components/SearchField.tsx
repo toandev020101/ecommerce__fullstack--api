@@ -1,5 +1,5 @@
 import { Autocomplete, Box, TextField, useTheme } from '@mui/material';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useState, useEffect } from 'react';
 import { BiSearchAlt as BiSearchAltIcon } from 'react-icons/bi';
 import { ValueObject } from '../interfaces/ValueObject';
 import { Theme } from '../theme';
@@ -9,38 +9,40 @@ interface Props {
   name: string;
   label: string;
   options?: ValueObject[];
-  searchValues?: ValueObject[];
+  searchValue?: ValueObject;
   onHandleChange: Function;
-  onHandleMultipleChange?: Function;
-  keyNumber?: number;
+  onHandleOptionChange?: Function;
+  required?: boolean;
+  disabled?: boolean;
 }
 
 const SearchField: React.FC<Props> = ({
   form,
   options,
-  searchValues,
+  searchValue,
   name,
   label,
   onHandleChange,
-  onHandleMultipleChange,
-  keyNumber = 3,
+  onHandleOptionChange,
+  required = false,
+  disabled = false,
 }) => {
   const theme: Theme = useTheme();
-  const [optionValues, setOptionValues] = useState<ValueObject[]>([]);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [searchOption, setSearchOption] = useState<ValueObject>({ label: '', value: -1 });
 
   useEffect(() => {
-    if (searchValues) {
-      setOptionValues(searchValues);
-      form.setValue(name, searchValues);
+    if (searchValue && searchValue.label) {
+      setSearchOption(searchValue);
+      form.setValue(name, searchValue.value);
+    } else {
+      setSearchOption({ label: '', value: -1 });
+      form.setValue(name, '');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchValues]);
+  }, [searchValue, form, name]);
 
   return (
-    <Box position="relative">
+    <Box position="relative" width="100%">
       <Autocomplete
-        multiple
         disableClearable
         id="tags-outlined"
         options={options ? options : []}
@@ -49,30 +51,36 @@ const SearchField: React.FC<Props> = ({
         renderInput={(params) => (
           <TextField
             {...params}
+            fullWidth
             label={label}
+            required={required}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
-              if (e.target.value.length >= keyNumber) {
-                onHandleChange(e);
+              onHandleChange(e);
+              setSearchOption({ label: e.target.value, value: -1 });
+
+              const value = options?.find((option) => option.label === e.target.value)?.value;
+              if (value) {
+                form.setValue(name, value);
+              } else {
+                form.setValue(name, '');
               }
-              setSearchTerm(e.target.value);
             }}
           />
         )}
         popupIcon=""
-        noOptionsText={searchTerm.length < keyNumber ? `Vui lòng nhập ${keyNumber} hoặc nhiều ký tự` : 'Không tìm thấy'}
+        noOptionsText="Không tìm thấy"
         sx={{ marginBottom: '10px' }}
-        isOptionEqualToValue={(option, value) => option.label.toLowerCase() === value.label.toLowerCase()}
-        value={optionValues}
-        onChange={(_e: any, options: ValueObject[]) => {
-          setOptionValues(options);
-          if (onHandleMultipleChange) {
-            form.setValue(name, options);
-            onHandleMultipleChange();
-          } else {
-            const values = options.map((option) => option.value);
-            form.setValue(name, values);
+        value={searchOption}
+        onChange={(_e: any, option: ValueObject | null) => {
+          if (option) {
+            setSearchOption(option);
+            form.setValue(name, option.value);
+            if (onHandleOptionChange) {
+              onHandleOptionChange(option);
+            }
           }
         }}
+        disabled={disabled}
       />
 
       <BiSearchAltIcon

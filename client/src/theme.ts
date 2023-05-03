@@ -108,6 +108,8 @@ export const themeSettings = (mode: 'light' | 'dark') => {
       common: {
         main: tokensDark.primary[500],
         white: '#ffffff',
+        black: '#000000',
+        lightRed: '#ffd5d5',
       },
       ...(mode === 'dark'
         ? {

@@ -124,8 +124,8 @@ export const login = async (req: Request<{}, {}, LoginInput, {}>, res: Response<
         success: false,
         message: 'Đăng nhập thất bại',
         errors: [
-          { field: 'username', message: 'Tài khoản đang bị khóa!' },
-          { field: 'password', message: 'Tài khoản đang bị khóa!' },
+          { field: 'username', message: 'Tài khoản đã bị khóa!' },
+          { field: 'password', message: 'Tài khoản đã bị khóa!' },
         ],
       });
     }
@@ -334,6 +334,9 @@ export const getAllAndRole = async (_req: Request, res: Response<CommonResponse<
     const users = await User.find({
       relations: {
         role: true,
+        ward: true,
+        district: true,
+        province: true,
       },
     });
 
@@ -343,6 +346,62 @@ export const getAllAndRole = async (_req: Request, res: Response<CommonResponse<
       success: true,
       message: 'Lấy tất cả tài khoản thành công',
       data: users,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// get one user and role
+export const getOneAndRoleByIdPublic = async (
+  req: Request<{ id: number }, {}, {}, {}>,
+  res: Response<CommonResponse<User>>,
+) => {
+  const { id } = req.params;
+  try {
+    // find user
+    const user = await User.findOne({
+      where: { id },
+      relations: {
+        role: true,
+        ward: true,
+        district: true,
+        province: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Tài khoản không tồn tại!',
+      });
+    }
+
+    // check active user
+    if (!user.isActive) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: 'Đăng nhập thất bại',
+        errors: [
+          { field: 'username', message: 'Tài khoản đã bị khóa!' },
+          { field: 'password', message: 'Tài khoản đã bị khóa!' },
+        ],
+      });
+    }
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy tài khoản thành công',
+      data: user,
     });
   } catch (error) {
     // send error
@@ -366,6 +425,9 @@ export const getOneAndRoleById = async (
       where: { id },
       relations: {
         role: true,
+        ward: true,
+        district: true,
+        province: true,
       },
     });
 

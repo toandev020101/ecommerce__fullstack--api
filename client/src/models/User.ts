@@ -22,4 +22,16 @@ export interface User {
     createdAt?: string;
     updatedAt?: string;
   };
+  ward?: {
+    id: number;
+    name: string;
+  };
+  district?: {
+    id: number;
+    name: string;
+  };
+  province?: {
+    id: number;
+    name: string;
+  };
 }

@@ -29,8 +29,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const checkPermission_1 = require("./../middlewares/checkPermission");
 const checkAuth_1 = require("./../middlewares/checkAuth");
 const express_1 = __importDefault(require("express"));
-const roleController = __importStar(require("../controllers/roleController"));
+const provinceController = __importStar(require("../controllers/provinceController"));
 const router = express_1.default.Router();
-router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/province', 'get'), roleController.getAll);
+router.get('/search', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/province/search', 'get'), provinceController.getListBySearchTerm);
 exports.default = router;
 //# sourceMappingURL=provinceRoute%20copy.js.map

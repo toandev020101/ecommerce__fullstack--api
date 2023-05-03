@@ -18,11 +18,12 @@ import {
   AiOutlineMenuUnfold as AiOutlineMenuUnfoldIcon,
   AiOutlineQuestionCircle as AiOutlineQuestionCircleIcon,
   AiOutlineSetting as AiOutlineSettingIcon,
+  AiOutlineHome as AiOutlineHomeIcon,
 } from 'react-icons/ai';
 import { BiBell as BiBellIcon, BiLogOut as BiLogOutIcon } from 'react-icons/bi';
 import { BsChatDots as BsChatDotsIcon, BsMoonStars as BsMoonStarsIcon, BsSun as BsSunIcon } from 'react-icons/bs';
 import { FiMail as FiMailIcon } from 'react-icons/fi';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as authApi from '../../apis/authApi';
 import * as userApi from '../../apis/userApi';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
@@ -52,23 +53,38 @@ const Header: React.FC = () => {
   };
   // menu
 
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>();
 
   useEffect(() => {
     const getOneUser = async () => {
       try {
-        const res = await userApi.getOneAndRoleById(JWTManager.getUserId() as number);
+        const res = await userApi.getOneAndRoleByIdPublic(JWTManager.getUserId() as number);
         setUser(res.data as User);
       } catch (error: any) {
         const { data } = error.response;
 
-        if (data.code === 401 || data.code === 403 || data.code === 500) {
+        if (data.code === 400) {
+          dispatch(
+            showToast({
+              page: 'login',
+              type: 'error',
+              message: data.message,
+              options: { theme: 'colored', toastId: 'loginId' },
+            }),
+          );
+          navigate('/dang-nhap');
+        } else if (data.code === 401 || data.code === 403 || data.code === 500) {
           navigate(`/error/${data.code}`);
         }
       }
     };
-    getOneUser();
-  }, [navigate]);
+
+    if (isAuthenticated) {
+      getOneUser();
+    } else {
+      setUser(undefined);
+    }
+  }, [dispatch, navigate, isAuthenticated]);
 
   const handleLogout = async () => {
     dispatch(authPending());
@@ -77,6 +93,8 @@ const Header: React.FC = () => {
     try {
       const res = await authApi.logout(user?.id as number);
       dispatch(authSuccess());
+      dispatch(logout());
+      JWTManager.deleteToken();
 
       dispatch(
         showToast({
@@ -86,9 +104,6 @@ const Header: React.FC = () => {
           options: { theme: 'colored', toastId: 'loginId' },
         }),
       );
-
-      dispatch(logout());
-      JWTManager.deleteToken();
       navigate('/dang-nhap');
     } catch (error: any) {
       const { data } = error.response;
@@ -140,7 +155,7 @@ const Header: React.FC = () => {
             </Badge>
           </IconButton>
 
-          {isAuthenticated && (
+          {user && (
             <Box>
               {/* avatar */}
               <Tooltip title="Cài đặt tài khoản">
@@ -209,7 +224,14 @@ const Header: React.FC = () => {
                     </Typography>
                   </Box>
                 </Box>
+
                 <Divider />
+
+                <MenuItem onClick={handleClose}>
+                  <Link to="/">
+                    <AiOutlineHomeIcon fontSize="20px" style={{ marginRight: '10px' }} /> Trang chủ
+                  </Link>
+                </MenuItem>
 
                 <MenuItem onClick={handleClose}>
                   <FiMailIcon fontSize="20px" style={{ marginRight: '10px' }} /> Hộp thư đến

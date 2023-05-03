@@ -5,19 +5,14 @@ import * as wardController from '../controllers/wardController';
 
 const router = express.Router();
 
-// @route GET api/v1/ward/any/:districtId
-// @desc Get list ward by districtId
+// @route GET api/v1/ward/:districtId/search
+// @desc Get list ward by districtId and search term
 // @access Private
 router.get(
-  '/any/:districtId',
+  '/:districtId/search',
   checkAuth,
-  checkPermission('/ward/any/:districtId', 'get'),
-  wardController.getListByDistrictId,
+  checkPermission('/ward/:districtId/search', 'get'),
+  wardController.getListByDistrictIdAndSearchTerm,
 );
-
-// @route GET api/v1/ward:id
-// @desc Get one ward by id
-// @access Private
-router.get('/:id', checkAuth, checkPermission('/ward/:id', 'get'), wardController.getOneById);
 
 export default router;

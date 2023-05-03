@@ -20,16 +20,16 @@ const ClientLayout: React.FC<Props> = ({ children }) => {
           color: theme.palette.common.white,
         }}
       >
-        <Container>
+        <Container maxWidth="lg">
           <Header />
           <Navbar />
         </Container>
       </Box>
 
-      {children}
+      <Box>{children}</Box>
 
-      <Box bgcolor={theme.palette.neutral[1000]} padding="20px 0">
-        <Container>
+      <Box bgcolor={theme.palette.neutral[1000]} padding="20px 0" borderTop="1px solid #e0e0e0">
+        <Container maxWidth="lg">
           <Footer />
         </Container>
       </Box>

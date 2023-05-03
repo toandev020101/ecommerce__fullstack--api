@@ -35,9 +35,9 @@ import {
   FiPlusSquare as FiPlusSquareIcon,
 } from 'react-icons/fi';
 import { IoMdImages as IoMdImagesIcon } from 'react-icons/io';
-import { useDispatch } from 'react-redux';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import * as categoryApi from '../../../../apis/categoryApi';
+import { useAppDispatch } from '../../../../app/hook';
 import TitlePage from '../../../../components/TitlePage';
 import ToastNotify from '../../../../components/ToastNotify';
 import { BaseResponse } from '../../../../interfaces/BaseResponse';
@@ -47,7 +47,7 @@ import { showToast } from '../../../../slices/toastSlice';
 import { Theme } from '../../../../theme';
 
 const CategoryProduct: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -345,7 +345,7 @@ const CategoryProduct: React.FC = () => {
           <Box display="flex" alignItems="center" gap="20px">
             <TextField
               id="outlined-basic"
-              label="Tìm kiếm tài khoản"
+              label="Tìm kiếm danh mục"
               variant="outlined"
               size="small"
               sx={{ width: '250px' }}
@@ -602,7 +602,7 @@ const CategoryProduct: React.FC = () => {
                         </TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>{row.slug}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>{row.level}</TableCell>
-                        <TableCell sx={{ fontSize: '14px' }}>{row.parent?.name}</TableCell>
+                        <TableCell sx={{ fontSize: '14px' }}>{row.parent ? row.parent.name : '--'}</TableCell>
                         <TableCell sx={{ fontSize: '14px' }}>
                           <FormControlLabel
                             control={

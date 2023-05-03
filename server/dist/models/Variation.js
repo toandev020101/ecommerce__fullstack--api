@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Variation = void 0;
 const typeorm_1 = require("typeorm");
 const VariationOption_1 = require("./VariationOption");
+const VariationCategory_1 = require("./VariationCategory");
 let Variation = class Variation extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -30,6 +31,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => VariationOption_1.VariationOption, (variationOption) => variationOption.variation),
     __metadata("design:type", Array)
 ], Variation.prototype, "variationOptions", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => VariationCategory_1.VariationCategory, (variationCategory) => variationCategory.variation),
+    __metadata("design:type", Array)
+], Variation.prototype, "variationCategories", void 0);
 Variation = __decorate([
     (0, typeorm_1.Entity)()
 ], Variation);

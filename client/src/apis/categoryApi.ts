@@ -14,6 +14,16 @@ export const getAll = (): Promise<Response<Category>> => {
   return axiosCLient.get(url);
 };
 
+export const getListBySearchTerm = (searchTerm: string): Promise<Response<Category>> => {
+  const url = '/category/search';
+  return axiosCLient.get(url, { params: { searchTerm } });
+};
+
+export const getListByParentSlugPublic = (parentSlug: string): Promise<Response<Category>> => {
+  const url = '/category/any/public';
+  return axiosCLient.get(url, { params: { parentSlug } });
+};
+
 export const getPaginationAndParent = (params: ListParams): Promise<Response<Category>> => {
   const url = '/category/pagination/parent';
   return axiosCLient.get(url, { params });

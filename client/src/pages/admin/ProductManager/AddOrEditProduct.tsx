@@ -32,7 +32,7 @@ import * as variationApi from '../../../apis/variationApi';
 import * as variationOptionApi from '../../../apis/variationOptionApi';
 import InputField from '../../../components/InputField';
 import MediaDialog from '../../../components/MediaDialog';
-import SearchField from '../../../components/SearchField';
+import SearchMultipleField from '../../../components/SearchMultipleField';
 import SelectField from '../../../components/SelectField';
 import TextEditor from '../../../components/TextEditor';
 import TitlePage from '../../../components/TitlePage';
@@ -148,6 +148,7 @@ const AddOrEditProduct: React.FC = () => {
       categoryId: '',
       shortDescription: '',
       description: '',
+      isHot: 0,
       isActive: 1,
       items: [],
       connectIds: [],
@@ -161,6 +162,9 @@ const AddOrEditProduct: React.FC = () => {
       try {
         const res = await variationApi.getAll();
         setVariations(res.data as Variation[]);
+
+        const variationIds = (res.data as Variation[]).map((variation) => variation.id);
+        setVariationIdSearchValues(variationIds);
       } catch (error: any) {
         const { data } = error.response;
         if (data.code === 401 || data.code === 403 || data.code === 500) {
@@ -227,12 +231,8 @@ const AddOrEditProduct: React.FC = () => {
                 },
               ]);
             } else {
-              let variationOptionIndex = -1;
-              variationOptions.forEach(
-                (variationOptionArr) =>
-                  (variationOptionIndex = variationOptionArr.findIndex(
-                    (variationOption) => variationOption.value === productConfiguration.variationOption.id,
-                  )),
+              const variationOptionIndex = variationOptions[variationIdIndex].findIndex(
+                (variationOption) => variationOption.value === productConfiguration.variationOption.id,
               );
 
               if (variationOptionIndex === -1) {
@@ -269,7 +269,7 @@ const AddOrEditProduct: React.FC = () => {
             sku += slugify(variationOptionProducts[i].label as string, { lower: true, locale: 'vi', trim: true });
             if (i !== variationOptionProducts.length - 1) {
               idx += '-';
-              sku += '-';
+              sku += '_';
             }
           }
 
@@ -334,6 +334,7 @@ const AddOrEditProduct: React.FC = () => {
             width: resData.width ? resData.width : 0,
             height: resData.height ? resData.height : 0,
             categoryId: resData ? resData.category.id : '',
+            isHot: resData ? resData.isHot : 0,
             isActive: resData ? resData.isActive : 1,
             shortDescription: resData.shortDescription ? resData.shortDescription : '',
             description: resData.description ? resData.description : '',
@@ -551,7 +552,7 @@ const AddOrEditProduct: React.FC = () => {
 
     for (const key in values) {
       if (values.hasOwnProperty(key) && values[key] === '') {
-        values[key] = undefined;
+        values[key] = null;
       }
     }
 
@@ -595,9 +596,8 @@ const AddOrEditProduct: React.FC = () => {
     }
   };
 
-  const handleResetForm = () => {
-    form.reset();
-    setImageUrlProduct(form.getValues('imageUrl') as string);
+  const handleCancelForm = () => {
+    navigate('/quan-tri/san-pham/danh-sach');
   };
 
   return (
@@ -730,7 +730,7 @@ const AddOrEditProduct: React.FC = () => {
                   </Box>
                 </TabPanel>
                 <TabPanel value={tabActive} index={1}>
-                  <SearchField
+                  <SearchMultipleField
                     form={form}
                     name="connectIds"
                     options={productOptions}
@@ -741,7 +741,7 @@ const AddOrEditProduct: React.FC = () => {
                 </TabPanel>
                 <TabPanel value={tabActive} index={2}>
                   {variations.map((variation, index) => (
-                    <SearchField
+                    <SearchMultipleField
                       key={`variation-${index}`}
                       form={form}
                       name={`variation${variation.id}`}
@@ -759,6 +759,7 @@ const AddOrEditProduct: React.FC = () => {
                       }}
                       onHandleMultipleChange={handleMultipleVariationOptionChange}
                       keyNumber={2}
+                      required
                     />
                   ))}
                 </TabPanel>
@@ -775,7 +776,7 @@ const AddOrEditProduct: React.FC = () => {
                         idx += variationOptionProducts[i].value;
                         if (i !== variationOptionProducts.length - 1) {
                           name += ' x ';
-                          sku += ' ';
+                          sku += '_';
                           idx += '-';
                         }
                       }
@@ -861,14 +862,7 @@ const AddOrEditProduct: React.FC = () => {
                                 Thư viện hình ảnh biến thể
                               </Typography>
 
-                              <Box
-                                margin="15px 0"
-                                display="flex"
-                                justifyContent="flex-end"
-                                alignItems="center"
-                                gap="10px"
-                                flexWrap="wrap"
-                              >
+                              <Box margin="15px 0" display="grid" gridTemplateColumns="repeat(5, 1fr)" gap="10px">
                                 {productItem?.library.map((imageUrl, i) => (
                                   <Box
                                     key={`library-${i}`}
@@ -1152,16 +1146,31 @@ const AddOrEditProduct: React.FC = () => {
             </Box>
 
             <Box marginTop="20px">
-              <SearchField
+              <SearchMultipleField
                 form={form}
                 name="tagIds"
                 options={tagOptions}
                 searchValues={tagSearchValues}
-                label="Tim kiếm từ khóa sản phẩm"
+                label="Tìm kiếm từ khóa sản phẩm"
                 onHandleChange={(e: ChangeEvent<HTMLInputElement>) => {
                   handleSearchTermTagChange(e.target.value);
                 }}
                 keyNumber={2}
+              />
+            </Box>
+
+            <Box marginTop="20px">
+              <SelectField
+                form={form}
+                errorServers={errors}
+                setErrorServers={setErrors}
+                name="isHot"
+                label="Nổi bật"
+                valueObjects={[
+                  { label: 'Không', value: 0 },
+                  { label: 'Có', value: 1 },
+                ]}
+                required
               />
             </Box>
 
@@ -1194,8 +1203,8 @@ const AddOrEditProduct: React.FC = () => {
               >
                 {id ? 'Cập nhật' : 'Thêm mới'}
               </LoadingButton>
-              <Button variant="contained" startIcon={<BiResetIcon />} color="secondary" onClick={handleResetForm}>
-                Làm lại
+              <Button variant="contained" startIcon={<BiResetIcon />} color="error" onClick={handleCancelForm}>
+                Hủy
               </Button>
             </Box>
           </Box>

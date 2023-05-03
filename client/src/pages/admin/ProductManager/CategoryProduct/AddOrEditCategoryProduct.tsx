@@ -123,7 +123,7 @@ const AddOrEditCategoryProduct: React.FC = () => {
 
     for (const key in values) {
       if (values.hasOwnProperty(key) && values[key] === '') {
-        values[key] = undefined;
+        values[key] = null;
       }
     }
 
@@ -167,9 +167,8 @@ const AddOrEditCategoryProduct: React.FC = () => {
     }
   };
 
-  const handleResetForm = () => {
-    form.reset();
-    setImageUrl(form.getValues('imageUrl') as string);
+  const handleCancelForm = () => {
+    navigate('/quan-tri/san-pham/danh-muc');
   };
 
   return (
@@ -248,7 +247,6 @@ const AddOrEditCategoryProduct: React.FC = () => {
               setErrorServers={setErrors}
               name="imageUrl"
               label="Hình ảnh danh mục"
-              required
               hidden
             />
 
@@ -338,8 +336,8 @@ const AddOrEditCategoryProduct: React.FC = () => {
             >
               {id ? 'Cập nhật' : 'Thêm mới'}
             </LoadingButton>
-            <Button variant="contained" startIcon={<BiResetIcon />} color="secondary" onClick={handleResetForm}>
-              Làm lại
+            <Button variant="contained" startIcon={<BiResetIcon />} color="error" onClick={handleCancelForm}>
+              Hủy
             </Button>
           </Box>
         </Box>

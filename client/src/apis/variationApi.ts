@@ -3,6 +3,11 @@ import { VariationInput } from '../interfaces/VariationInput';
 import { Variation } from './../models/Variation';
 import axiosCLient from './axiosClient';
 
+export const getListByCategorySlugPublic = (categorySlug: string): Promise<Response<Variation>> => {
+  const url = '/variation/any/public';
+  return axiosCLient.get(url, { params: { categorySlug } });
+};
+
 export const getAll = (): Promise<Response<Variation>> => {
   const url = '/variation';
   return axiosCLient.get(url);

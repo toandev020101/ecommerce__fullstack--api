@@ -23,6 +23,11 @@ router.get(
 // @access Private
 router.get('/role', checkAuth, checkPermission('/user/role', 'get'), userController.getAllAndRole);
 
+// @route GET api/v1/user/public/:id/role
+// @desc Get one user and role
+// @access Public
+router.get('/public/:id/role', userController.getOneAndRoleByIdPublic);
+
 // @route GET api/v1/user/:id/role
 // @desc Get one user and role
 // @access Private

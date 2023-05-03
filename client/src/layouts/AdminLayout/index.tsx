@@ -25,7 +25,7 @@ const AdminLayout: React.FC<Props> = ({ children }) => {
           <Header />
 
           {/* content */}
-          <Box padding="20px">{children}</Box>
+          <Box padding="20px 20px 40px">{children}</Box>
           {/* content */}
 
           <Footer />

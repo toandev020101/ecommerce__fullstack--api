@@ -15,7 +15,7 @@ const initialState: ToastState = {
   page: null,
   type: 'info',
   message: undefined,
-  options: { autoClose: 2000 },
+  options: { autoClose: 1500 },
 };
 
 export const toastSlice = createSlice({

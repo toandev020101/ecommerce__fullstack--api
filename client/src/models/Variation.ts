@@ -8,4 +8,14 @@ export interface Variation {
       value: string;
     },
   ];
+  variationCategories?: [
+    {
+      id: number;
+      variationId: number;
+      category: {
+        id: number;
+        name: string;
+      };
+    },
+  ];
 }

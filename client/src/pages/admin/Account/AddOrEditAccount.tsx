@@ -1,7 +1,7 @@
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoadingButton } from '@mui/lab';
 import { Avatar, Box, Breadcrumbs, Button, Grid, Typography, useTheme } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { BiEdit as BiEditIcon, BiReset as BiResetIcon } from 'react-icons/bi';
 import { FiPlusSquare as FiPlusSquareIcon } from 'react-icons/fi';
@@ -27,6 +27,10 @@ import { Theme } from '../../../theme';
 import userSchema from '../../../validations/userSchema';
 import { ValueObject } from '../../../interfaces/ValueObject';
 import { BaseResponse } from '../../../interfaces/BaseResponse';
+import SearchField from '../../../components/SearchField';
+import { District } from '../../../models/District';
+import { Ward } from '../../../models/Ward';
+import { Province } from '../../../models/Province';
 
 const AddOrEditAccount: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -39,12 +43,20 @@ const AddOrEditAccount: React.FC = () => {
   const [isOpenMediaDialog, setIsOpenMediaDialog] = useState<boolean>(false);
 
   const [roles, setRoles] = useState<ValueObject[]>([]);
-  const [provinces, setProvinces] = useState<ValueObject[]>([]);
-  const [wards, setWards] = useState<ValueObject[]>([]);
-  const [districts, setDistricts] = useState<ValueObject[]>([]);
+  const [provinceOptions, setProvinceOptions] = useState<ValueObject[]>([]);
+  const [districtOptions, setDistrictOptions] = useState<ValueObject[]>([]);
+  const [wardOptions, setWardOptions] = useState<ValueObject[]>([]);
 
-  const [provinceId, setProvinceId] = useState<number | null>(null);
-  const [districtId, setDistrictId] = useState<number | null>(null);
+  const [provinceSearchValue, setProvinceSearchValue] = useState<ValueObject>();
+  const [districtSearchValue, setDistrictSearchValue] = useState<ValueObject>();
+  const [wardSearchValue, setWardSearchValue] = useState<ValueObject>();
+
+  const [provinceSearchTerm, setProvinceSearchTerm] = useState<string>('');
+  const [districtSearchTerm, setDistrictSearchTerm] = useState<string>('');
+  const [wardSearchTerm, setWardSearchTerm] = useState<string>('');
+
+  const [provinceId, setProvinceId] = useState<number>(-1);
+  const [districtId, setDistrictId] = useState<number>(-1);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errors, setErrors] = useState<FieldError[]>([]);
@@ -94,76 +106,6 @@ const AddOrEditAccount: React.FC = () => {
   }, [form, navigate]);
 
   useEffect(() => {
-    const getAllProvince = async () => {
-      try {
-        const res = await provinceApi.getAll();
-        const resData = res.data as Role[];
-        let data: ValueObject[] = [{ label: 'Chọn tỉnh, thành phố', value: '' }];
-
-        for (let i = 0; i < resData.length; i++) {
-          data.push({ label: resData[i].name, value: resData[i].id });
-        }
-        setProvinces(data);
-
-        form.setValue('districtId', '');
-        form.setValue('wardId', '');
-      } catch (error: any) {
-        const { data } = error.response;
-        if (data.code === 401 || data.code === 403 || data.code === 500) {
-          navigate(`/error/${data.code}`);
-        }
-      }
-    };
-
-    getAllProvince();
-  }, [form, navigate]);
-
-  useEffect(() => {
-    const getListDistrict = async () => {
-      try {
-        const res = await districtApi.getListByProvinceId(provinceId as number);
-        const resData = res.data as Role[];
-        let data: ValueObject[] = [{ label: 'Chọn quận, huyện', value: '' }];
-
-        for (let i = 0; i < resData.length; i++) {
-          data.push({ label: resData[i].name, value: resData[i].id });
-        }
-        setDistricts(data);
-        form.setValue('wardId', '');
-      } catch (error: any) {
-        const { data } = error.response;
-        if (data.code === 401 || data.code === 403 || data.code === 500) {
-          navigate(`/error/${data.code}`);
-        }
-      }
-    };
-
-    getListDistrict();
-  }, [form, provinceId, navigate]);
-
-  useEffect(() => {
-    const getListWard = async () => {
-      try {
-        const res = await wardApi.getListByDistrictId(districtId as number);
-        const resData = res.data as Role[];
-        let data: ValueObject[] = [{ label: 'Chọn phường, xã', value: '' }];
-
-        for (let i = 0; i < resData.length; i++) {
-          data.push({ label: resData[i].name, value: resData[i].id });
-        }
-        setWards(data);
-      } catch (error: any) {
-        const { data } = error.response;
-        if (data.code === 401 || data.code === 403 || data.code === 500) {
-          navigate(`/error/${data.code}`);
-        }
-      }
-    };
-
-    getListWard();
-  }, [districtId, navigate]);
-
-  useEffect(() => {
     // check mode add or edit
     const { pathname } = location;
     const slugArr = pathname.split('/');
@@ -175,25 +117,28 @@ const AddOrEditAccount: React.FC = () => {
         const resData = res.data as User;
 
         setAvatar(resData.avatar as string);
-        setProvinceId(resData.provinceId as number);
-        setDistrictId(resData.districtId as number);
 
-        setTimeout(() => {
-          form.reset({
-            fullName: resData ? resData.fullName : '',
-            username: resData ? resData.username : '',
-            gender: resData ? resData.gender : 0,
-            email: resData.email ? resData.email : '',
-            avatar: resData.avatar ? resData.avatar : '',
-            phoneNumber: resData.phoneNumber ? resData.phoneNumber : '',
-            street: resData.street ? resData.street : '',
-            provinceId: resData.provinceId ? resData.provinceId : '',
-            districtId: resData.districtId ? resData.districtId : '',
-            wardId: resData.wardId ? resData.wardId : '',
-            isActive: resData ? resData.isActive : 1,
-            roleId: resData ? resData.roleId?.toString() : (form.getValues('roleId') as string),
-          });
-        }, 500);
+        setProvinceId(resData.provinceId ? resData.provinceId : -1);
+        setDistrictId(resData.districtId ? resData.districtId : -1);
+
+        setProvinceSearchValue({ label: resData.province?.name as string, value: resData.provinceId as number });
+        setDistrictSearchValue({ label: resData.district?.name as string, value: resData.districtId as number });
+        setWardSearchValue({ label: resData.ward?.name as string, value: resData.wardId as number });
+
+        form.reset({
+          fullName: resData ? resData.fullName : '',
+          username: resData ? resData.username : '',
+          gender: resData ? resData.gender : 0,
+          email: resData.email ? resData.email : '',
+          avatar: resData.avatar ? resData.avatar : '',
+          phoneNumber: resData.phoneNumber ? resData.phoneNumber : '',
+          street: resData.street ? resData.street : '',
+          provinceId: resData.provinceId ? resData.provinceId : '',
+          districtId: resData.districtId ? resData.districtId : '',
+          wardId: resData.wardId ? resData.wardId : '',
+          isActive: resData ? resData.isActive : 1,
+          roleId: resData ? resData.roleId : '',
+        });
       } catch (error: any) {
         const { data } = error.response;
         if (data.code === 404 || data.code === 401 || data.code === 403 || data.code === 500) {
@@ -206,6 +151,71 @@ const AddOrEditAccount: React.FC = () => {
       getOneUser();
     }
   }, [dispatch, form, id, location, navigate]);
+
+  useEffect(() => {
+    const getListProvinceBySearchTerm = async () => {
+      try {
+        const res = await provinceApi.getListBySearchTerm(provinceSearchTerm);
+        const resData = res.data as Province[];
+        let data: ValueObject[] = [];
+
+        for (let i = 0; i < resData.length; i++) {
+          data.push({ label: resData[i].name, value: resData[i].id });
+        }
+        setProvinceOptions(data);
+      } catch (error: any) {
+        const { data } = error.response;
+        if (data.code === 401 || data.code === 403 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+
+    getListProvinceBySearchTerm();
+  }, [provinceSearchTerm, navigate]);
+
+  useEffect(() => {
+    const getListDistrictByProvinceIdAndSearchTerm = async () => {
+      try {
+        const res = await districtApi.getListByProvinceIdAndSearchTerm(provinceId, districtSearchTerm);
+        const resData = res.data as District[];
+        let data: ValueObject[] = [];
+
+        for (let i = 0; i < resData.length; i++) {
+          data.push({ label: resData[i].name, value: resData[i].id });
+        }
+        setDistrictOptions(data);
+      } catch (error: any) {
+        const { data } = error.response;
+        if (data.code === 401 || data.code === 403 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+    getListDistrictByProvinceIdAndSearchTerm();
+  }, [districtSearchTerm, navigate, provinceId]);
+
+  useEffect(() => {
+    const getListWardByDistrictIdAndSearchTerm = async () => {
+      try {
+        const res = await wardApi.getListByDistrictIdAndSearchTerm(districtId, wardSearchTerm);
+        const resData = res.data as Ward[];
+        let data: ValueObject[] = [];
+
+        for (let i = 0; i < resData.length; i++) {
+          data.push({ label: resData[i].name, value: resData[i].id });
+        }
+        setWardOptions(data);
+      } catch (error: any) {
+        const { data } = error.response;
+        if (data.code === 401 || data.code === 403 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+
+    getListWardByDistrictIdAndSearchTerm();
+  }, [wardSearchTerm, navigate, districtId]);
 
   const handleConfirmDialog = (newAvatar: string) => {
     form.setValue('avatar', newAvatar);
@@ -222,7 +232,7 @@ const AddOrEditAccount: React.FC = () => {
 
     for (const key in values) {
       if (values.hasOwnProperty(key) && values[key] === '') {
-        values[key] = undefined;
+        values[key] = null;
       }
     }
 
@@ -266,9 +276,8 @@ const AddOrEditAccount: React.FC = () => {
     }
   };
 
-  const handleResetForm = () => {
-    form.reset();
-    setAvatar(form.getValues('avatar') as string);
+  const handleCancelForm = () => {
+    navigate('/quan-tri/tai-khoan/danh-sach');
   };
 
   return (
@@ -397,8 +406,8 @@ const AddOrEditAccount: React.FC = () => {
               >
                 {id ? 'Cập nhật' : 'Thêm mới'}
               </LoadingButton>
-              <Button variant="contained" startIcon={<BiResetIcon />} color="secondary" onClick={handleResetForm}>
-                Làm lại
+              <Button variant="contained" startIcon={<BiResetIcon />} color="error" onClick={handleCancelForm}>
+                Hủy
               </Button>
             </Box>
           </Box>
@@ -465,41 +474,58 @@ const AddOrEditAccount: React.FC = () => {
               />
             </Box>
 
-            <Box display="flex" gap="10px" marginBottom="10px">
-              <SelectField
+            <Box display="flex" gap="10px">
+              <SearchField
                 form={form}
-                errorServers={errors}
-                setErrorServers={setErrors}
                 name="provinceId"
-                label="Tỉnh/thành phố"
-                valueObjects={provinces}
-                onHandleChange={(e: any) => setProvinceId(parseInt(e.target.value))}
-                search
+                options={provinceOptions}
+                searchValue={provinceSearchValue}
+                label="Tìm kiếm tỉnh, thành phố"
+                onHandleChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setProvinceSearchTerm(e.target.value);
+                  setDistrictSearchValue(undefined);
+                  setWardSearchValue(undefined);
+                }}
+                onHandleOptionChange={(option: ValueObject) => {
+                  setProvinceId(option.value as number);
+                  setProvinceSearchValue(option);
+                  setDistrictId(-1);
+                  setDistrictSearchValue(undefined);
+                  setWardSearchValue(undefined);
+                }}
               />
 
-              <SelectField
+              <SearchField
                 form={form}
-                errorServers={errors}
-                setErrorServers={setErrors}
                 name="districtId"
-                label="Quận/huyện"
-                valueObjects={districts}
-                disabled={form.getValues('provinceId') === ''}
-                onHandleChange={(e: any) => setDistrictId(parseInt(e.target.value))}
-                search
+                options={districtOptions}
+                searchValue={districtSearchValue}
+                label="Tìm kiếm quận, huyện"
+                onHandleChange={(e: ChangeEvent<HTMLInputElement>) => {
+                  setDistrictSearchTerm(e.target.value);
+                  setWardSearchValue(undefined);
+                }}
+                onHandleOptionChange={(option: ValueObject) => {
+                  setDistrictId(option.value as number);
+                  setDistrictSearchValue(option);
+                  setWardSearchValue(undefined);
+                }}
+                disabled={provinceId === -1}
               />
             </Box>
 
             <Box display="flex" gap="10px" marginBottom="10px">
-              <SelectField
+              <SearchField
                 form={form}
-                errorServers={errors}
-                setErrorServers={setErrors}
                 name="wardId"
-                label="Phường/xã"
-                valueObjects={wards}
-                disabled={form.getValues('districtId') === ''}
-                search
+                options={wardOptions}
+                searchValue={wardSearchValue}
+                label="Tìm kiếm phường, xã"
+                onHandleChange={(e: ChangeEvent<HTMLInputElement>) => setWardSearchTerm(e.target.value)}
+                onHandleOptionChange={(option: ValueObject) => {
+                  setWardSearchValue(option);
+                }}
+                disabled={districtId === -1}
               />
 
               <InputField
@@ -507,7 +533,7 @@ const AddOrEditAccount: React.FC = () => {
                 errorServers={errors}
                 setErrorServers={setErrors}
                 name="street"
-                label="Đường,số nhà"
+                label="Số nhà, đường"
               />
             </Box>
           </Box>

@@ -64,7 +64,7 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
   try {
     // find tags
     const tagRes = await Tag.findAndCount({
-      where: { name: Like(`%${searchTerm}%`) },
+      where: [{ name: Like(`%${searchTerm}%`) }, { slug: Like(`%${searchTerm}%`) }],
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },

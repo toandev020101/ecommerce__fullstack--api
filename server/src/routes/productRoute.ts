@@ -8,6 +8,11 @@ import * as productController from '../controllers/productController';
 
 const router = express.Router();
 
+// @route GET api/v1/product/pagination/public?_limit=&_page=&_sort=&_order=
+// @desc Get pagination product by category slug
+// @access Public
+router.get('/pagination/public', productController.getPaginationByCategorySlugPublic);
+
 // @route GET api/v1/product/pagination?_limit=&_page=&_sort=&_order=
 // @desc Get pagination product
 // @access Private
@@ -18,10 +23,20 @@ router.get('/pagination', checkAuth, checkPermission('/product/pagination', 'get
 // @access Private
 router.get('/search', checkAuth, checkPermission('/product/search', 'get'), productController.getListBySearchTerm);
 
+// @route GET api/v1/product/ids
+// @desc Get list product by ids
+// @access Private
+router.get('/ids', checkAuth, checkPermission('/product/ids', 'get'), productController.getListByIds);
+
 // @route GET api/v1/product
 // @desc Get all product
 // @access Private
 router.get('', checkAuth, checkPermission('/product', 'get'), productController.getAll);
+
+// @route GET api/v1/product/:slug/public
+// @desc Get one product
+// @access Public
+router.get('/:slug/public', productController.getOneBySlugPublic);
 
 // @route GET api/v1/product/:id
 // @desc Get one product
@@ -58,7 +73,7 @@ router.put(
 // @route PATCH api/v1/user/:id
 // @desc Patch one user (isActive, ...)
 // @access Private
-router.patch('/:id', checkAuth, checkPermission('/product/:id', 'patch'), productController.changeActive);
+router.patch('/:id', checkAuth, checkPermission('/product/:id', 'patch'), productController.changeAttribute);
 
 // @route DELETE api/v1/product
 // @desc Delete any product

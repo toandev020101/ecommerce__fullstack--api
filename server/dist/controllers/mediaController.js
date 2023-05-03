@@ -113,7 +113,7 @@ const addAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let medias = [];
     for (let i = 0; i < files.length; i++) {
         medias.push({
-            fileUrl: `http://localhost:4000/${files[i].filename}`,
+            fileUrl: `${process.env.SERVER_URL}/${files[i].filename}`,
             name: files[i].filename,
             mimetype: files[i].mimetype,
             size: `${Math.floor(files[i].size / 1024)} kb`,

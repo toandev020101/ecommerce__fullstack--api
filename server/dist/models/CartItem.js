@@ -11,8 +11,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CartItem = void 0;
 const typeorm_1 = require("typeorm");
-const Cart_1 = require("./Cart");
 const ProductItem_1 = require("./ProductItem");
+const User_1 = require("./User");
 let CartItem = class CartItem extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -26,12 +26,12 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
-], CartItem.prototype, "cartId", void 0);
+], CartItem.prototype, "userId", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Cart_1.Cart, (cart) => cart.cartItems),
-    (0, typeorm_1.JoinColumn)({ name: 'cartId' }),
-    __metadata("design:type", Cart_1.Cart)
-], CartItem.prototype, "cart", void 0);
+    (0, typeorm_1.ManyToOne)(() => User_1.User, (user) => user.cartItems),
+    (0, typeorm_1.JoinColumn)({ name: 'userId' }),
+    __metadata("design:type", User_1.User)
+], CartItem.prototype, "user", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)

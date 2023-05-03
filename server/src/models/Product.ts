@@ -25,7 +25,7 @@ export class Product extends BaseEntity {
   @Column()
   slug!: string;
 
-  @Column({ length: 300, nullable: true })
+  @Column({ type: 'text', nullable: true })
   shortDescription: string;
 
   @Column({ type: 'text', nullable: true })
@@ -45,6 +45,9 @@ export class Product extends BaseEntity {
 
   @Column({ default: 0 })
   height!: number;
+
+  @Column({ default: 0 })
+  isHot!: number;
 
   @Column({ default: 1 })
   isActive!: number;

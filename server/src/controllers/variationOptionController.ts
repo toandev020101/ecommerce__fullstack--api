@@ -79,7 +79,10 @@ export const getPaginationByVariationId = async (
         value: true,
         slug: true,
       },
-      where: { variationId, value: Like(`%${searchTerm}%`) },
+      where: [
+        { variationId, value: Like(`%${searchTerm}%`) },
+        { variationId, slug: Like(`%${searchTerm}%`) },
+      ],
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },

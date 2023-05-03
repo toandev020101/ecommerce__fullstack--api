@@ -9,12 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOneById = exports.getListByProvinceId = void 0;
+exports.getListByProvinceIdAndSearchTerm = void 0;
 const District_1 = require("./../models/District");
-const getListByProvinceId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const typeorm_1 = require("typeorm");
+const getListByProvinceIdAndSearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { provinceId } = req.params;
+    const { searchTerm } = req.query;
     try {
-        const districts = yield District_1.District.find({ where: { provinceId } });
+        const districts = yield District_1.District.find({
+            where: searchTerm ? { provinceId, name: (0, typeorm_1.Like)(`%${searchTerm}%`) } : { provinceId },
+        });
         return res.status(200).json({
             code: 200,
             success: true,
@@ -30,32 +34,5 @@ const getListByProvinceId = (req, res) => __awaiter(void 0, void 0, void 0, func
         });
     }
 });
-exports.getListByProvinceId = getListByProvinceId;
-const getOneById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    try {
-        const district = yield District_1.District.findOneBy({ id });
-        if (!district) {
-            return res.status(404).json({
-                code: 404,
-                success: false,
-                message: 'Quận, huyện không tồn tại',
-            });
-        }
-        return res.status(200).json({
-            code: 200,
-            success: true,
-            message: 'Lấy quận, huyện thành công',
-            data: district,
-        });
-    }
-    catch (error) {
-        return res.status(500).json({
-            code: 500,
-            success: false,
-            message: `Lỗi server :: ${error.message}`,
-        });
-    }
-});
-exports.getOneById = getOneById;
+exports.getListByProvinceIdAndSearchTerm = getListByProvinceIdAndSearchTerm;
 //# sourceMappingURL=districtController.js.map

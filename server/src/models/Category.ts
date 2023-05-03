@@ -1,13 +1,14 @@
 import { BaseEntity, Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Product } from './Product';
+import { VariationCategory } from './VariationCategory';
 
 @Entity()
 export class Category extends BaseEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
-  imageUrl!: string;
+  @Column({ nullable: true })
+  imageUrl: string;
 
   @Column({ length: 100 })
   name!: string;
@@ -32,4 +33,7 @@ export class Category extends BaseEntity {
 
   @OneToMany(() => Product, (product) => product.category)
   products: Product[];
+
+  @OneToMany(() => VariationCategory, (variationCategory) => variationCategory.category)
+  variationCategories: VariationCategory[];
 }

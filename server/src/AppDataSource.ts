@@ -1,5 +1,4 @@
 import { DataSource } from 'typeorm';
-import { Cart } from './models/Cart';
 import { CartItem } from './models/CartItem';
 import { Category } from './models/Category';
 import { Coupon } from './models/Coupon';
@@ -13,6 +12,7 @@ import { Permission } from './models/Permission';
 import { Product } from './models/Product';
 import { ProductConfiguration } from './models/ProductConfiguration';
 import { ProductConnect } from './models/ProductConnect';
+import { ProductImage } from './models/ProductImage';
 import { ProductItem } from './models/ProductItem';
 import { ProductTag } from './models/ProductTag';
 import { Province } from './models/Province';
@@ -22,9 +22,12 @@ import { RolePermission } from './models/RolePermission';
 import { Tag } from './models/Tag';
 import { User } from './models/User';
 import { Variation } from './models/Variation';
+import { VariationCategory } from './models/VariationCategory';
 import { VariationOption } from './models/VariationOption';
 import { Ward } from './models/Ward';
-import { ProductImage } from './models/ProductImage';
+import { OrderStatus } from './models/OrderStatus';
+import { ShipMethod } from './models/ShipMethod';
+import { PaymentMethod } from './models/PaymentMethod';
 
 const AppDataSource = new DataSource({
   type: (process.env.DB_TYPE || 'postgres') as any,
@@ -39,7 +42,6 @@ const AppDataSource = new DataSource({
     Permission,
     RolePermission,
     Media,
-    Cart,
     CartItem,
     Category,
     Ward,
@@ -49,6 +51,9 @@ const AppDataSource = new DataSource({
     Order,
     OrderCoupon,
     OrderLine,
+    OrderStatus,
+    ShipMethod,
+    PaymentMethod,
     Product,
     ProductConfiguration,
     ProductItem,
@@ -60,6 +65,7 @@ const AppDataSource = new DataSource({
     Review,
     Variation,
     VariationOption,
+    VariationCategory,
   ],
 });
 

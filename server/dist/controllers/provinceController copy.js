@@ -9,15 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAll = void 0;
+exports.getListBySearchTerm = void 0;
 const Province_1 = require("./../models/Province");
-const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const typeorm_1 = require("typeorm");
+const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { searchTerm } = req.query;
     try {
-        const provinces = yield Province_1.Province.find();
+        const provinces = yield Province_1.Province.findBy(searchTerm ? { name: (0, typeorm_1.Like)(`%${searchTerm}%`) } : {});
         return res.status(200).json({
             code: 200,
             success: true,
-            message: 'Lấy tất cả tỉnh, thành phố thành công',
+            message: 'Lấy danh sách tỉnh, thành phố thành công',
             data: provinces,
         });
     }
@@ -29,5 +31,5 @@ const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
     }
 });
-exports.getAll = getAll;
+exports.getListBySearchTerm = getListBySearchTerm;
 //# sourceMappingURL=provinceController%20copy.js.map

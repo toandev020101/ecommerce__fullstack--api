@@ -102,17 +102,13 @@ const Sidebar: React.FC<Props> = ({ width }) => {
       ],
     },
     {
-      slug: 'ban-hang',
-      name: 'Bán hàng',
+      slug: 'don-hang',
+      name: 'Đơn hàng',
       icon: <TbListDetailsIcon />,
       child: [
         {
-          slug: 'don-hang',
-          name: 'Đơn hàng',
-        },
-        {
-          slug: 'khach-hang',
-          name: 'Khách hàng',
+          slug: 'danh-sach',
+          name: 'Danh sách đơn hàng',
         },
         {
           slug: 'phieu-uu-dai',
@@ -132,10 +128,6 @@ const Sidebar: React.FC<Props> = ({ width }) => {
         {
           slug: 'phuong-thuc',
           name: 'Phương thức',
-        },
-        {
-          slug: 'khu-vuc',
-          name: 'Khu vực',
         },
       ],
     },

@@ -33,7 +33,6 @@ import {
   FiChevronUp as FiChevronUpIcon,
   FiPlusSquare as FiPlusSquareIcon,
 } from 'react-icons/fi';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import slugify from 'slugify';
 import * as tagApi from '../../../../apis/tagApi';
@@ -48,9 +47,10 @@ import { Tag } from '../../../../models/Tag';
 import { showToast } from '../../../../slices/toastSlice';
 import { Theme } from '../../../../theme';
 import tagSchema from '../../../../validations/tagSchema';
+import { useAppDispatch } from '../../../../app/hook';
 
 const TagProduct: React.FC = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
   const theme: Theme = useTheme();

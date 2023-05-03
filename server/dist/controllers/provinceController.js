@@ -9,15 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOneById = exports.getAll = void 0;
+exports.getListBySearchTerm = void 0;
 const Province_1 = require("./../models/Province");
-const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const typeorm_1 = require("typeorm");
+const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { searchTerm } = req.query;
     try {
-        const provinces = yield Province_1.Province.find();
+        const provinces = yield Province_1.Province.findBy(searchTerm ? { name: (0, typeorm_1.Like)(`%${searchTerm}%`) } : {});
         return res.status(200).json({
             code: 200,
             success: true,
-            message: 'Lấy tất cả tỉnh, thành phố thành công',
+            message: 'Lấy danh sách tỉnh, thành phố thành công',
             data: provinces,
         });
     }
@@ -29,32 +31,5 @@ const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
         });
     }
 });
-exports.getAll = getAll;
-const getOneById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    try {
-        const province = yield Province_1.Province.findOneBy({ id });
-        if (!province) {
-            return res.status(404).json({
-                code: 404,
-                success: false,
-                message: 'Tỉnh, thành phố không tồn tại',
-            });
-        }
-        return res.status(200).json({
-            code: 200,
-            success: true,
-            message: 'Lấy tỉnh, thành phố thành công',
-            data: province,
-        });
-    }
-    catch (error) {
-        return res.status(500).json({
-            code: 500,
-            success: false,
-            message: `Lỗi server :: ${error.message}`,
-        });
-    }
-});
-exports.getOneById = getOneById;
+exports.getListBySearchTerm = getListBySearchTerm;
 //# sourceMappingURL=provinceController.js.map

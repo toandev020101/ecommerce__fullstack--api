@@ -9,6 +9,7 @@ export interface ProductInput {
   categoryId: number | string;
   shortDescription: string;
   description: string;
+  isHot: number;
   isActive: number;
 
   items: {

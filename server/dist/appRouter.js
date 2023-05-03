@@ -16,6 +16,12 @@ const tagRoute_1 = __importDefault(require("./routes/tagRoute"));
 const variationRoute_1 = __importDefault(require("./routes/variationRoute"));
 const variationOptionRoute_1 = __importDefault(require("./routes/variationOptionRoute"));
 const productRoute_1 = __importDefault(require("./routes/productRoute"));
+const cartItemRoute_1 = __importDefault(require("./routes/cartItemRoute"));
+const orderRoute_1 = __importDefault(require("./routes/orderRoute"));
+const shipMethodRoute_1 = __importDefault(require("./routes/shipMethodRoute"));
+const paymentMethodRoute_1 = __importDefault(require("./routes/paymentMethodRoute"));
+const couponRoute_1 = __importDefault(require("./routes/couponRoute"));
+const orderStatusRoute_1 = __importDefault(require("./routes/orderStatusRoute"));
 const appRouter = (app) => {
     const apiRoute = '/api/v1';
     app.use(`${apiRoute}/auth`, authRoute_1.default);
@@ -31,6 +37,12 @@ const appRouter = (app) => {
     app.use(`${apiRoute}/tag`, tagRoute_1.default);
     app.use(`${apiRoute}/variation`, variationRoute_1.default);
     app.use(`${apiRoute}/variation-option`, variationOptionRoute_1.default);
+    app.use(`${apiRoute}/cart-item`, cartItemRoute_1.default);
+    app.use(`${apiRoute}/order`, orderRoute_1.default);
+    app.use(`${apiRoute}/order-status`, orderStatusRoute_1.default);
+    app.use(`${apiRoute}/ship-method`, shipMethodRoute_1.default);
+    app.use(`${apiRoute}/payment-method`, paymentMethodRoute_1.default);
+    app.use(`${apiRoute}/coupon`, couponRoute_1.default);
 };
 exports.default = appRouter;
 //# sourceMappingURL=appRouter.js.map

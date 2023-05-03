@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 
-const tagSchema = yup.object().shape({
+const productSchema = yup.object().shape({
   imageUrl: yup.string().required('Ảnh sản phẩm không thể để trống!'),
   name: yup.string().min(4, 'Tên sản phẩm phải có ít nhất 4 ký tự!').max(255, 'Tên sản phẩm chỉ tối đa 255 ký tự!'),
   slug: yup.string().min(4, 'Đường dẫn phải có ít nhất 4 ký tự!').max(255, 'Đường dẫn chỉ tối đa 255 ký tự!'),
@@ -24,4 +24,4 @@ const tagSchema = yup.object().shape({
     }),
   ),
 });
-export default tagSchema;
+export default productSchema;

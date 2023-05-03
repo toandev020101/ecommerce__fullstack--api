@@ -11,7 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = void 0;
 const typeorm_1 = require("typeorm");
-const Cart_1 = require("./Cart");
+const CartItem_1 = require("./CartItem");
 const District_1 = require("./District");
 const Media_1 = require("./Media");
 const Order_1 = require("./Order");
@@ -19,6 +19,7 @@ const Province_1 = require("./Province");
 const Review_1 = require("./Review");
 const Role_1 = require("./Role");
 const Ward_1 = require("./Ward");
+const Coupon_1 = require("./Coupon");
 let User = class User extends typeorm_1.BaseEntity {
 };
 __decorate([
@@ -106,13 +107,17 @@ __decorate([
     __metadata("design:type", Role_1.Role)
 ], User.prototype, "role", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Cart_1.Cart, (cart) => cart.user),
+    (0, typeorm_1.OneToMany)(() => CartItem_1.CartItem, (cartItem) => cartItem.user),
     __metadata("design:type", Array)
-], User.prototype, "carts", void 0);
+], User.prototype, "cartItems", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Order_1.Order, (order) => order.user),
     __metadata("design:type", Array)
 ], User.prototype, "orders", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => Coupon_1.Coupon, (coupon) => coupon.user),
+    __metadata("design:type", Array)
+], User.prototype, "coupons", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Review_1.Review, (review) => review.user),
     __metadata("design:type", Array)

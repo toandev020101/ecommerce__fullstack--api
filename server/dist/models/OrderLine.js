@@ -22,6 +22,10 @@ __decorate([
 ], OrderLine.prototype, "id", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
+    __metadata("design:type", String)
+], OrderLine.prototype, "variation", void 0);
+__decorate([
+    (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], OrderLine.prototype, "quantity", void 0);
 __decorate([
