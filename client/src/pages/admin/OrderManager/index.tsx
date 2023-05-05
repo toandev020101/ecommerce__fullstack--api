@@ -31,12 +31,7 @@ import {
 } from '@mui/material';
 import queryString from 'query-string';
 import React, { useEffect, useState } from 'react';
-import {
-  BiDetail as BiDetailIcon,
-  BiEdit as BiEditIcon,
-  BiSearchAlt as BiSearchAltIcon,
-  BiTrashAlt as BiTrashAltIcon,
-} from 'react-icons/bi';
+import { BiEdit as BiEditIcon, BiSearchAlt as BiSearchAltIcon, BiTrashAlt as BiTrashAltIcon } from 'react-icons/bi';
 import {
   FiChevronDown as FiChevronDownIcon,
   FiChevronUp as FiChevronUpIcon,
@@ -586,12 +581,7 @@ const OrderManager: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <Skeleton animation="wave" width="100%">
-                            <Typography>Địa chỉ</Typography>
-                          </Skeleton>
-                        </TableCell>
-                        <TableCell>
-                          <Skeleton animation="wave" width="100%">
-                            <Typography>Số lượng sản phẩm</Typography>
+                            <Typography>Tổng số lượng</Typography>
                           </Skeleton>
                         </TableCell>
                         <TableCell>
@@ -622,12 +612,6 @@ const OrderManager: React.FC = () => {
 
                         <TableCell>
                           <Box display="flex" gap="10px">
-                            <Skeleton animation="wave" variant="circular">
-                              <IconButton>
-                                <BiDetailIcon />
-                              </IconButton>
-                            </Skeleton>
-
                             <Skeleton animation="wave" variant="circular">
                               <IconButton>
                                 <BiEditIcon />
@@ -697,11 +681,7 @@ const OrderManager: React.FC = () => {
                               sx={{ fontSize: '15px' }}
                             >
                               {statusArr.map((statusItem, idx) => (
-                                <MenuItem
-                                  key={`status-item-${idx}`}
-                                  value={statusItem.id}
-                                  disabled={statusItem.isShip === 1}
-                                >
+                                <MenuItem key={`status-item-${idx}`} value={statusItem.id}>
                                   {statusItem.name}
                                 </MenuItem>
                               ))}

@@ -34,6 +34,7 @@ export interface Order {
         product: {
           id: number;
           name: string;
+          imageUrl: string;
         };
       };
     },

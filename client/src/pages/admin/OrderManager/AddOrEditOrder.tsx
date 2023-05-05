@@ -361,9 +361,7 @@ const AddOrEditOrder: React.FC = () => {
         let data: ValueObject[] = [];
 
         for (let i = 0; i < resData.length; i++) {
-          if (resData[i].isShip !== 1) {
-            data.push({ label: resData[i].name, value: resData[i].id });
-          }
+          data.push({ label: resData[i].name, value: resData[i].id });
         }
 
         setStatusOptions(data);
@@ -578,12 +576,10 @@ const AddOrEditOrder: React.FC = () => {
       const newSelectedArr = rows.map((row) => row.id);
       setSelectedArr(newSelectedArr);
 
-      handleUpdateTotalPrice(rows);
       return;
     }
 
     setSelectedArr([]);
-    setTotalPrice(0);
   };
 
   const handleRowClick = (_event: React.MouseEvent<unknown>, id: number) => {
@@ -600,19 +596,6 @@ const AddOrEditOrder: React.FC = () => {
       newSelectedArr = newSelectedArr.concat(selectedArr.slice(0, selectedIndex), selectedArr.slice(selectedIndex + 1));
     }
     setSelectedArr(newSelectedArr);
-
-    let newTotalPrice = totalPrice;
-    const rowIndex = rows.findIndex((row) => row.id === id);
-    const rowTotalPrice = handleDiscount(rows[rowIndex])
-      ? rows[rowIndex].quantity * rows[rowIndex].productItem.discount
-      : rows[rowIndex].quantity * rows[rowIndex].productItem.price;
-
-    if (selectedIndex === -1) {
-      newTotalPrice += rowTotalPrice;
-    } else {
-      newTotalPrice -= rowTotalPrice;
-    }
-    setTotalPrice(newTotalPrice);
   };
 
   const isSelected = (id: number) => selectedArr.indexOf(id) !== -1;
@@ -743,6 +726,7 @@ const AddOrEditOrder: React.FC = () => {
     const newRows = [...rows];
     newRows[index].quantity = quantity;
     setRows(newRows);
+
     handleUpdateTotalPrice(newRows);
 
     // update server

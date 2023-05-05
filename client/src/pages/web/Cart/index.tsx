@@ -41,6 +41,7 @@ import { showToast } from '../../../slices/toastSlice';
 import { Theme } from '../../../theme';
 import { toDate } from '../../../utils/date';
 import { priceFormat } from '../../../utils/format';
+import { setIsReload } from '../../../slices/globalSlice';
 
 const Cart: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -164,9 +165,9 @@ const Cart: React.FC = () => {
     getAllCartItem();
   }, [dispatch, navigate, reload]);
 
-  const handleUpdateTotalPrice = (rows: CartItem[]) => {
+  const handleUpdateTotalPrice = (rowArr: CartItem[]) => {
     let newTotalPrice = 0;
-    rows.forEach((row) => {
+    rowArr.forEach((row) => {
       newTotalPrice += handleDiscount(row)
         ? row.quantity * row.productItem.discount
         : row.quantity * row.productItem.price;
@@ -202,18 +203,8 @@ const Cart: React.FC = () => {
     }
     setSelectedArr(newSelectedArr);
 
-    let newTotalPrice = totalPrice;
-    const rowIndex = rows.findIndex((row) => row.id === id);
-    const rowTotalPrice = handleDiscount(rows[rowIndex])
-      ? rows[rowIndex].quantity * rows[rowIndex].productItem.discount
-      : rows[rowIndex].quantity * rows[rowIndex].productItem.price;
-
-    if (selectedIndex === -1) {
-      newTotalPrice += rowTotalPrice;
-    } else {
-      newTotalPrice -= rowTotalPrice;
-    }
-    setTotalPrice(newTotalPrice);
+    const selectedRows = rows.filter((row) => newSelectedArr.includes(row.id));
+    handleUpdateTotalPrice(selectedRows);
   };
 
   const isSelected = (id: number) => selectedArr.indexOf(id) !== -1;
@@ -247,6 +238,7 @@ const Cart: React.FC = () => {
       setReload(!reload);
       setSelectedArr([]);
       setDeleteRowIndex(-1);
+      dispatch(setIsReload());
     } catch (error: any) {
       const { data } = error.response;
 
@@ -344,7 +336,9 @@ const Cart: React.FC = () => {
     const newRows = [...rows];
     newRows[index].quantity = quantity;
     setRows(newRows);
-    handleUpdateTotalPrice(newRows);
+
+    const selectedRows = newRows.filter((row) => selectedArr.includes(row.id));
+    handleUpdateTotalPrice(selectedRows);
 
     // update server
     try {

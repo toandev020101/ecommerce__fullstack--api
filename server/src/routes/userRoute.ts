@@ -5,6 +5,7 @@ import validateYup from '../middlewares/validateYup';
 import * as userController from '../controllers/userController';
 import userSchema from '../validations/userSchema';
 import * as yup from 'yup';
+import changePasswordSchema from '../validations/changePasswordSchema';
 
 const router = express.Router();
 
@@ -55,7 +56,18 @@ router.post('', checkAuth, checkPermission('/user', 'post'), validateYup(userSch
 router.put('/:id', checkAuth, checkPermission('/user/:id', 'put'), validateYup(userSchema), userController.updateOne);
 
 // @route PATCH api/v1/user/:id
-// @desc Patch one user (isActive, ...)
+// @desc Patch one user password
+// @access Private
+router.patch(
+  '/:id/password',
+  checkAuth,
+  checkPermission('/user/:id/password', 'patch'),
+  validateYup(changePasswordSchema),
+  userController.changePassword,
+);
+
+// @route PATCH api/v1/user/:id
+// @desc Patch one user isActive
 // @access Private
 router.patch('/:id', checkAuth, checkPermission('/user/:id', 'patch'), userController.changeActive);
 

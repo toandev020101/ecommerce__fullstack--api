@@ -50,6 +50,7 @@ import productSchema from '../../../validations/productSchema';
 import { BaseResponse } from '../../../interfaces/BaseResponse';
 import { showToast } from '../../../slices/toastSlice';
 import { useAppDispatch } from '../../../app/hook';
+import { toDateString } from '../../../utils/date';
 
 interface ImageItem {
   idx: string;
@@ -292,8 +293,8 @@ const AddOrEditProduct: React.FC = () => {
                 SKU: productItem.SKU,
                 price: productItem.price,
                 discount: productItem.discount,
-                discountStartDate: productItem.discountStartDate ? productItem.discountStartDate : ' ',
-                discountEndDate: productItem.discountEndDate ? productItem.discountEndDate : ' ',
+                discountStartDate: productItem.discountStartDate ? toDateString(productItem.discountStartDate) : ' ',
+                discountEndDate: productItem.discountEndDate ? toDateString(productItem.discountEndDate) : ' ',
                 inventory: {
                   quantity: productItem.inventory.quantity,
                   priceEntry: productItem.inventory.priceEntry,

@@ -48,6 +48,10 @@ __decorate([
     __metadata("design:type", Date)
 ], ProductItem.prototype, "discountEndDate", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 0, comment: '0: chưa xóa, 1: đã xóa' }),
+    __metadata("design:type", Number)
+], ProductItem.prototype, "deleted", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Number)
 ], ProductItem.prototype, "inventoryId", void 0);

@@ -42,9 +42,14 @@ router.get(
 router.get('/date', checkAuth, checkPermission('/media/date', 'get'), mediaController.getAllDate);
 
 // @route POST api/v1/media/any
-// @desc Post all media
+// @desc Post media
 // @access Private
 router.post('/any', checkAuth, checkPermission('/media/any', 'post'), upload.array('files'), mediaController.addAny);
+
+// @route POST api/v1/media
+// @desc Post one media
+// @access Private
+router.post('', checkAuth, checkPermission('/media', 'post'), upload.single('file'), mediaController.addOne);
 
 // @route Delete api/v1/media
 // @desc Delete any media

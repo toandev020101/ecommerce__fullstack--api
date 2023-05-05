@@ -74,35 +74,35 @@ const ProductCategory: React.FC = () => {
 
   const sliders = [
     {
-      imageUrl: 'https://cdn.tgdd.vn/2023/04/banner/a14-800-200-800x200-2.png',
+      imageUrl: '/images/test/slider5.png',
       slug: '',
       name: '',
     },
     {
-      imageUrl: 'https://cdn.tgdd.vn/2023/04/banner/a14-800-200-800x200-2.png',
+      imageUrl: '/images/test/slider5.png',
       slug: '',
       name: '',
     },
     {
-      imageUrl: 'https://cdn.tgdd.vn/2023/04/banner/a14-800-200-800x200-2.png',
+      imageUrl: '/images/test/slider5.png',
       slug: '',
       name: '',
     },
     {
-      imageUrl: 'https://cdn.tgdd.vn/2023/04/banner/a14-800-200-800x200-2.png',
+      imageUrl: '/images/test/slider5.png',
       slug: '',
       name: '',
     },
   ];
   const banners = [
     {
-      imageUrl: 'https://cdn.tgdd.vn/2023/04/banner/sticky-s21fe-390x97.png',
-      slug: 'https://www.thegioididong.com/dtdd/samsung-galaxy-s21-fe-6gb',
+      imageUrl: '/images/test/banner1.png',
+      slug: '#',
       name: '',
     },
     {
-      imageUrl: 'https://cdn.tgdd.vn/2023/02/banner/sticky-a57-copy-390x97.png',
-      slug: 'https://www.thegioididong.com/dtdd/oppo-a57-128gb',
+      imageUrl: '/images/test/banner2.png',
+      slug: '#',
       name: '',
     },
   ];

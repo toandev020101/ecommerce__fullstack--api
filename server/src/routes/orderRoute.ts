@@ -12,10 +12,20 @@ const router = express.Router();
 // @access Private
 router.get('/pagination', checkAuth, checkPermission('/order/pagination', 'get'), orderController.getPagination);
 
+// @route GET api/v1/order
+// @desc Get list order by orderStatusId
+// @access Private
+router.get(
+  '/status/:statusId',
+  checkAuth,
+  checkPermission('/order/status/:statusId', 'get'),
+  orderController.getListByStatusId,
+);
+
 // @route GET api/v1/order/id
 // @desc Get one order
 // @access Private
-router.get('/:id', checkAuth, checkPermission('/order/:id', 'get'), orderController.getOne);
+router.get('/:id', checkAuth, checkPermission('/order/:id', 'get'), orderController.getOneById);
 
 // @route POST api/v1/order
 // @desc post order

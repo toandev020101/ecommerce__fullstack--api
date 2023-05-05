@@ -32,6 +32,7 @@ import { LoadingButton } from '@mui/lab';
 import { showToast } from '../slices/toastSlice';
 import { useAppDispatch } from '../app/hook';
 import { CartItemInput } from '../interfaces/CartItemInput';
+import { setIsReload } from '../slices/globalSlice';
 
 const ProductDetail: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -198,6 +199,7 @@ const ProductDetail: React.FC = () => {
 
       setQuantity(1);
       setIsLoading(false);
+      dispatch(setIsReload());
     } catch (error: any) {
       setIsLoading(false);
 

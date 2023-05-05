@@ -32,9 +32,13 @@ const cartItemController = __importStar(require("../controllers/cartItemControll
 const checkAuth_1 = require("../middlewares/checkAuth");
 const checkPermission_1 = require("../middlewares/checkPermission");
 const validateYup_1 = __importDefault(require("../middlewares/validateYup"));
+const yup = __importStar(require("yup"));
 const router = express_1.default.Router();
+router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item', 'get'), cartItemController.getAll);
+router.post('/any', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item/any', 'post'), (0, validateYup_1.default)(yup.array().of(cartItemSchema_1.default)), cartItemController.addAny);
 router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item', 'post'), (0, validateYup_1.default)(cartItemSchema_1.default), cartItemController.addOne);
-router.patch('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item/:id', 'patch'), (0, validateYup_1.default)(cartItemSchema_1.default), cartItemController.updateOne);
+router.patch('/:id/product-item', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item/:id/product-item', 'patch'), cartItemController.changeProductItem);
+router.patch('/:id/quantity', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item/:id/quantity', 'patch'), cartItemController.changeQuantity);
 router.delete('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item', 'delete'), cartItemController.removeAny);
 router.delete('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/cart-item/:id', 'delete'), cartItemController.removeOne);
 exports.default = router;

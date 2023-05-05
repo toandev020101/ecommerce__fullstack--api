@@ -67,6 +67,7 @@ import { showToast } from '../../../slices/toastSlice';
 import { Theme } from '../../../theme';
 import { priceFormat } from '../../../utils/format';
 import productSchema from '../../../validations/productSchema';
+import { toDate } from '../../../utils/date';
 
 const ProductManager: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -380,7 +381,7 @@ const ProductManager: React.FC = () => {
   const handlePrice = (items: ProductItem[]) => {
     const currentDate = new Date();
     const priceArr = items.map((item) => {
-      if (item.discountStartDate <= currentDate && item.discountEndDate >= currentDate) {
+      if (toDate(item.discountStartDate) <= currentDate && toDate(item.discountEndDate) >= currentDate) {
         return item.discount;
       }
 

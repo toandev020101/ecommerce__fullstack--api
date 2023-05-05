@@ -20,6 +20,10 @@ import VariationProduct from '../pages/admin/ProductManager/VariationProduct';
 import VariationOptionProduct from '../pages/admin/ProductManager/VariationProduct/VariationOptionProduct';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
+import AccountProfile from '../pages/web/Account';
+import ChangePassword from '../pages/web/Account/ChangePassword';
+import OrderDetail from '../pages/web/Account/OrderDetail';
+import OrderHistory from '../pages/web/Account/OrderHistory';
 import Cart from '../pages/web/Cart';
 import Checkout from '../pages/web/Checkout';
 import Home from '../pages/web/Home';
@@ -45,6 +49,10 @@ export const privateRoutes: Route[] = [
   // user
   { path: '/gio-hang', component: Cart },
   { path: '/thanh-toan', component: Checkout },
+  { path: '/nguoi-dung/tai-khoan/ho-so', component: AccountProfile },
+  { path: '/nguoi-dung/tai-khoan/thay-doi-mat-khau', component: ChangePassword },
+  { path: '/nguoi-dung/don-hang/:id', component: OrderDetail },
+  { path: '/nguoi-dung/don-hang', component: OrderHistory },
 
   // admin
   { path: '/quan-tri', component: Dashboard, layout: AdminLayout },

@@ -19,7 +19,7 @@ export const getAll = async (_req: Request, res: Response<CommonResponse<Product
   try {
     // find products
     const products = await Product.find({
-      where: { deleted: 0 },
+      where: { deleted: 0, productItems: { deleted: 0 } },
       relations: {
         category: true,
         productItems: {
@@ -57,7 +57,7 @@ export const getListBySearchTerm = async (
 
   try {
     // find products
-    const products = await Product.findBy({ name: Like(`%${searchTerm}%`), deleted: 0 });
+    const products = await Product.findBy({ name: Like(`%${searchTerm}%`), deleted: 0, productItems: { deleted: 0 } });
 
     // send results
     return res.status(200).json({
@@ -85,7 +85,7 @@ export const getListByIds = async (
   try {
     // find products
     const products = await Product.find({
-      where: { id: In(ids) },
+      where: { id: In(ids), deleted: 0, productItems: { deleted: 0 } },
       relations: {
         productItems: {
           inventory: true,
@@ -170,7 +170,8 @@ export const getPaginationByCategorySlugPublic = async (
       .leftJoin('productConfigurations.variationOption', 'variationOption')
       .where('category.slug = :categorySlug', { categorySlug })
       .andWhere('product.deleted = :deleted', { deleted: 0 })
-      .andWhere('product.isActive = :isActive', { isActive: 1 });
+      .andWhere('product.isActive = :isActive', { isActive: 1 })
+      .andWhere('productItems.deleted = :deleted', { deleted: 0 });
 
     if (categoryFilters) {
       let queryString = '(';
@@ -428,7 +429,8 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
       .leftJoin('productTags.tag', 'tag')
       .leftJoin('product.productItems', 'productItems', 'productItems.productId = product.id')
       .leftJoin('productItems.inventory', 'inventory')
-      .where('product.deleted = :deleted', { deleted: 0 });
+      .where('product.deleted = :deleted', { deleted: 0 })
+      .andWhere('productItems.deleted = :deleted', { deleted: 0 });
 
     if (categoryId && categoryId !== '') {
       queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });
@@ -596,7 +598,7 @@ export const getOneBySlugPublic = async (
   try {
     // find product
     const product = await Product.findOne({
-      where: { slug, deleted: 0 },
+      where: { slug, deleted: 0, productItems: { deleted: 0 } },
       relations: {
         category: true,
         productTags: { tag: true },
@@ -644,7 +646,7 @@ export const getOneById = async (req: Request<{ id: number }, {}, {}, {}>, res: 
   try {
     // find product
     const product = await Product.findOne({
-      where: { id, deleted: 0 },
+      where: { id, deleted: 0, productItems: { deleted: 0 } },
       relations: {
         category: true,
         productTags: { tag: true },
@@ -1059,14 +1061,10 @@ export const updateOne = async (
       // delete product image
       await transactionalEntityManager.delete(ProductImage, { productItemId: In(productItemIds) });
 
-      // handle inventory id
-      const inventoryIds: number[] = productItems.map((productItem) => productItem.inventoryId);
-
-      // delete product item
-      await transactionalEntityManager.delete(ProductItem, { productId: id });
-
-      // delete inventory
-      await transactionalEntityManager.delete(Inventory, { id: In(inventoryIds) });
+      productItemIds.forEach(async (productItemId) => {
+        // delete product item
+        await transactionalEntityManager.update(ProductItem, productItemId, { deleted: 1 });
+      });
 
       for (let i = 0; i < items.length; i++) {
         const { idx, library, inventory, ...itemOthers } = items[i];

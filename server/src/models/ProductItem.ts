@@ -38,6 +38,9 @@ export class ProductItem extends BaseEntity {
   @Column({ nullable: true })
   discountEndDate: Date;
 
+  @Column({ default: 0, comment: '0: chưa xóa, 1: đã xóa' })
+  deleted: number;
+
   @Column()
   inventoryId!: number;
   @OneToOne(() => Inventory)

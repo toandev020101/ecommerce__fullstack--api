@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeOne = exports.removeAny = exports.changeActive = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getOneAndRoleByIdPublic = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
+exports.removeOne = exports.removeAny = exports.changePassword = exports.changeActive = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getOneAndRoleByIdPublic = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("jsonwebtoken");
 const typeorm_1 = require("typeorm");
@@ -452,6 +452,17 @@ const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 message: 'Tài khoản không tồn tại!',
             });
         }
+        if (data.email && data.email !== '') {
+            user = yield User_1.User.findOneBy({ email: data.email });
+            if (user) {
+                return res.status(400).json({
+                    code: 400,
+                    success: false,
+                    message: 'Email đã tồn tại!',
+                    errors: [{ field: 'email', message: 'Email đã tồn tại!' }],
+                });
+            }
+        }
         yield User_1.User.update(id, data);
         return res.status(200).json({
             code: 200,
@@ -498,6 +509,63 @@ const changeActive = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.changeActive = changeActive;
+const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const { password, newPassword } = req.body;
+    try {
+        let user = yield User_1.User.findOne({
+            select: {
+                username: true,
+                password: true,
+            },
+            where: { id },
+        });
+        if (!user) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: 'Tài khoản không tồn tại!',
+            });
+        }
+        const isPasswordValid = yield bcrypt_1.default.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Thay đổi mật khẩu thất bại',
+                errors: [{ field: 'password', message: 'Mật khẩu không chính xác!' }],
+            });
+        }
+        if (password === newPassword) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Thay đổi mật khẩu thất bại',
+                errors: [
+                    { field: 'newPassword', message: 'Không thể nhập mật khẩu hiện tại!' },
+                    { field: 'confirmNewPassword', message: 'Không thể nhập mật khẩu hiện tại!' },
+                ],
+            });
+        }
+        const salt = yield bcrypt_1.default.genSalt(10);
+        const hashedPassword = yield bcrypt_1.default.hash(newPassword, salt);
+        yield User_1.User.update(id, { password: hashedPassword });
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Thay đổi mật khẩu thành công',
+            data: null,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.changePassword = changePassword;
 const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { ids } = req.body;
     try {

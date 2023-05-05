@@ -471,7 +471,7 @@ const Checkout: React.FC = () => {
         }),
       );
       setIsLoading(false);
-      navigate('/tai-khoan/don-hang');
+      navigate('/nguoi-dung/don-hang');
     } catch (error: any) {
       setIsLoading(false);
 

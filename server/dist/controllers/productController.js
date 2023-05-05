@@ -39,7 +39,7 @@ const Product_1 = require("./../models/Product");
 const getAll = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const products = yield Product_1.Product.find({
-            where: { deleted: 0 },
+            where: { deleted: 0, productItems: { deleted: 0 } },
             relations: {
                 category: true,
                 productItems: {
@@ -69,7 +69,7 @@ exports.getAll = getAll;
 const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
     try {
-        const products = yield Product_1.Product.findBy({ name: (0, typeorm_1.Like)(`%${searchTerm}%`), deleted: 0 });
+        const products = yield Product_1.Product.findBy({ name: (0, typeorm_1.Like)(`%${searchTerm}%`), deleted: 0, productItems: { deleted: 0 } });
         return res.status(200).json({
             code: 200,
             success: true,
@@ -90,7 +90,7 @@ const getListByIds = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     const { ids } = req.query;
     try {
         const products = yield Product_1.Product.find({
-            where: { id: (0, typeorm_1.In)(ids) },
+            where: { id: (0, typeorm_1.In)(ids), deleted: 0, productItems: { deleted: 0 } },
             relations: {
                 productItems: {
                     inventory: true,
@@ -160,7 +160,8 @@ const getPaginationByCategorySlugPublic = (req, res) => __awaiter(void 0, void 0
             .leftJoin('productConfigurations.variationOption', 'variationOption')
             .where('category.slug = :categorySlug', { categorySlug })
             .andWhere('product.deleted = :deleted', { deleted: 0 })
-            .andWhere('product.isActive = :isActive', { isActive: 1 });
+            .andWhere('product.isActive = :isActive', { isActive: 1 })
+            .andWhere('productItems.deleted = :deleted', { deleted: 0 });
         if (categoryFilters) {
             let queryString = '(';
             categoryFilters.forEach((categoryFilter, index) => {
@@ -390,7 +391,8 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             .leftJoin('productTags.tag', 'tag')
             .leftJoin('product.productItems', 'productItems', 'productItems.productId = product.id')
             .leftJoin('productItems.inventory', 'inventory')
-            .where('product.deleted = :deleted', { deleted: 0 });
+            .where('product.deleted = :deleted', { deleted: 0 })
+            .andWhere('productItems.deleted = :deleted', { deleted: 0 });
         if (categoryId && categoryId !== '') {
             queryBuilder.andWhere('product.categoryId = :categoryId', { categoryId });
         }
@@ -531,7 +533,7 @@ const getOneBySlugPublic = (req, res) => __awaiter(void 0, void 0, void 0, funct
     const { slug } = req.params;
     try {
         const product = yield Product_1.Product.findOne({
-            where: { slug, deleted: 0 },
+            where: { slug, deleted: 0, productItems: { deleted: 0 } },
             relations: {
                 category: true,
                 productTags: { tag: true },
@@ -574,7 +576,7 @@ const getOneById = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     const { id } = req.params;
     try {
         const product = yield Product_1.Product.findOne({
-            where: { id, deleted: 0 },
+            where: { id, deleted: 0, productItems: { deleted: 0 } },
             relations: {
                 category: true,
                 productTags: { tag: true },
@@ -878,9 +880,9 @@ const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const productItemIds = productItems.map((productItem) => productItem.id);
             yield transactionalEntityManager.delete(ProductConfiguration_1.ProductConfiguration, { productItemId: (0, typeorm_1.In)(productItemIds) });
             yield transactionalEntityManager.delete(ProductImage_1.ProductImage, { productItemId: (0, typeorm_1.In)(productItemIds) });
-            const inventoryIds = productItems.map((productItem) => productItem.inventoryId);
-            yield transactionalEntityManager.delete(ProductItem_1.ProductItem, { productId: id });
-            yield transactionalEntityManager.delete(Inventory_1.Inventory, { id: (0, typeorm_1.In)(inventoryIds) });
+            productItemIds.forEach((productItemId) => __awaiter(void 0, void 0, void 0, function* () {
+                yield transactionalEntityManager.update(ProductItem_1.ProductItem, productItemId, { deleted: 1 });
+            }));
             for (let i = 0; i < items.length; i++) {
                 const _d = items[i], { idx, library, inventory } = _d, itemOthers = __rest(_d, ["idx", "library", "inventory"]);
                 const insertedInventory = yield transactionalEntityManager.insert(Inventory_1.Inventory, inventory);

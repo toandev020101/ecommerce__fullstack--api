@@ -23,10 +23,6 @@ __decorate([
     __metadata("design:type", String)
 ], OrderStatus.prototype, "name", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0, comment: '0: không phải đơn vị giao hàng, 1: đơn vị giao hàng' }),
-    __metadata("design:type", Number)
-], OrderStatus.prototype, "isShip", void 0);
-__decorate([
     (0, typeorm_1.OneToMany)(() => Order_1.Order, (order) => order.orderStatus),
     __metadata("design:type", Array)
 ], OrderStatus.prototype, "orders", void 0);

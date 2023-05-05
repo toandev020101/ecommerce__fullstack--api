@@ -16,24 +16,20 @@ const Home: React.FC = () => {
 
   const imgs = [
     {
-      imageUrl:
-        'https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_100/https://cdn.tgdd.vn/2023/04/banner/redmi-note12-GRQ-720-220-720x220-1.png',
-      slug: 'https://www.thegioididong.com/dtdd/xiaomi-redmi-note-12-4g',
+      imageUrl: '/images/test/slider1.png',
+      slug: '#',
     },
     {
-      imageUrl:
-        'https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_100/https://cdn.tgdd.vn/2023/04/banner/Realme-C55-GRQ-720-220-720x220-1.png',
-      slug: 'https://www.thegioididong.com/dtdd/realme-c55',
+      imageUrl: '/images/test/slider2.png',
+      slug: '#',
     },
     {
-      imageUrl:
-        'https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_100/https://cdn.tgdd.vn/2023/04/banner/a54-720-220-720x220-3.png',
-      slug: 'https://www.thegioididong.com/khuyen-mai-soc/galaxy-a-series-2023',
+      imageUrl: '/images/test/slider3.png',
+      slug: '#',
     },
     {
-      imageUrl:
-        'https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_100/https://cdn.tgdd.vn/2023/04/banner/ip14-720-220-720x220-4.png',
-      slug: 'https://www.thegioididong.com/dtdd/iphone-14-pro-max#2-gia',
+      imageUrl: '/images/test/slider4.png',
+      slug: '#',
     },
   ];
 
@@ -63,7 +59,7 @@ const Home: React.FC = () => {
 
           {/* begin: banner */}
           <img
-            src="https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_100/https://cdn.tgdd.vn/2023/04/banner/Promote-Des-1200x100-10.png"
+            src="/images/test/banner3.webp"
             alt=""
             style={{ height: '100%', width: '100%', objectFit: 'cover', borderRadius: '5px', marginTop: '20px' }}
           />

@@ -30,20 +30,25 @@ import { MdOutlineAdminPanelSettings as MdOutlineAdminPanelSettingsIcon } from '
 import { Link, useNavigate } from 'react-router-dom';
 import * as authApi from '../../apis/authApi';
 import * as userApi from '../../apis/userApi';
+import * as cartItemApi from '../../apis/cartItemApi';
 import { useAppDispatch, useAppSelector } from '../../app/hook';
 import { User } from '../../models/User';
 import { authFai, authPending, authSuccess, logout, selectIsAuthenticated } from '../../slices/authSlice';
 import { showToast } from '../../slices/toastSlice';
 import { Theme } from '../../theme';
 import JWTManager from '../../utils/jwt';
+import { CartItem } from '../../models/CartItem';
+import { selectIsReload } from '../../slices/globalSlice';
 
 const Header: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const theme: Theme = useTheme();
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isReload = useAppSelector(selectIsReload);
 
   const [user, setUser] = useState<User>();
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   // menu
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
@@ -75,7 +80,25 @@ const Header: React.FC = () => {
     } else {
       setUser(undefined);
     }
-  }, [navigate, isAuthenticated]);
+  }, [navigate, isAuthenticated, isReload]);
+
+  useEffect(() => {
+    const getAllCartItem = async () => {
+      try {
+        const res = await cartItemApi.getAll();
+        setCartItems(res.data as CartItem[]);
+      } catch (error: any) {
+        const { data } = error.response;
+        if (data.code === 401 || data.code === 403 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+
+    if (isAuthenticated) {
+      getAllCartItem();
+    }
+  }, [dispatch, navigate, isAuthenticated, isReload]);
 
   const handleLogout = async () => {
     dispatch(authPending());
@@ -236,13 +259,13 @@ const Header: React.FC = () => {
                   )}
 
                   <MenuItem onClick={handleCloseMenuUser}>
-                    <Link to="/tai-khoan" style={{ width: '100%' }}>
+                    <Link to="/nguoi-dung/tai-khoan/ho-so" style={{ width: '100%' }}>
                       <AiOutlineUserIcon fontSize="20px" style={{ marginRight: '10px' }} /> Tài khoản của tôi
                     </Link>
                   </MenuItem>
 
                   <MenuItem onClick={handleCloseMenuUser}>
-                    <Link to="/tai-khoan/don-hang" style={{ width: '100%' }}>
+                    <Link to="/nguoi-dung/don-hang" style={{ width: '100%' }}>
                       <AiOutlineInboxIcon fontSize="20px" style={{ marginRight: '10px' }} /> Đơn hàng
                     </Link>
                   </MenuItem>
@@ -303,7 +326,7 @@ const Header: React.FC = () => {
         {/* cart */}
         <Link to="/gio-hang" style={{ marginRight: '40px' }}>
           <Badge
-            badgeContent={4}
+            badgeContent={cartItems.length}
             color="secondary"
             sx={{
               '& .MuiBadge-badge': {

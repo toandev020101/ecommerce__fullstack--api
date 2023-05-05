@@ -62,7 +62,8 @@ export const getPaginationAndUser = async (
     }
 
     if (_limit && _page) {
-      queryBuilder.take((_page + 1) * _limit);
+      // _page ts: number, error: string, fix: parseInt(_page.toString())
+      queryBuilder.take((parseInt(_page.toString()) + 1) * _limit);
     }
 
     if (_sort && _order) {
@@ -159,6 +160,49 @@ export const addAny = async (req: Request, res: Response<CommonResponse<null>>) 
       success: true,
       message: 'Thêm danh sách file media thành công',
       data: null,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// add one media
+export const addOne = async (req: Request, res: Response<CommonResponse<string>>) => {
+  const file = req.file as Express.Multer.File;
+  if (!file) {
+    // send error
+    return res.status(400).json({
+      code: 400,
+      success: false,
+      message: `Thêm file media thất bại`,
+    });
+  }
+
+  let media: MediaItem = {
+    fileUrl: `${process.env.SERVER_URL}/${file.filename}`,
+    name: file.filename,
+    mimetype: file.mimetype,
+    size: `${Math.floor(file.size / 1024)} kb`,
+    type: file.mimetype.split('/')[0] === 'image' ? 0 : 1,
+    path: file.path,
+    userId: req.userId as number,
+  };
+
+  try {
+    // add media
+    await Media.insert(media);
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Thêm file media thành công',
+      data: media.fileUrl,
     });
   } catch (error) {
     // send error

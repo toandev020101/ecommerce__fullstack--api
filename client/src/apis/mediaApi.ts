@@ -21,6 +21,15 @@ export const addAny = (formData: FormData): Promise<Response<null>> => {
   });
 };
 
+export const addOne = (formData: FormData): Promise<Response<string>> => {
+  const url = '/media';
+  return axiosCLient.post(url, formData, {
+    headers: {
+      'content-type': 'multipart/form-data',
+    },
+  });
+};
+
 export const removeAny = (ids: number[]): Promise<Response<null>> => {
   const url = `/media`;
   return axiosCLient.delete(url, { data: { ids } });

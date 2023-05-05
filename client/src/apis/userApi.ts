@@ -3,6 +3,7 @@ import { Response } from '../interfaces/common';
 import { User } from '../models/User';
 import axiosCLient from './axiosClient';
 import { UserInput } from '../interfaces/UserInput';
+import { ChangePasswordInput } from '../interfaces/ChangePasswordInput';
 
 export const getAllAndRole = (): Promise<Response<User>> => {
   const url = '/user/role';
@@ -41,6 +42,11 @@ export const updateOne = (id: number, data: UserInput): Promise<Response<null>> 
 
 export const changeActive = (id: number, data: { isActive: number }): Promise<Response<null>> => {
   const url = `/user/${id}`;
+  return axiosCLient.patch(url, data);
+};
+
+export const changePassword = (id: number, data: ChangePasswordInput): Promise<Response<null>> => {
+  const url = `/user/${id}/password`;
   return axiosCLient.patch(url, data);
 };
 

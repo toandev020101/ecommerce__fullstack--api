@@ -4,15 +4,16 @@ import { Secret, verify } from 'jsonwebtoken';
 import { Brackets } from 'typeorm';
 import AppDataSource from '../AppDataSource';
 import { AuthResponse } from '../interfaces/AuthResponse';
-import { CommonResponse, ListParams } from './../interfaces/common';
 import { FieldError } from './../interfaces/FieldError';
 import { LoginInput } from './../interfaces/LoginInput';
 import { RegisterInput } from './../interfaces/RegisterInput';
 import { UserAuthPayload } from './../interfaces/UserAuthPayload';
 import { UserInput } from './../interfaces/UserInput';
+import { CommonResponse, ListParams } from './../interfaces/common';
 import { Role } from './../models/Role';
 import { User } from './../models/User';
 import { createToken, sendRefreshToken } from './../utils/jwt';
+import { ChangePasswordInput } from '../interfaces/ChangePasswordInput';
 
 // register user
 export const register = async (req: Request<{}, {}, RegisterInput, {}>, res: Response<AuthResponse>) => {
@@ -577,6 +578,20 @@ export const updateOne = async (
       });
     }
 
+    // check user
+    if (data.email && data.email !== '') {
+      user = await User.findOneBy({ email: data.email });
+
+      if (user) {
+        return res.status(400).json({
+          code: 400,
+          success: false,
+          message: 'Email đã tồn tại!',
+          errors: [{ field: 'email', message: 'Email đã tồn tại!' }],
+        });
+      }
+    }
+
     // update user
     await User.update(id, data);
 
@@ -625,6 +640,79 @@ export const changeActive = async (
       code: 200,
       success: true,
       message: 'Cập nhật tài khoản thành công',
+      data: null,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// update password one user
+export const changePassword = async (
+  req: Request<{ id: number }, {}, ChangePasswordInput, {}>,
+  res: Response<CommonResponse<null>>,
+) => {
+  const { id } = req.params;
+  const { password, newPassword } = req.body;
+
+  try {
+    // check user
+    let user = await User.findOne({
+      select: {
+        username: true,
+        password: true,
+      },
+      where: { id },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Tài khoản không tồn tại!',
+      });
+    }
+
+    // verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: 'Thay đổi mật khẩu thất bại',
+        errors: [{ field: 'password', message: 'Mật khẩu không chính xác!' }],
+      });
+    }
+
+    if (password === newPassword) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: 'Thay đổi mật khẩu thất bại',
+        errors: [
+          { field: 'newPassword', message: 'Không thể nhập mật khẩu hiện tại!' },
+          { field: 'confirmNewPassword', message: 'Không thể nhập mật khẩu hiện tại!' },
+        ],
+      });
+    }
+
+    // hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // update user
+    await User.update(id, { password: hashedPassword });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Thay đổi mật khẩu thành công',
       data: null,
     });
   } catch (error) {

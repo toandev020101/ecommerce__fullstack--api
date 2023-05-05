@@ -11,6 +11,113 @@ import { OrderCoupon } from './../models/OrderCoupon';
 import { OrderLine } from './../models/OrderLine';
 import { In, Like } from 'typeorm';
 
+// get order by status id
+export const getListByStatusId = async (
+  req: Request<{ statusId: string }, {}, {}, { searchTerm: string }>,
+  res: Response<CommonResponse<Order>>,
+) => {
+  const { statusId } = req.params;
+  const { searchTerm } = req.query;
+  const userId = req.userId;
+
+  let whereOptions: any[] = [{ userId }];
+
+  const orderStatusId = parseInt(statusId);
+
+  if (orderStatusId !== -1 && searchTerm) {
+    whereOptions = [
+      {
+        orderStatusId,
+        id: Like(`%${searchTerm[0] === '#' ? searchTerm.split('#')[1] : searchTerm}%`),
+        userId,
+      },
+      {
+        orderStatusId,
+        orderLines: {
+          productItem: {
+            product: {
+              name: Like(`%${searchTerm}%`),
+            },
+          },
+        },
+        userId,
+      },
+    ];
+  } else if (orderStatusId !== -1) {
+    whereOptions = [{ orderStatusId, userId }];
+  } else if (searchTerm) {
+    whereOptions = [
+      { id: Like(`%${searchTerm[0] === '#' ? searchTerm.split('#')[1] : searchTerm}%`), userId },
+      {
+        orderLines: {
+          productItem: {
+            product: {
+              name: Like(`%${searchTerm}%`),
+            },
+          },
+        },
+        userId,
+      },
+    ];
+  }
+
+  try {
+    // find orders
+    const orders = await Order.find({
+      select: {
+        id: true,
+        userId: true,
+        totalPrice: true,
+        orderStatusId: true,
+        orderStatus: {
+          id: true,
+          name: true,
+        },
+        orderLines: {
+          id: true,
+          variation: true,
+          quantity: true,
+          price: true,
+          productItemId: true,
+          productItem: {
+            id: true,
+            productId: true,
+            product: {
+              id: true,
+              name: true,
+              imageUrl: true,
+            },
+          },
+        },
+      },
+      where: whereOptions,
+      relations: {
+        orderStatus: true,
+        orderLines: {
+          productItem: {
+            product: true,
+          },
+        },
+      },
+    });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy danh sách đơn hàng thành công',
+      data: orders,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
 // get pagination
 export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: Response<CommonResponse<Order>>) => {
   const { _limit, _page, _sort, _order, statusId, searchTerm } = req.query;
@@ -140,7 +247,7 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
 };
 
 // get one
-export const getOne = async (req: Request<{ id: number }, {}, {}, {}>, res: Response<CommonResponse<Order>>) => {
+export const getOneById = async (req: Request<{ id: number }, {}, {}, {}>, res: Response<CommonResponse<Order>>) => {
   const { id } = req.params;
 
   try {
@@ -151,8 +258,11 @@ export const getOne = async (req: Request<{ id: number }, {}, {}, {}>, res: Resp
         ward: true,
         district: true,
         province: true,
-        orderLines: true,
+        orderLines: { productItem: { product: true } },
         orderCoupons: true,
+        orderStatus: true,
+        shipMethod: true,
+        paymentMethod: true,
       },
     });
 

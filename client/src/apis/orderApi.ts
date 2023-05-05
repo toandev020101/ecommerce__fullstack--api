@@ -3,9 +3,9 @@ import { OrderInput } from '../interfaces/OrderInput';
 import { Order } from '../models/Order';
 import axiosCLient from './axiosClient';
 
-export const getListByStatusId = (orderStatusId: number): Promise<Response<Order>> => {
-  const url = '/order';
-  return axiosCLient.get(url, { params: { orderStatusId } });
+export const getListByStatusId = (orderStatusId: number, searchTerm: string): Promise<Response<Order>> => {
+  const url = `/order/status/${orderStatusId}`;
+  return axiosCLient.get(url, { params: { searchTerm } });
 };
 
 export const getPagination = (params: ListParams): Promise<Response<Order>> => {
