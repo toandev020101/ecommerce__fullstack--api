@@ -57,7 +57,22 @@ export const getListBySearchTerm = async (
 
   try {
     // find products
-    const products = await Product.findBy({ name: Like(`%${searchTerm}%`), deleted: 0, productItems: { deleted: 0 } });
+    const products = await Product.find({
+      where: [
+        { name: Like(`%${searchTerm}%`), deleted: 0, productItems: { deleted: 0 } },
+        { deleted: 0, productItems: { deleted: 0, price: Like(`%${searchTerm}%`) } },
+        { productTags: { tag: { name: Like(`%${searchTerm}%`) } }, deleted: 0, productItems: { deleted: 0 } },
+      ],
+      relations: {
+        productItems: {
+          productConfigurations: {
+            variationOption: true,
+          },
+        },
+        category: true,
+        productTags: { tag: true },
+      },
+    });
 
     // send results
     return res.status(200).json({

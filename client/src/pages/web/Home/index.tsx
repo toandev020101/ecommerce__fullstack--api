@@ -1,13 +1,18 @@
 import { Box, Button, Container, Typography, useTheme } from '@mui/material';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ToastNotify from '../../../components/ToastNotify';
 import { Theme } from '../../../theme';
 import Carousel from '../../../components/Carousel';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ProductItem from '../../../components/ProductItem';
 import TitlePage from '../../../components/TitlePage';
+import { Product } from '../../../models/Product';
+import * as productApi from '../../../apis/productApi';
+import { toDate } from '../../../utils/date';
+import { priceFormat } from '../../../utils/format';
 
 const Home: React.FC = () => {
+  const navigate = useNavigate();
   const theme: Theme = useTheme();
   const sliderSettings = {
     slidesToShow: 2,
@@ -32,6 +37,24 @@ const Home: React.FC = () => {
       slug: '#',
     },
   ];
+
+  const [products, setProducts] = useState<Product[]>([]);
+
+  useEffect(() => {
+    const getAllProductPublic = async () => {
+      try {
+        const res = await productApi.getAllPublic();
+        setProducts(res.data as Product[]);
+      } catch (error: any) {
+        const { data } = error.response;
+        if (data.code === 401 || data.code === 403 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+
+    getAllProductPublic();
+  }, [navigate]);
 
   return (
     <>
@@ -88,23 +111,53 @@ const Home: React.FC = () => {
             </Typography>
 
             <Carousel arrow="rectangle">
-              {Array(8)
-                .fill(0)
-                .map((_, index) => (
+              {products.slice(0, 10).map((product, index) => {
+                const createdAtDate = toDate(product.createdAt);
+                const currentDate = new Date();
+                let isLatest = false;
+
+                if (
+                  currentDate.getFullYear() === createdAtDate.getFullYear() &&
+                  currentDate.getMonth() === createdAtDate.getMonth() &&
+                  currentDate.getDate() - createdAtDate.getDate() <= 7
+                ) {
+                  isLatest = true;
+                }
+
+                const priceArr = product.productItems.map((productItem) => {
+                  if (
+                    toDate(productItem.discountStartDate) <= currentDate &&
+                    toDate(productItem.discountEndDate) >= currentDate
+                  ) {
+                    return productItem.discount;
+                  }
+
+                  return productItem.price;
+                });
+
+                // min -> max
+                priceArr.sort((price1, price2) => price1 - price2);
+
+                const priceString =
+                  priceArr.length > 1 && priceArr[0] !== priceArr[priceArr.length - 1]
+                    ? `${priceFormat(priceArr[0])} - ${priceFormat(priceArr[priceArr.length - 1])}`
+                    : priceFormat(priceArr[0]);
+
+                return (
                   <ProductItem
                     key={`product-item-discount-${index}`}
-                    imageUrl="https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_100/https://cdn.tgdd.vn/Products/Images/42/251192/iphone-14-pro-max-den-thumb-600x600.jpg"
-                    name="iPhone 14 pro max 128GB"
-                    slug="iphone-14-pro-max-128GB"
-                    categorySlug="dien-thoai"
-                    price="3.000.0000đ"
-                    isLatest
-                    isHot
+                    imageUrl={product.imageUrl}
+                    name={product.name}
+                    slug={product.slug}
+                    categorySlug={product.category.slug}
+                    price={priceString}
+                    isLatest={isLatest}
+                    isHot={product.isHot === 1}
                     rate={4.5}
                     ratingCount={232}
-                    type="carousel"
                   />
-                ))}
+                );
+              })}
             </Carousel>
 
             <Box display="flex" justifyContent="center" marginTop="10px">
@@ -141,22 +194,53 @@ const Home: React.FC = () => {
 
             {/* list product */}
             <Box display="grid" gridTemplateColumns="repeat(5, 1fr)">
-              {Array(10)
-                .fill(0)
-                .map((_, index) => (
+              {products.slice(0, 8).map((product, index) => {
+                const createdAtDate = toDate(product.createdAt);
+                const currentDate = new Date();
+                let isLatest = false;
+
+                if (
+                  currentDate.getFullYear() === createdAtDate.getFullYear() &&
+                  currentDate.getMonth() === createdAtDate.getMonth() &&
+                  currentDate.getDate() - createdAtDate.getDate() <= 7
+                ) {
+                  isLatest = true;
+                }
+
+                const priceArr = product.productItems.map((productItem) => {
+                  if (
+                    toDate(productItem.discountStartDate) <= currentDate &&
+                    toDate(productItem.discountEndDate) >= currentDate
+                  ) {
+                    return productItem.discount;
+                  }
+
+                  return productItem.price;
+                });
+
+                // min -> max
+                priceArr.sort((price1, price2) => price1 - price2);
+
+                const priceString =
+                  priceArr.length > 1 && priceArr[0] !== priceArr[priceArr.length - 1]
+                    ? `${priceFormat(priceArr[0])} - ${priceFormat(priceArr[priceArr.length - 1])}`
+                    : priceFormat(priceArr[0]);
+
+                return (
                   <ProductItem
                     key={`product-item-discount-${index}`}
-                    imageUrl="https://img.tgdd.vn/imgt/f_webp,fit_outside,quality_100/https://cdn.tgdd.vn/Products/Images/42/251192/iphone-14-pro-max-den-thumb-600x600.jpg"
-                    name="iPhone 14 pro max 128GB"
-                    slug="iphone-14-pro-max-128GB"
-                    categorySlug="dien-thoai"
-                    price="3.000.0000đ"
-                    isLatest
-                    isHot
+                    imageUrl={product.imageUrl}
+                    name={product.name}
+                    slug={product.slug}
+                    categorySlug={product.category.slug}
+                    price={priceString}
+                    isLatest={isLatest}
+                    isHot={product.isHot === 1}
                     rate={4.5}
                     ratingCount={232}
                   />
-                ))}
+                );
+              })}
             </Box>
             {/* list product */}
 

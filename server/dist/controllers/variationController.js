@@ -268,6 +268,7 @@ const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
             yield transactionalEntityManager.delete(VariationOption_1.VariationOption, { variationId: ids });
+            yield transactionalEntityManager.delete(VariationCategory_1.VariationCategory, { variationId: ids });
             yield transactionalEntityManager.delete(Variation_1.Variation, ids);
         }));
         return res.status(200).json({
@@ -299,6 +300,7 @@ const removeOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
         yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
             yield transactionalEntityManager.delete(VariationOption_1.VariationOption, { variationId: id });
+            yield transactionalEntityManager.delete(VariationCategory_1.VariationCategory, { variationId: id });
             yield transactionalEntityManager.delete(Variation_1.Variation, id);
         }));
         return res.status(200).json({

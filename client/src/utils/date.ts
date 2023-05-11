@@ -51,6 +51,12 @@ export const dateToString = (date: any, type: number = 0) => {
     return `${newDate.getDate()}/${newDate.getMonth() + 1}/${newDate.getFullYear()}`;
   }
 
+  if (type === 2) {
+    return `${newDate.getHours()}:${newDate.getMinutes()} ${newDate.getDate()}/${
+      newDate.getMonth() + 1
+    }/${newDate.getFullYear()}`;
+  }
+
   return `Ngày ${newDate.getDate()} tháng ${newDate.getMonth() + 1} năm ${newDate.getFullYear()}`;
 };
 

@@ -27,6 +27,10 @@ __decorate([
     __metadata("design:type", String)
 ], PaymentMethod.prototype, "description", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 0, comment: '0: chưa xóa, 1: đã xóa' }),
+    __metadata("design:type", Number)
+], PaymentMethod.prototype, "deleted", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => Order_1.Order, (order) => order.paymentMethod),
     __metadata("design:type", Array)
 ], PaymentMethod.prototype, "orders", void 0);

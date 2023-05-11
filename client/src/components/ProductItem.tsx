@@ -44,6 +44,7 @@ const ProductItem: React.FC<Props> = ({
               ? {
                   borderBottom: '1px solid #e9e9e9',
                   borderRight: '1px solid #e9e9e9',
+                  bgcolor: theme.palette.common.white,
 
                   '&:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4), &:nth-child(5)': {
                     borderTop: '1px solid #e9e9e9',
@@ -54,7 +55,6 @@ const ProductItem: React.FC<Props> = ({
                   },
                 }
               : {
-                  bgcolor: theme.palette.neutral[1000],
                   boxShadow: '0 .0625rem .125rem 0 rgba(0,0,0,.1)',
                 }
           }
@@ -87,6 +87,7 @@ const ProductItem: React.FC<Props> = ({
               ? {
                   borderBottom: '1px solid #e9e9e9',
                   borderRight: '1px solid #e9e9e9',
+                  bgcolor: theme.palette.common.white,
 
                   '&:nth-child(1), &:nth-child(2), &:nth-child(3), &:nth-child(4), &:nth-child(5)': {
                     borderTop: '1px solid #e9e9e9',
@@ -110,7 +111,6 @@ const ProductItem: React.FC<Props> = ({
                   },
                 }
               : {
-                  bgcolor: theme.palette.neutral[1000],
                   boxShadow: '0 .0625rem .125rem 0 rgba(0,0,0,.1)',
 
                   borderRadius: '3px',

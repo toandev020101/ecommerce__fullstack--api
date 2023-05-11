@@ -1,78 +1,62 @@
-import { toDate } from '../utils/date';
-import { Coupon } from './../models/Coupon';
-import { Inventory } from '../models/Inventory';
-import { ProductItem } from '../models/ProductItem';
-import { OrderStatus } from '../models/OrderStatus';
 import { Request, Response } from 'express';
-import AppDataSource from '../AppDataSource';
+import { Like } from 'typeorm';
 import { CommonResponse, ListParams } from '../interfaces/common';
-import { CartItem } from '../models/CartItem';
-import { Order } from '../models/Order';
-import { OrderInput } from '../interfaces/OrderInput';
-import { OrderCoupon } from '../models/OrderCoupon';
-import { OrderLine } from '../models/OrderLine';
+import { toDate, toDateString } from '../utils/date';
+import { CouponInput } from './../interfaces/CouponInput';
+import { Coupon } from './../models/Coupon';
+
+// get all
+export const getAllPublic = async (_req: Request, res: Response<CommonResponse<Coupon>>) => {
+  try {
+    // find coupons
+    const coupons = await Coupon.find();
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Lấy tất cả mã giảm giá thành công',
+      data: coupons,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
 
 // get pagination
-export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: Response<CommonResponse<Order>>) => {
-  const { _limit, _page, _sort, _order } = req.query;
+export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: Response<CommonResponse<Coupon>>) => {
+  const { _limit, _page, _sort, _order, searchTerm } = req.query;
 
   try {
-    // find orders
-    const orderRes = await Order.findAndCount({
-      select: {
-        id: true,
-        userId: true,
-        fullName: true,
-        phoneNumber: true,
-        street: true,
-        wardId: true,
-        ward: {
-          id: true,
-          name: true,
-        },
-        districtId: true,
-        district: {
-          id: true,
-          name: true,
-        },
-        provinceId: true,
-        province: {
-          id: true,
-          name: true,
-        },
-        totalPrice: true,
-        orderStatusId: true,
-        orderStatus: {
-          id: true,
-          name: true,
-        },
-        paymentMethodId: true,
-        paymentMethod: {
-          id: true,
-          name: true,
-        },
-      },
+    // find coupons
+    const couponRes = await Coupon.findAndCount({
+      where: searchTerm
+        ? [
+            { name: Like(`%${searchTerm}%`) },
+            { priceMaxName: Like(`%${searchTerm}%`) },
+            { code: Like(`%${searchTerm}%`) },
+          ]
+        : {},
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },
-      relations: {
-        ward: true,
-        district: true,
-        province: true,
-        paymentMethod: true,
-      },
     });
 
     // send results
     return res.status(200).json({
       code: 200,
       success: true,
-      message: 'Lấy danh sách đơn hàng thành công',
-      data: orderRes[0],
+      message: 'Lấy danh sách mã giảm giá thành công',
+      data: couponRes[0],
       pagination: {
         _limit,
         _page,
-        _total: orderRes[1],
+        _total: couponRes[1],
       },
     });
   } catch (error) {
@@ -85,9 +69,9 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
   }
 };
 
-// add order
-export const checkOne = async (req: Request<{}, {}, {}, { code: string }>, res: Response<CommonResponse<Coupon>>) => {
-  const { code } = req.query;
+// add coupon
+export const checkOne = async (req: Request<{ code: string }, {}, {}, {}>, res: Response<CommonResponse<Coupon>>) => {
+  const { code } = req.params;
 
   try {
     // check coupon
@@ -102,7 +86,8 @@ export const checkOne = async (req: Request<{}, {}, {}, { code: string }>, res: 
     }
 
     const currentDate = new Date();
-    if (toDate(coupon.startDate) > currentDate) {
+    const currentDateString = toDateString(currentDate);
+    if (toDate(toDateString(coupon.startDate)) > toDate(currentDateString)) {
       return res.status(400).json({
         code: 400,
         success: false,
@@ -110,11 +95,19 @@ export const checkOne = async (req: Request<{}, {}, {}, { code: string }>, res: 
       });
     }
 
-    if (toDate(coupon.endDate) < currentDate) {
+    if (toDate(toDateString(coupon.endDate)) < toDate(currentDateString)) {
       return res.status(400).json({
         code: 400,
         success: false,
         message: 'Mã giảm giá đã quá hạn',
+      });
+    }
+
+    if (coupon.quantity === 0) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: 'Mã giảm giá đã hết',
       });
     }
 
@@ -136,80 +129,81 @@ export const checkOne = async (req: Request<{}, {}, {}, { code: string }>, res: 
 };
 
 // add order
-export const addOne = async (req: Request<{}, {}, OrderInput, {}>, res: Response<CommonResponse<null>>) => {
-  const { lines, coupons, ...others } = req.body;
+export const addOne = async (req: Request<{}, {}, CouponInput, {}>, res: Response<CommonResponse<null>>) => {
+  const data = req.body;
   const userId = req.userId;
 
   try {
-    await AppDataSource.transaction(async (transactionalEntityManager) => {
-      const orderStatus = await OrderStatus.findOneBy({ name: 'Chờ xác nhận' });
-      if (!orderStatus) {
-        return res.status(500).json({
-          code: 500,
-          success: false,
-          message: `Lỗi server :: không tìm thấy trạng thái`,
-        });
-      }
-
-      // add order
-      const insertedOrder = await transactionalEntityManager.insert(Order, {
-        ...others,
-        userId,
-        orderStatusId: orderStatus.id,
+    // check code
+    const coupon = await Coupon.findOneBy({ code: data.code });
+    if (coupon) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: 'Mã đã tồn tại',
+        errors: [{ field: 'code', message: 'Mã đã tồn tại!' }],
       });
+    }
 
-      if (lines.length > 0) {
-        // handle data
-        let lineData = [];
-        for (let i = 0; i < lines.length; i++) {
-          lineData.push({
-            orderId: insertedOrder.raw.insertId,
-            variation: lines[i].variation,
-            quantity: lines[i].quantity,
-            price: lines[i].price,
-            productItemId: lines[i].productItemId,
-          });
-
-          // delete cart item
-          await transactionalEntityManager.delete(CartItem, { userId, productItemId: lines[i].productItemId });
-
-          // desc quantity
-          const productItem = await ProductItem.findOne({
-            where: { id: lines[i].productItemId },
-            relations: { inventory: true },
-          });
-          await transactionalEntityManager.update(Inventory, productItem?.inventoryId, {
-            quantity: (productItem?.inventory?.quantity as number) - lines[i].quantity,
-          });
-        }
-
-        // add order line
-        await transactionalEntityManager.insert(OrderLine, lineData);
-      }
-
-      if (coupons && coupons.length > 0) {
-        // handle data
-        let couponData = [];
-        for (let i = 0; i < coupons.length; i++) {
-          couponData.push({
-            orderId: insertedOrder.raw.insertId,
-            code: coupons[i].code,
-            price: coupons[i].price,
-          });
-        }
-
-        // add order coupon
-        await transactionalEntityManager.insert(OrderCoupon, couponData);
-      }
-
-      return null;
-    });
+    // add coupon
+    await Coupon.insert({ ...data, userId });
 
     // send results
     return res.status(200).json({
       code: 200,
       success: true,
-      message: 'Thêm đơn hàng thành công',
+      message: 'Thêm mã giảm giá thành công',
+      data: null,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
+// update coupon
+export const updateOne = async (
+  req: Request<{ id: string }, {}, CouponInput, {}>,
+  res: Response<CommonResponse<null>>,
+) => {
+  const data = req.body;
+  const userId = req.userId;
+  const { id } = req.params;
+
+  try {
+    // check code
+    let coupon = await Coupon.findOneBy({ id: parseInt(id) });
+    if (!coupon) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Mã giảm giá không tồn tại',
+      });
+    }
+
+    // check code
+    coupon = await Coupon.findOneBy({ code: data.code });
+    if (coupon && coupon.id !== parseInt(id)) {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: 'Mã đã tồn tại',
+        errors: [{ field: 'code', message: 'Mã đã tồn tại!' }],
+      });
+    }
+
+    // update coupon
+    await Coupon.update(id, { ...data, userId });
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Cập nhật mã giảm giá thành công',
       data: null,
     });
   } catch (error) {
@@ -227,26 +221,26 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
   const { ids } = req.body;
   try {
     for (let i = 0; i < ids.length; i++) {
-      // check order
-      const order = await Order.findOneBy({ id: ids[i] });
+      // check coupon
+      const coupon = await Coupon.findOneBy({ id: ids[i] });
 
-      if (!order) {
+      if (!coupon) {
         return res.status(404).json({
           code: 404,
           success: false,
-          message: 'Đơn hàng không tồn tại',
+          message: 'Mã giảm giá không tồn tại',
         });
       }
     }
 
-    // delete order
-    await Order.delete(ids);
+    // delete coupon
+    await Coupon.delete(ids);
 
     // send results
     return res.status(200).json({
       code: 200,
       success: true,
-      message: 'Xóa danh sách đơn hàng thành công',
+      message: 'Xóa danh sách mã giảm giá thành công',
       data: null,
     });
   } catch (error) {
@@ -263,25 +257,25 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
 export const removeOne = async (req: Request<{ id: number }, {}, {}, {}>, res: Response<CommonResponse<null>>) => {
   const { id } = req.params;
   try {
-    // check order
-    const order = await Order.findOneBy({ id });
+    // check coupon
+    const coupon = await Coupon.findOneBy({ id });
 
-    if (!order) {
+    if (!coupon) {
       return res.status(404).json({
         code: 404,
         success: false,
-        message: 'Đơn hàng không tồn tại',
+        message: 'Mã giảm giá không tồn tại',
       });
     }
 
-    // delete order
-    await CartItem.delete(id);
+    // delete coupon
+    await Coupon.delete(id);
 
     // send results
     return res.status(200).json({
       code: 200,
       success: true,
-      message: 'Xóa đơn hàng thành công',
+      message: 'Xóa mã giảm giá thành công',
       data: null,
     });
   } catch (error) {

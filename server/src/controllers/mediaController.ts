@@ -126,7 +126,7 @@ export const getAllDate = async (_req: Request, res: Response<CommonResponse<Dat
 };
 
 // add any media
-export const addAny = async (req: Request, res: Response<CommonResponse<null>>) => {
+export const addAny = async (req: Request, res: Response<CommonResponse<string>>) => {
   const files = req.files as Express.Multer.File[];
   if (!files) {
     // send error
@@ -159,7 +159,7 @@ export const addAny = async (req: Request, res: Response<CommonResponse<null>>) 
       code: 200,
       success: true,
       message: 'Thêm danh sách file media thành công',
-      data: null,
+      data: medias.map((media) => media.fileUrl),
     });
   } catch (error) {
     // send error

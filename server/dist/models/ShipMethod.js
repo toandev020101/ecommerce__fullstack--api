@@ -27,6 +27,10 @@ __decorate([
     __metadata("design:type", Number)
 ], ShipMethod.prototype, "price", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 0, comment: '0: chưa xóa, 1: đã xóa' }),
+    __metadata("design:type", Number)
+], ShipMethod.prototype, "deleted", void 0);
+__decorate([
     (0, typeorm_1.OneToMany)(() => Order_1.Order, (order) => order.shipMethod),
     __metadata("design:type", Array)
 ], ShipMethod.prototype, "orders", void 0);

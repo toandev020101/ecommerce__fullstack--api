@@ -94,6 +94,7 @@ const getAll = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 },
             },
             where: { userId },
+            order: { id: 'DESC' },
             relations: {
                 productItem: {
                     product: {

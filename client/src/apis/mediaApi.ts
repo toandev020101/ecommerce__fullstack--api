@@ -12,7 +12,7 @@ export const getAllDate = (): Promise<Response<Date>> => {
   return axiosCLient.get(url);
 };
 
-export const addAny = (formData: FormData): Promise<Response<null>> => {
+export const addAny = (formData: FormData): Promise<Response<string>> => {
   const url = '/media/any';
   return axiosCLient.post(url, formData, {
     headers: {

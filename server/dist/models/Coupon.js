@@ -23,6 +23,10 @@ __decorate([
     __metadata("design:type", String)
 ], Coupon.prototype, "name", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ nullable: true }),
+    __metadata("design:type", String)
+], Coupon.prototype, "priceMaxName", void 0);
+__decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", String)
 ], Coupon.prototype, "code", void 0);
@@ -38,6 +42,10 @@ __decorate([
     (0, typeorm_1.Column)({ default: 0, type: 'tinyint', comment: '0: vnđ, 1: %' }),
     __metadata("design:type", Number)
 ], Coupon.prototype, "type", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    __metadata("design:type", Number)
+], Coupon.prototype, "quantity", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     __metadata("design:type", Date)

@@ -1,3 +1,4 @@
+import { ReviewImage } from './models/ReviewImage';
 import { DataSource } from 'typeorm';
 import { CartItem } from './models/CartItem';
 import { Category } from './models/Category';
@@ -63,6 +64,7 @@ const AppDataSource = new DataSource({
     ProductTag,
     Province,
     Review,
+    ReviewImage,
     Variation,
     VariationOption,
     VariationCategory,

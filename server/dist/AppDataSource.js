@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const ReviewImage_1 = require("./models/ReviewImage");
 const typeorm_1 = require("typeorm");
 const CartItem_1 = require("./models/CartItem");
 const Category_1 = require("./models/Category");
@@ -64,6 +65,7 @@ const AppDataSource = new typeorm_1.DataSource({
         ProductTag_1.ProductTag,
         Province_1.Province,
         Review_1.Review,
+        ReviewImage_1.ReviewImage,
         Variation_1.Variation,
         VariationOption_1.VariationOption,
         VariationCategory_1.VariationCategory,

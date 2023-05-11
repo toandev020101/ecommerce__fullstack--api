@@ -18,6 +18,8 @@ import shipMethodRoute from './routes/shipMethodRoute';
 import paymentMethodRoute from './routes/paymentMethodRoute';
 import couponRoute from './routes/couponRoute';
 import orderStatusRoute from './routes/orderStatusRoute';
+import reviewRoute from './routes/reviewRoute';
+import orderLineRoute from './routes/orderLineRoute';
 
 const appRouter = (app: Application) => {
   const apiRoute = '/api/v1';
@@ -40,11 +42,13 @@ const appRouter = (app: Application) => {
 
   app.use(`${apiRoute}/cart-item`, cartItemRoute);
   app.use(`${apiRoute}/order`, orderRoute);
+  app.use(`${apiRoute}/order-line`, orderLineRoute);
   app.use(`${apiRoute}/order-status`, orderStatusRoute);
 
   app.use(`${apiRoute}/ship-method`, shipMethodRoute);
   app.use(`${apiRoute}/payment-method`, paymentMethodRoute);
   app.use(`${apiRoute}/coupon`, couponRoute);
+  app.use(`${apiRoute}/review`, reviewRoute);
 };
 
 export default appRouter;

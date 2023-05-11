@@ -1,3 +1,21 @@
+export interface OrderLine {
+  id: number;
+  variation: string;
+  quantity: number;
+  price: number;
+  productItemId: number;
+  productItem: {
+    id: number;
+    imageUrl: string;
+    productId: number;
+    product: {
+      id: number;
+      name: string;
+      imageUrl: string;
+    };
+  };
+}
+
 export interface Order {
   id: number;
   fullName: string;
@@ -21,24 +39,7 @@ export interface Order {
     name: string;
   };
   note?: string;
-  orderLines: [
-    {
-      id: number;
-      variation: string;
-      quantity: number;
-      price: number;
-      productItemId: number;
-      productItem: {
-        id: number;
-        productId: number;
-        product: {
-          id: number;
-          name: string;
-          imageUrl: string;
-        };
-      };
-    },
-  ];
+  orderLines: OrderLine[];
   orderCoupons: [
     {
       id: number;

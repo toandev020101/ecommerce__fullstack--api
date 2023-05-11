@@ -3,6 +3,11 @@ import { ListParams, Response } from '../interfaces/common';
 import { Product } from '../models/Product';
 import axiosCLient from './axiosClient';
 
+export const getAllPublic = (): Promise<Response<Product>> => {
+  const url = '/product/public';
+  return axiosCLient.get(url);
+};
+
 export const getAll = (): Promise<Response<Product>> => {
   const url = '/product';
   return axiosCLient.get(url);

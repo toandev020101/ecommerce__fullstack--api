@@ -1,7 +1,13 @@
+import { Media } from './../models/Media';
+import { OrderCoupon } from './../models/OrderCoupon';
+import { ReviewImage } from './../models/ReviewImage';
+import { Review } from './../models/Review';
+import { OrderLine } from './../models/OrderLine';
+import { Order } from './../models/Order';
 import bcrypt from 'bcrypt';
 import { Request, Response } from 'express';
 import { Secret, verify } from 'jsonwebtoken';
-import { Brackets } from 'typeorm';
+import { Brackets, In } from 'typeorm';
 import AppDataSource from '../AppDataSource';
 import { AuthResponse } from '../interfaces/AuthResponse';
 import { FieldError } from './../interfaces/FieldError';
@@ -748,8 +754,39 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
       }
     }
 
-    // delete user
-    await User.delete(ids);
+    await AppDataSource.transaction(async (transactionalEntityManager) => {
+      const orderRemoves = await Order.findBy({ userId: In(ids) });
+      const orderRemoveIds = orderRemoves.map((orderRemove) => orderRemove.id);
+
+      // get order line removes
+      const orderLineRemoves = await OrderLine.findBy({ orderId: In(orderRemoveIds) });
+      const orderLineRemoveIds = orderLineRemoves.map((orderLineRemove) => orderLineRemove.id);
+
+      const reviewRemoves = await Review.findBy({ orderLinedId: In(orderLineRemoveIds) });
+      const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+
+      // delete old reply
+      await transactionalEntityManager.delete(Review, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review image
+      await transactionalEntityManager.delete(ReviewImage, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review
+      await transactionalEntityManager.delete(Review, { id: In(reviewRemoveIds) });
+
+      // delete order line
+      await transactionalEntityManager.delete(OrderLine, { orderId: In(orderRemoveIds) });
+      // delete order coupon
+      await transactionalEntityManager.delete(OrderCoupon, { orderId: In(orderRemoveIds) });
+      // delete order
+      await transactionalEntityManager.delete(Order, { id: In(orderRemoveIds) });
+
+      // delete media
+      await transactionalEntityManager.delete(Media, { userId: In(ids) });
+
+      // delete user
+      await transactionalEntityManager.delete(User, { id: In(ids) });
+    });
 
     // send results
     return res.status(200).json({
@@ -783,8 +820,39 @@ export const removeOne = async (req: Request<{ id: number }, {}, {}, {}>, res: R
       });
     }
 
-    // delete user
-    await User.delete(id);
+    await AppDataSource.transaction(async (transactionalEntityManager) => {
+      const orderRemoves = await Order.findBy({ userId: id });
+      const orderRemoveIds = orderRemoves.map((orderRemove) => orderRemove.id);
+
+      // get order line removes
+      const orderLineRemoves = await OrderLine.findBy({ orderId: In(orderRemoveIds) });
+      const orderLineRemoveIds = orderLineRemoves.map((orderLineRemove) => orderLineRemove.id);
+
+      const reviewRemoves = await Review.findBy({ orderLinedId: In(orderLineRemoveIds) });
+      const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+
+      // delete old reply
+      await transactionalEntityManager.delete(Review, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review image
+      await transactionalEntityManager.delete(ReviewImage, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review
+      await transactionalEntityManager.delete(Review, { id: In(reviewRemoveIds) });
+
+      // delete order line
+      await transactionalEntityManager.delete(OrderLine, { orderId: In(orderRemoveIds) });
+      // delete order coupon
+      await transactionalEntityManager.delete(OrderCoupon, { orderId: In(orderRemoveIds) });
+      // delete order
+      await transactionalEntityManager.delete(Order, { id: In(orderRemoveIds) });
+
+      // delete media
+      await transactionalEntityManager.delete(Media, { userId: id });
+
+      // delete user
+      await transactionalEntityManager.delete(User, { id });
+    });
 
     // send results
     return res.status(200).json({

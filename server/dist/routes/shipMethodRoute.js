@@ -30,7 +30,14 @@ const express_1 = __importDefault(require("express"));
 const shipMethodController = __importStar(require("../controllers/shipMethodController"));
 const checkAuth_1 = require("../middlewares/checkAuth");
 const checkPermission_1 = require("../middlewares/checkPermission");
+const shipMethodSchema_1 = __importDefault(require("../validations/shipMethodSchema"));
+const validateYup_1 = __importDefault(require("../middlewares/validateYup"));
 const router = express_1.default.Router();
+router.get('/pagination', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/ship-method/pagination', 'get'), shipMethodController.getPagination);
 router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/ship-method', 'get'), shipMethodController.getAll);
+router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/ship-method', 'post'), (0, validateYup_1.default)(shipMethodSchema_1.default), shipMethodController.addOne);
+router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/ship-method/:id', 'put'), (0, validateYup_1.default)(shipMethodSchema_1.default), shipMethodController.updateOne);
+router.delete('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/ship-method', 'delete'), shipMethodController.removeAny);
+router.delete('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/ship-method/:id', 'delete'), shipMethodController.removeOne);
 exports.default = router;
 //# sourceMappingURL=shipMethodRoute.js.map

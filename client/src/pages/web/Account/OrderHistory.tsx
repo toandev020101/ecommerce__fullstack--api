@@ -2,6 +2,10 @@ import {
   Box,
   Button,
   Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   InputAdornment,
   Tab,
@@ -11,24 +15,26 @@ import {
   useTheme,
 } from '@mui/material';
 import React, { ChangeEvent, useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { BiSearchAlt as BiSearchAltIcon } from 'react-icons/bi';
 import { AiOutlineInbox as AiOutlineInboxIcon } from 'react-icons/ai';
-import * as userApi from '../../../apis/userApi';
-import * as orderStatusApi from '../../../apis/orderStatusApi';
+import { BiSearchAlt as BiSearchAltIcon } from 'react-icons/bi';
+import { Link, useNavigate } from 'react-router-dom';
+import * as cartItemApi from '../../../apis/cartItemApi';
 import * as orderApi from '../../../apis/orderApi';
+import * as orderStatusApi from '../../../apis/orderStatusApi';
+import * as userApi from '../../../apis/userApi';
 import { useAppDispatch, useAppSelector } from '../../../app/hook';
 import TitlePage from '../../../components/TitlePage';
 import ToastNotify from '../../../components/ToastNotify';
-import { User } from '../../../models/User';
-import { showToast } from '../../../slices/toastSlice';
-import { Theme } from '../../../theme';
-import JWTManager from '../../../utils/jwt';
-import Sidebar from './Sidebar';
+import { CartItemInput } from '../../../interfaces/CartItemInput';
 import { Order } from '../../../models/Order';
 import { OrderStatus } from '../../../models/OrderStatus';
-import { priceFormat } from '../../../utils/format';
+import { User } from '../../../models/User';
 import { selectIsReload } from '../../../slices/globalSlice';
+import { showToast } from '../../../slices/toastSlice';
+import { Theme } from '../../../theme';
+import { priceFormat } from '../../../utils/format';
+import JWTManager from '../../../utils/jwt';
+import Sidebar from './Sidebar';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -74,6 +80,7 @@ const OrderHistory: React.FC = () => {
   const [orderStatusArr, setOrderStatusArr] = useState<OrderStatus[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
 
+  const [openRatingDialog, setOpenRatingDialog] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
@@ -149,11 +156,45 @@ const OrderHistory: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    const handleCancelStatusClick = async (id: number) => {
+    const handleBuyBackClick = async () => {
+      const newCartItems = data.orderLines.map((orderLine) => ({
+        quantity: orderLine.quantity,
+        productItemId: orderLine.productItemId,
+      }));
+
+      try {
+        const res = await cartItemApi.addAny(newCartItems as CartItemInput[]);
+        dispatch(
+          showToast({
+            page: 'cart',
+            type: 'success',
+            message: res.message,
+            options: { theme: 'colored', toastId: 'cartId' },
+          }),
+        );
+        navigate('/gio-hang');
+      } catch (error: any) {
+        const { data } = error.response;
+        if (data.code === 403 || data.code === 404) {
+          dispatch(
+            showToast({
+              page: 'cart',
+              type: 'error',
+              message: data.message,
+              options: { theme: 'colored', toastId: 'cartId' },
+            }),
+          );
+        } else if (data.code === 401 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+
+    const handleCancelStatusClick = async () => {
       const orderStatusId = orderStatusArr.find((status) => status.name === 'Đã hủy')?.id as number;
 
       try {
-        const res = await orderApi.changeStatus(id, { orderStatusId });
+        const res = await orderApi.changeStatus(data.id, { orderStatusId });
         dispatch(
           showToast({
             page: 'orderHistory',
@@ -164,7 +205,7 @@ const OrderHistory: React.FC = () => {
         );
 
         const newOrders = [...orders];
-        const newOrderIndex = newOrders.findIndex((newOrder) => newOrder.id === id);
+        const newOrderIndex = newOrders.findIndex((newOrder) => newOrder.id === data.id);
         if (tabActive === 0) {
           newOrders[newOrderIndex].orderStatusId = orderStatusId;
           newOrders[newOrderIndex].orderStatus.id = orderStatusId;
@@ -191,6 +232,10 @@ const OrderHistory: React.FC = () => {
       }
     };
 
+    const handleRatingDialogClose = () => {
+      setOpenRatingDialog(false);
+    };
+
     return (
       <Box boxShadow="0 1px 2px 0 rgba(0,0,0,.13)" bgcolor={theme.palette.common.white} padding="15px 20px">
         <Box display="flex" justifyContent="space-between" color={theme.palette.primary[500]} textTransform="uppercase">
@@ -205,7 +250,7 @@ const OrderHistory: React.FC = () => {
             <Box key={`order-line-item-${index}`} display="flex" justifyContent="space-between" alignItems="center">
               <Box display="flex" gap="10px">
                 <img
-                  src={orderLine.productItem.product.imageUrl}
+                  src={orderLine.productItem.imageUrl}
                   alt={orderLine.productItem.product.name}
                   style={{
                     width: '80px',
@@ -243,9 +288,11 @@ const OrderHistory: React.FC = () => {
             {data.orderStatus.name !== 'Chờ xử lý' &&
             data.orderStatus.name !== 'Vận chuyển' &&
             data.orderStatus.name !== 'Đang giao' ? (
-              <Button variant="contained">Mua lại</Button>
+              <Button variant="contained" onClick={() => handleBuyBackClick()}>
+                Mua lại
+              </Button>
             ) : (
-              <Button variant="contained" onClick={() => handleCancelStatusClick(data.id)}>
+              <Button variant="contained" onClick={() => handleCancelStatusClick()}>
                 Hủy đơn
               </Button>
             )}
@@ -256,7 +303,63 @@ const OrderHistory: React.FC = () => {
               </Button>
             </Link>
 
-            {data.orderStatus.name === 'Thành công' && <Button variant="outlined">Đánh giá</Button>}
+            {data.orderStatus.name === 'Thành công' && (
+              <>
+                <Button variant="outlined" onClick={() => setOpenRatingDialog(true)}>
+                  Đánh giá
+                </Button>
+                <Dialog
+                  open={openRatingDialog}
+                  onClose={handleRatingDialogClose}
+                  aria-labelledby="alert-dialog-title"
+                  aria-describedby="alert-dialog-description"
+                >
+                  <DialogTitle id="alert-dialog-title" sx={{ fontSize: '18px' }}>
+                    Đánh giá sản phẩm
+                  </DialogTitle>
+                  <DialogContent>
+                    {data.orderLines.map((orderLine, index) => (
+                      <Box
+                        key={`order-line-item-${index}`}
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '10px',
+                          gap: '10px',
+                          cursor: 'pointer',
+                          '&:hover': {
+                            bgcolor: theme.palette.neutral[800],
+                          },
+                        }}
+                        onClick={() =>
+                          navigate(`/nguoi-dung/don-hang/danh-gia/${orderLine.id}`, {
+                            state: { productItem: orderLine.productItem },
+                          })
+                        }
+                      >
+                        <img
+                          src={orderLine.productItem.imageUrl}
+                          alt={orderLine.productItem.product.name}
+                          style={{
+                            width: '50px',
+                            height: '50px',
+                            objectFit: 'cover',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '3px',
+                          }}
+                        />
+                        <Typography>{orderLine.productItem.product.name}</Typography>
+                      </Box>
+                    ))}
+                  </DialogContent>
+                  <DialogActions>
+                    <Button variant="contained" onClick={handleRatingDialogClose} color="error">
+                      Hủy
+                    </Button>
+                  </DialogActions>
+                </Dialog>
+              </>
+            )}
             <Link to={`/nguoi-dung/don-hang/${data.id}`}>
               <Button variant="outlined">Xem chi tiết</Button>
             </Link>

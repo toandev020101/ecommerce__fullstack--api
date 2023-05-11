@@ -21,12 +21,17 @@ router.get('/pagination', checkAuth, checkPermission('/product/pagination', 'get
 // @route GET api/v1/product/search
 // @desc Get list product by search term
 // @access Private
-router.get('/search', checkAuth, checkPermission('/product/search', 'get'), productController.getListBySearchTerm);
+router.get('/search', productController.getListBySearchTerm);
 
 // @route GET api/v1/product/ids
 // @desc Get list product by ids
 // @access Private
 router.get('/ids', checkAuth, checkPermission('/product/ids', 'get'), productController.getListByIds);
+
+// @route GET api/v1/product/public
+// @desc Get all product
+// @access Public
+router.get('/public', productController.getAll);
 
 // @route GET api/v1/product
 // @desc Get all product

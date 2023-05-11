@@ -5,11 +5,14 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { OrderLine } from './OrderLine';
 import { User } from './User';
+import { ReviewImage } from './ReviewImage';
 
 @Entity()
 export class Review extends BaseEntity {
@@ -23,20 +26,39 @@ export class Review extends BaseEntity {
   user: User;
 
   @Column()
-  orderedProductId!: number;
+  orderLinedId!: number;
   @ManyToOne(() => OrderLine, (orderLine) => orderLine.reviews)
-  @JoinColumn({ name: 'orderedProductId' })
+  @JoinColumn({ name: 'orderLinedId' })
   orderLine: OrderLine;
 
-  @Column()
+  @Column({ default: 0 })
   ratingValue!: number;
 
   @Column({ length: 350 })
   comment!: string;
+
+  @Column({ default: 0, comment: '0: chưa duyệt, 1: đã duyệt' })
+  status!: number;
+
+  @Column({ default: 0, comment: '0: đánh giá, 1: phản hồi' })
+  type!: number;
+
+  @Column({ nullable: true })
+  reviewId: number;
+
+  @OneToOne(() => Review, (review) => review.reply)
+  @JoinColumn({ name: 'reviewId' })
+  review: Review;
+
+  @OneToOne(() => Review, (reply) => reply.review)
+  reply: Review;
 
   @CreateDateColumn()
   createdAt!: Date;
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @OneToMany(() => ReviewImage, (reviewImage) => reviewImage.review)
+  reviewImages: ReviewImage[];
 }

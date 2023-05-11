@@ -1,38 +1,50 @@
+import { LoadingButton } from '@mui/lab';
 import {
+  Avatar,
   Box,
   Breadcrumbs,
   Button,
   ButtonGroup,
+  Checkbox,
   Container,
   Dialog,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   IconButton,
+  InputAdornment,
+  Pagination,
   Rating,
+  TextField,
   Typography,
   useTheme,
 } from '@mui/material';
 import parseToHTML from 'html-react-parser';
-import React, { useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { AiOutlineMinus as AiOutlineMinusIcon, AiOutlinePlus as AiOutlinePlusIcon } from 'react-icons/ai';
-import { BiX as BiXIcon } from 'react-icons/bi';
+import { BiX as BiXIcon, BiSearchAlt as BiSearchAltIcon } from 'react-icons/bi';
 import { FaStar as FaStarIcon } from 'react-icons/fa';
 import { MdAddShoppingCart as MdAddShoppingCartIcon } from 'react-icons/md';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import * as productApi from '../apis/productApi';
 import * as cartItemApi from '../apis/cartItemApi';
+import * as productApi from '../apis/productApi';
+import * as reviewApi from '../apis/reviewApi';
+import { useAppDispatch } from '../app/hook';
+import { CartItemInput } from '../interfaces/CartItemInput';
 import { Product } from '../models/Product';
+import { Review } from '../models/Review';
+import { setIsReload } from '../slices/globalSlice';
+import { showToast } from '../slices/toastSlice';
 import { Theme } from '../theme';
-import { toDate } from '../utils/date';
+import { dateToString, toDate } from '../utils/date';
 import { priceFormat } from '../utils/format';
 import Carousel from './Carousel';
 import TitlePage from './TitlePage';
 import ToastNotify from './ToastNotify';
-import { LoadingButton } from '@mui/lab';
-import { showToast } from '../slices/toastSlice';
-import { useAppDispatch } from '../app/hook';
-import { CartItemInput } from '../interfaces/CartItemInput';
-import { setIsReload } from '../slices/globalSlice';
+
+const orderReview = 'desc';
+const sortReview = 'id';
+const limitReview = 5;
 
 const ProductDetail: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -58,6 +70,45 @@ const ProductDetail: React.FC = () => {
   const [itemActive, setItemActive] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const [ratingAvgNumber, setRatingAvgNumber] = useState<number>(0);
+  const [ratingPeople, setRatingPeople] = useState<number>(0);
+  const [ratingStars, setRatingStars] = useState<
+    {
+      number: number;
+      percent: number;
+    }[]
+  >([
+    {
+      number: 5,
+      percent: 0,
+    },
+    {
+      number: 4,
+      percent: 0,
+    },
+    {
+      number: 3,
+      percent: 0,
+    },
+    {
+      number: 2,
+      percent: 0,
+    },
+    {
+      number: 1,
+      percent: 0,
+    },
+  ]);
+  const [ratingImages, setRatingImages] = useState<string[]>([]);
+
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [totalReview, setTotalReview] = useState<number>(0);
+
+  const [reviewPage, setReviewPage] = useState(0);
+  const [searchTermReview, setSearchTermReview] = useState<string>('');
+  const [reviewStar, setReviewStar] = useState(0);
+  const [isReviewImage, setIsReviewImage] = useState<boolean>(false);
 
   useEffect(() => {
     const getOneProduct = async () => {
@@ -131,6 +182,116 @@ const ProductDetail: React.FC = () => {
     setColors(newColors);
     setVariations(newVariations);
   }, [product]);
+
+  useEffect(() => {
+    const getListReviewByProductId = async () => {
+      try {
+        const res = await reviewApi.getListByProductId(product?.id as number);
+        const resData = res.data as Review[];
+
+        if (resData.length > 0) {
+          let totalRating = 0;
+          const ratingStarCounts: {
+            number: number;
+            count: number;
+          }[] = [
+            {
+              number: 5,
+              count: 0,
+            },
+            {
+              number: 4,
+              count: 0,
+            },
+            {
+              number: 3,
+              count: 0,
+            },
+            {
+              number: 2,
+              count: 0,
+            },
+            {
+              number: 1,
+              count: 0,
+            },
+          ];
+          resData.forEach((review) => {
+            totalRating += review.ratingValue;
+            ratingStarCounts.forEach((ratingStarCount) => {
+              if (ratingStarCount.number === review.ratingValue) {
+                ratingStarCount.count += 1;
+              }
+            });
+          });
+
+          const newRatingAvgNumber = parseFloat((totalRating / resData.length).toFixed(1));
+          setRatingAvgNumber(newRatingAvgNumber);
+          setRatingPeople(resData.length);
+
+          const newRatingStars: {
+            number: number;
+            percent: number;
+          }[] = [...ratingStars];
+
+          newRatingStars.forEach((newRatingStar) => {
+            ratingStarCounts.forEach((ratingStarCount) => {
+              if (ratingStarCount.number === newRatingStar.number) {
+                newRatingStar.percent = (ratingStarCount.count / resData.length) * 100;
+              }
+            });
+          });
+          setRatingStars(newRatingStars);
+
+          let newRatingImages: string[] = [];
+          resData.forEach((review) => {
+            review.reviewImages.forEach((reviewImage) => {
+              newRatingImages.push(reviewImage.imageUrl);
+            });
+          });
+          setRatingImages(newRatingImages);
+        }
+      } catch (error: any) {
+        const { data } = error.response;
+
+        if (data.code === 401 || data.code === 403 || data.code === 404 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+    getListReviewByProductId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, product]);
+
+  useEffect(() => {
+    const getPaginationReviewByProductId = async () => {
+      try {
+        const res = await reviewApi.getPaginationByProductId(product?.id as number, {
+          _limit: limitReview,
+          _page: reviewPage,
+          _sort: sortReview,
+          _order: orderReview,
+          star: reviewStar,
+          isImage: isReviewImage,
+          searchTerm: searchTermReview,
+        });
+        const resData = res.data as Review[];
+        if (resData.length === 0 && reviewPage > 0) {
+          setReviewPage(reviewPage - 1);
+        }
+
+        setReviews(resData);
+        setTotalReview(res.pagination?._total as number);
+      } catch (error: any) {
+        const { data } = error.response;
+
+        if (data.code === 401 || data.code === 403 || data.code === 404 || data.code === 500) {
+          navigate(`/error/${data.code}`);
+        }
+      }
+    };
+    getPaginationReviewByProductId();
+  }, [isReviewImage, navigate, product, reviewPage, reviewStar, searchTermReview]);
 
   const handleColorActiveClick = (index: number) => {
     setColorActive(index);
@@ -248,8 +409,8 @@ const ProductDetail: React.FC = () => {
               {product?.name}
             </Typography>
 
-            <Rating name="read-only" value={4.6} size="small" precision={0.1} readOnly />
-            <Typography>101 đánh giá</Typography>
+            <Rating name="read-only" value={ratingAvgNumber} size="small" precision={0.1} readOnly />
+            <Typography>{ratingPeople} đánh giá</Typography>
           </Box>
           {/* title */}
 
@@ -381,19 +542,13 @@ const ProductDetail: React.FC = () => {
                   <Box borderRight="1px solid #d9d9d9" width="260px" paddingRight="25px">
                     <Box display="flex" alignItems="center" gap="10px">
                       <Typography fontSize="20px" fontWeight={500} color={theme.palette.warning.main}>
-                        4.6
+                        {ratingAvgNumber}
                       </Typography>
-                      <Rating name="read-only" value={4.6} precision={0.1} readOnly />
-                      <Typography marginTop="3px">101 đánh giá</Typography>
+                      <Rating name="read-only" value={ratingAvgNumber} precision={0.1} readOnly />
+                      <Typography marginTop="3px">{ratingPeople} đánh giá</Typography>
                     </Box>
 
-                    {[
-                      { number: 5, percent: 65 },
-                      { number: 4, percent: 25 },
-                      { number: 3, percent: 15 },
-                      { number: 2, percent: 0 },
-                      { number: 1, percent: 0 },
-                    ].map((star, index) => (
+                    {ratingStars.map((star, index) => (
                       <Box key={`star-item-${index}`} display="flex" alignItems="center" gap="5px" marginTop="5px">
                         <Typography fontSize="12px">{star.number}</Typography>
                         <FaStarIcon fontSize="12px" />
@@ -418,9 +573,214 @@ const ProductDetail: React.FC = () => {
                   </Box>
                   {/* table */}
 
-                  {/* filter */}
-                  <Box></Box>
-                  {/* filter */}
+                  {/* images */}
+                  <Box
+                    display="grid"
+                    gridTemplateColumns="repeat(5, 1fr)"
+                    gridTemplateRows="repeat(2, 1fr)"
+                    flex={1}
+                    gap="10px"
+                    padding="10px"
+                  >
+                    {ratingImages.slice(0, 10).map((ratingImage, index) => (
+                      <Box
+                        key={`rating-image-item-${index}`}
+                        sx={
+                          ratingImages.length > 10
+                            ? {
+                                position: 'relative',
+                                '&:last-child::before': {
+                                  content: `"Xem ${ratingImages.length - 9} ảnh từ KH"`,
+                                  position: 'absolute',
+                                  top: 0,
+                                  left: 0,
+                                  bgcolor: 'rgba(0,0,0,0.6)',
+                                  width: '100%',
+                                  height: '100%',
+                                  color: theme.palette.common.white,
+                                  textAlign: 'center',
+                                  lineHeight: '100%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  borderRadius: '3px',
+                                },
+                              }
+                            : {}
+                        }
+                      >
+                        <img
+                          src={ratingImage}
+                          alt={ratingImage}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '3px',
+                          }}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                  {/* images */}
+                </Box>
+
+                {/* filter */}
+                <Box>
+                  <TextField
+                    id="outlined-basic"
+                    label="Tìm kiếm đánh giá"
+                    variant="outlined"
+                    size="small"
+                    sx={{ width: '250px' }}
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <BiSearchAltIcon fontSize="20px" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    value={searchTermReview}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => setSearchTermReview(e.target.value)}
+                  />
+
+                  <Box display="flex" gap="10px" alignItems="center" marginTop="20px">
+                    <Typography>Lọc theo:</Typography>
+                    {[0, 5, 4, 3, 2, 1].map((star, index) => (
+                      <Button
+                        key={`star-button-item-${index}`}
+                        variant={`${reviewStar === star ? 'contained' : 'outlined'}`}
+                        sx={{ textTransform: 'none' }}
+                        onClick={() => setReviewStar(star)}
+                      >
+                        {star === 0 ? 'Tất cả' : `${star} sao`}
+                      </Button>
+                    ))}
+                  </Box>
+
+                  <FormControlLabel
+                    sx={{ marginTop: '10px' }}
+                    control={
+                      <Checkbox
+                        checked={isReviewImage}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => setIsReviewImage(e.target.checked)}
+                      />
+                    }
+                    label="Có hình ảnh"
+                  />
+
+                  <Typography variant="h6" marginTop="10px">
+                    {totalReview} đánh giá
+                  </Typography>
+                </Box>
+                {/* filter */}
+
+                {/* list rating */}
+                <Box>
+                  {reviews.map((review, index) => (
+                    <Box key={`rating-item-${index}`}>
+                      <Box display="flex" gap="10px" marginTop="10px" paddingTop="10px" borderTop="1px solid #e0e0e0">
+                        {review.user.avatar ? (
+                          <Avatar src={review.user.avatar} sx={{ width: 45, height: 45 }} />
+                        ) : (
+                          <Avatar sx={{ width: 45, height: 45 }}>{review.user.fullName.charAt(0)}</Avatar>
+                        )}
+
+                        <Box display="flex" flexDirection="column" gap="5px">
+                          <Typography>{review.user.fullName}</Typography>
+                          <Rating name="read-only" value={review.ratingValue} size="small" readOnly />
+                          <Typography fontSize="12px" color={theme.palette.neutral[300]}>
+                            {dateToString(review.createdAt, 2)} | Phân loại loại hàng: {review.orderLine.variation}
+                          </Typography>
+
+                          <Typography>{review.comment}</Typography>
+                          <Box display="grid" gridTemplateColumns="repeat(10, 1fr)" gap="10px">
+                            {review.reviewImages?.map((reviewImage, idx) => (
+                              <img
+                                key={`review-image-item-${idx}`}
+                                src={reviewImage.imageUrl}
+                                alt={reviewImage.imageUrl}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  border: '1px solid #e0e0e0',
+                                  borderRadius: '3px',
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                      </Box>
+
+                      {review.reply && review.reply.status === 1 && (
+                        <Box
+                          margin="10px 0 0 50px"
+                          display="flex"
+                          gap="10px"
+                          padding="10px"
+                          bgcolor={theme.palette.neutral[800]}
+                          borderRadius="5px"
+                          sx={{
+                            position: 'relative',
+                            '&::before': {
+                              content: '""',
+                              position: 'absolute',
+                              top: '-20px',
+                              left: '8px',
+                              borderWidth: '10px',
+                              borderStyle: 'solid',
+                              borderColor: `transparent transparent ${theme.palette.neutral[800]} transparent`,
+                            },
+                          }}
+                        >
+                          {review.user.avatar ? (
+                            <Avatar src={review.user.avatar} sx={{ width: 45, height: 45 }} />
+                          ) : (
+                            <Avatar sx={{ width: 45, height: 45 }}>{review.user.fullName.charAt(0)}</Avatar>
+                          )}
+
+                          <Box display="flex" flexDirection="column" gap="5px">
+                            <Box display="flex" alignItems="center" gap="10px">
+                              <Typography>{review.reply.user.fullName}</Typography>
+                              <Typography
+                                fontSize="11px"
+                                sx={{
+                                  bgcolor: theme.palette.primary[500],
+                                  color: theme.palette.common.white,
+                                  padding: '2px 5px',
+                                  borderRadius: '3px',
+                                }}
+                              >
+                                {review.reply.user.role.name}
+                              </Typography>
+                            </Box>
+                            <Typography fontSize="12px" color={theme.palette.neutral[300]}>
+                              {dateToString(review.reply.createdAt, 2)}
+                            </Typography>
+
+                            <Typography>{review.reply.comment}</Typography>
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+                {/* list rating */}
+
+                <Box marginTop="20px" display="flex" justifyContent="center">
+                  {totalReview > 0 ? (
+                    <Pagination
+                      count={Math.ceil(totalReview / limitReview)}
+                      color="primary"
+                      onChange={(_event: React.ChangeEvent<unknown>, newPage: number) => {
+                        setReviewPage(newPage - 1);
+                      }}
+                    />
+                  ) : (
+                    <Typography>Chưa có bình luận nào !</Typography>
+                  )}
                 </Box>
               </Box>
               {/* rating */}
@@ -488,16 +848,18 @@ const ProductDetail: React.FC = () => {
                     >
                       {product && priceFormat(product.productItems[itemActive].price)}
                     </Typography>
-                    <Typography fontSize="16px" color={theme.palette.error.main}>
-                      -
-                      {100 -
-                        Math.ceil(
-                          ((product?.productItems[itemActive].discount as number) /
-                            (product?.productItems[itemActive].price as number)) *
-                            100,
-                        )}
-                      %
-                    </Typography>
+                    <Box display="flex" alignItems="center" gap="5px" color={theme.palette.error.main}>
+                      <Typography fontSize="16px">Giảm</Typography>
+                      <Typography fontSize="16px">
+                        {100 -
+                          Math.ceil(
+                            ((product?.productItems[itemActive].discount as number) /
+                              (product?.productItems[itemActive].price as number)) *
+                              100,
+                          )}
+                        %
+                      </Typography>
+                    </Box>
                   </>
                 )}
               </Box>

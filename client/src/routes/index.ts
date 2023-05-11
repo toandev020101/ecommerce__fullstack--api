@@ -11,22 +11,29 @@ import Dashboard from '../pages/admin/Dashboard';
 import MediaFile from '../pages/admin/MediaFile';
 import OrderManager from '../pages/admin/OrderManager';
 import AddOrEditOrder from '../pages/admin/OrderManager/AddOrEditOrder';
+import Voucher from '../pages/admin/OrderManager/Voucher';
+import PaymentMethodManager from '../pages/admin/PaymentMethodManager';
 import ProductManager from '../pages/admin/ProductManager';
 import AddOrEditProduct from '../pages/admin/ProductManager/AddOrEditProduct';
 import CategoryProduct from '../pages/admin/ProductManager/CategoryProduct';
 import AddOrEditCategoryProduct from '../pages/admin/ProductManager/CategoryProduct/AddOrEditCategoryProduct';
+import RatingProduct from '../pages/admin/ProductManager/RatingProduct';
+import AddOrEditRating from '../pages/admin/ProductManager/RatingProduct/AddOrEditRating';
 import TagProduct from '../pages/admin/ProductManager/TagProduct';
 import VariationProduct from '../pages/admin/ProductManager/VariationProduct';
 import VariationOptionProduct from '../pages/admin/ProductManager/VariationProduct/VariationOptionProduct';
+import ShipMethodManager from '../pages/admin/ShipMethodManager';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import AccountProfile from '../pages/web/Account';
 import ChangePassword from '../pages/web/Account/ChangePassword';
 import OrderDetail from '../pages/web/Account/OrderDetail';
 import OrderHistory from '../pages/web/Account/OrderHistory';
+import OrderRating from '../pages/web/Account/OrderRating';
 import Cart from '../pages/web/Cart';
 import Checkout from '../pages/web/Checkout';
 import Home from '../pages/web/Home';
+import VoucherList from '../pages/web/VoucherList';
 
 interface Route {
   path: string;
@@ -51,8 +58,11 @@ export const privateRoutes: Route[] = [
   { path: '/thanh-toan', component: Checkout },
   { path: '/nguoi-dung/tai-khoan/ho-so', component: AccountProfile },
   { path: '/nguoi-dung/tai-khoan/thay-doi-mat-khau', component: ChangePassword },
+
+  { path: '/nguoi-dung/don-hang/danh-gia/:orderLinedId', component: OrderRating },
   { path: '/nguoi-dung/don-hang/:id', component: OrderDetail },
   { path: '/nguoi-dung/don-hang', component: OrderHistory },
+  { path: '/ma-giam-gia', component: VoucherList },
 
   // admin
   { path: '/quan-tri', component: Dashboard, layout: AdminLayout },
@@ -86,7 +96,15 @@ export const privateRoutes: Route[] = [
     layout: AdminLayout,
   },
 
+  { path: '/quan-tri/san-pham/danh-gia', component: RatingProduct, layout: AdminLayout },
+  { path: '/quan-tri/san-pham/danh-gia/them-moi', component: AddOrEditRating, layout: AdminLayout },
+  { path: '/quan-tri/san-pham/danh-gia/chinh-sua/:id', component: AddOrEditRating, layout: AdminLayout },
+
   { path: '/quan-tri/don-hang/danh-sach', component: OrderManager, layout: AdminLayout },
   { path: '/quan-tri/don-hang/danh-sach/them-moi', component: AddOrEditOrder, layout: AdminLayout },
   { path: '/quan-tri/don-hang/danh-sach/chinh-sua/:id', component: AddOrEditOrder, layout: AdminLayout },
+
+  { path: '/quan-tri/don-hang/ma-giam-gia', component: Voucher, layout: AdminLayout },
+  { path: '/quan-tri/phuong-thuc-giao-hang', component: ShipMethodManager, layout: AdminLayout },
+  { path: '/quan-tri/phuong-thuc-thanh-toan', component: PaymentMethodManager, layout: AdminLayout },
 ];

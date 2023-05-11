@@ -1,9 +1,11 @@
 export interface CouponInput {
   name: string;
+  priceMaxName?: string;
   code: string;
   discountValue: number;
-  priceMax: number;
+  priceMax?: number | string;
   type: number;
-  startDate: Date;
-  endDate: Date;
+  quantity: number;
+  startDate: Date | string;
+  endDate: Date | string;
 }

@@ -1,3 +1,6 @@
+import { ReviewImage } from './../models/ReviewImage';
+import { Review } from './../models/Review';
+import { Coupon } from './../models/Coupon';
 import { Inventory } from './../models/Inventory';
 import { ProductItem } from './../models/ProductItem';
 import { OrderStatus } from './../models/OrderStatus';
@@ -81,6 +84,7 @@ export const getListByStatusId = async (
           productItemId: true,
           productItem: {
             id: true,
+            imageUrl: true,
             productId: true,
             product: {
               id: true,
@@ -91,6 +95,7 @@ export const getListByStatusId = async (
         },
       },
       where: whereOptions,
+      order: { id: 'DESC' },
       relations: {
         orderStatus: true,
         orderLines: {
@@ -357,6 +362,12 @@ export const addOne = async (req: Request<{}, {}, OrderInput, {}>, res: Response
             code: coupons[i].code,
             price: coupons[i].price,
           });
+
+          // find coupon
+          const coupon = await Coupon.findOneBy({ code: coupons[i].code });
+
+          // desc coupon
+          await transactionalEntityManager.update(Coupon, coupon?.id, { quantity: (coupon?.quantity as number) - 1 });
         }
 
         // add order coupon
@@ -419,6 +430,19 @@ export const updateOne = async (
           });
         });
 
+        const oldOrderLineIds = oldOrderLines.map((oldOrderLine) => oldOrderLine.id);
+        const reviewRemoves = await Review.findBy({ orderLinedId: In(oldOrderLineIds) });
+        const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+
+        // delete old reply
+        await transactionalEntityManager.delete(Review, { reviewId: In(reviewRemoveIds) });
+
+        // delete old review image
+        await transactionalEntityManager.delete(ReviewImage, { reviewId: In(reviewRemoveIds) });
+
+        // delete old review
+        await transactionalEntityManager.delete(Review, { id: In(reviewRemoveIds) });
+
         // delete old order line
         await transactionalEntityManager.delete(OrderLine, { orderId: id });
 
@@ -462,6 +486,12 @@ export const updateOne = async (
             code: coupons[i].code,
             price: coupons[i].price,
           });
+
+          // find coupon
+          const coupon = await Coupon.findOneBy({ code: coupons[i].code });
+
+          // desc coupon
+          await transactionalEntityManager.update(Coupon, coupon?.id, { quantity: (coupon?.quantity as number) - 1 });
         }
 
         // add order coupon
@@ -546,6 +576,22 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
     }
 
     await AppDataSource.transaction(async (transactionalEntityManager) => {
+      // get old order lines
+      const oldOrderLines = await OrderLine.findBy({ orderId: In(ids) });
+
+      const oldOrderLineIds = oldOrderLines.map((oldOrderLine) => oldOrderLine.id);
+      const reviewRemoves = await Review.findBy({ orderLinedId: In(oldOrderLineIds) });
+      const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+
+      // delete old reply
+      await transactionalEntityManager.delete(Review, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review image
+      await transactionalEntityManager.delete(ReviewImage, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review
+      await transactionalEntityManager.delete(Review, { id: In(reviewRemoveIds) });
+
       // delete order line
       await transactionalEntityManager.delete(OrderLine, { orderId: In(ids) });
       // delete order coupon
@@ -587,6 +633,22 @@ export const removeOne = async (req: Request<{ id: number }, {}, {}, {}>, res: R
     }
 
     await AppDataSource.transaction(async (transactionalEntityManager) => {
+      // get old order lines
+      const oldOrderLines = await OrderLine.findBy({ orderId: id });
+
+      const oldOrderLineIds = oldOrderLines.map((oldOrderLine) => oldOrderLine.id);
+      const reviewRemoves = await Review.findBy({ orderLinedId: In(oldOrderLineIds) });
+      const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+
+      // delete old reply
+      await transactionalEntityManager.delete(Review, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review image
+      await transactionalEntityManager.delete(ReviewImage, { reviewId: In(reviewRemoveIds) });
+
+      // delete old review
+      await transactionalEntityManager.delete(Review, { id: In(reviewRemoveIds) });
+
       // delete order line
       await transactionalEntityManager.delete(OrderLine, { orderId: id });
       // delete order coupon

@@ -30,7 +30,14 @@ const express_1 = __importDefault(require("express"));
 const paymentMethodController = __importStar(require("../controllers/paymentMethodController"));
 const checkAuth_1 = require("../middlewares/checkAuth");
 const checkPermission_1 = require("../middlewares/checkPermission");
+const paymentMethodSchema_1 = __importDefault(require("../validations/paymentMethodSchema"));
+const validateYup_1 = __importDefault(require("../middlewares/validateYup"));
 const router = express_1.default.Router();
+router.get('/pagination', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/payment-method/pagination', 'get'), paymentMethodController.getPagination);
 router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/payment-method', 'get'), paymentMethodController.getAll);
+router.post('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/payment-method', 'post'), (0, validateYup_1.default)(paymentMethodSchema_1.default), paymentMethodController.addOne);
+router.put('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/payment-method/:id', 'put'), (0, validateYup_1.default)(paymentMethodSchema_1.default), paymentMethodController.updateOne);
+router.delete('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/payment-method', 'delete'), paymentMethodController.removeAny);
+router.delete('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/payment-method/:id', 'delete'), paymentMethodController.removeOne);
 exports.default = router;
 //# sourceMappingURL=paymentMethodRoute.js.map

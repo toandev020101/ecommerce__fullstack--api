@@ -921,7 +921,7 @@ const Account: React.FC = () => {
                         <TableCell>
                           <Box display="flex" alignItems="center" gap="10px">
                             <Skeleton animation="wave" variant="circular">
-                              <Avatar sx={{ width: 34, height: 34 }} />
+                              <Avatar sx={{ width: 40, height: 40 }} />
                             </Skeleton>
                             <Box>
                               <Skeleton animation="wave" width="100%">
@@ -1009,9 +1009,9 @@ const Account: React.FC = () => {
                         <TableCell sx={{ fontSize: '14px' }}>
                           <Box display="flex" alignItems="center" gap="10px">
                             {row.avatar ? (
-                              <Avatar src={row.avatar} sx={{ width: 36, height: 36 }} />
+                              <Avatar src={row.avatar} sx={{ width: 40, height: 40 }} />
                             ) : (
-                              <Avatar sx={{ width: 36, height: 36 }}>{row.fullName.charAt(0)}</Avatar>
+                              <Avatar sx={{ width: 40, height: 40 }}>{row.fullName.charAt(0)}</Avatar>
                             )}
                             <Box>
                               <Typography variant="h6">{row.fullName}</Typography>

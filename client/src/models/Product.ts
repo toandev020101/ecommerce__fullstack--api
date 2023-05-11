@@ -36,6 +36,8 @@ export interface ProductItem {
       };
     },
   ];
+
+  product?: Product;
 }
 
 export interface Product {

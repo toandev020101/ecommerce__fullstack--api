@@ -24,6 +24,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeOne = exports.removeAny = exports.changeStatus = exports.updateOne = exports.addOne = exports.getOneById = exports.getPagination = exports.getListByStatusId = void 0;
+const ReviewImage_1 = require("./../models/ReviewImage");
+const Review_1 = require("./../models/Review");
+const Coupon_1 = require("./../models/Coupon");
 const Inventory_1 = require("./../models/Inventory");
 const ProductItem_1 = require("./../models/ProductItem");
 const OrderStatus_1 = require("./../models/OrderStatus");
@@ -96,6 +99,7 @@ const getListByStatusId = (req, res) => __awaiter(void 0, void 0, void 0, functi
                     productItemId: true,
                     productItem: {
                         id: true,
+                        imageUrl: true,
                         productId: true,
                         product: {
                             id: true,
@@ -106,6 +110,7 @@ const getListByStatusId = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 },
             },
             where: whereOptions,
+            order: { id: 'DESC' },
             relations: {
                 orderStatus: true,
                 orderLines: {
@@ -342,6 +347,8 @@ const addOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         code: coupons[i].code,
                         price: coupons[i].price,
                     });
+                    const coupon = yield Coupon_1.Coupon.findOneBy({ code: coupons[i].code });
+                    yield transactionalEntityManager.update(Coupon_1.Coupon, coupon === null || coupon === void 0 ? void 0 : coupon.id, { quantity: (coupon === null || coupon === void 0 ? void 0 : coupon.quantity) - 1 });
                 }
                 yield transactionalEntityManager.insert(OrderCoupon_1.OrderCoupon, couponData);
             }
@@ -385,6 +392,12 @@ const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         quantity: oldOrderLine.productItem.inventory.quantity + oldOrderLine.quantity,
                     });
                 }));
+                const oldOrderLineIds = oldOrderLines.map((oldOrderLine) => oldOrderLine.id);
+                const reviewRemoves = yield Review_1.Review.findBy({ orderLinedId: (0, typeorm_1.In)(oldOrderLineIds) });
+                const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+                yield transactionalEntityManager.delete(Review_1.Review, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+                yield transactionalEntityManager.delete(ReviewImage_1.ReviewImage, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+                yield transactionalEntityManager.delete(Review_1.Review, { id: (0, typeorm_1.In)(reviewRemoveIds) });
                 yield transactionalEntityManager.delete(OrderLine_1.OrderLine, { orderId: id });
                 let lineData = [];
                 for (let i = 0; i < lines.length; i++) {
@@ -415,6 +428,8 @@ const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                         code: coupons[i].code,
                         price: coupons[i].price,
                     });
+                    const coupon = yield Coupon_1.Coupon.findOneBy({ code: coupons[i].code });
+                    yield transactionalEntityManager.update(Coupon_1.Coupon, coupon === null || coupon === void 0 ? void 0 : coupon.id, { quantity: (coupon === null || coupon === void 0 ? void 0 : coupon.quantity) - 1 });
                 }
                 yield transactionalEntityManager.insert(OrderCoupon_1.OrderCoupon, couponData);
             }
@@ -479,6 +494,13 @@ const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }
         }
         yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
+            const oldOrderLines = yield OrderLine_1.OrderLine.findBy({ orderId: (0, typeorm_1.In)(ids) });
+            const oldOrderLineIds = oldOrderLines.map((oldOrderLine) => oldOrderLine.id);
+            const reviewRemoves = yield Review_1.Review.findBy({ orderLinedId: (0, typeorm_1.In)(oldOrderLineIds) });
+            const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+            yield transactionalEntityManager.delete(Review_1.Review, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(ReviewImage_1.ReviewImage, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(Review_1.Review, { id: (0, typeorm_1.In)(reviewRemoveIds) });
             yield transactionalEntityManager.delete(OrderLine_1.OrderLine, { orderId: (0, typeorm_1.In)(ids) });
             yield transactionalEntityManager.delete(OrderCoupon_1.OrderCoupon, { orderId: (0, typeorm_1.In)(ids) });
             yield transactionalEntityManager.delete(Order_1.Order, { id: (0, typeorm_1.In)(ids) });
@@ -511,6 +533,13 @@ const removeOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             });
         }
         yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
+            const oldOrderLines = yield OrderLine_1.OrderLine.findBy({ orderId: id });
+            const oldOrderLineIds = oldOrderLines.map((oldOrderLine) => oldOrderLine.id);
+            const reviewRemoves = yield Review_1.Review.findBy({ orderLinedId: (0, typeorm_1.In)(oldOrderLineIds) });
+            const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+            yield transactionalEntityManager.delete(Review_1.Review, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(ReviewImage_1.ReviewImage, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(Review_1.Review, { id: (0, typeorm_1.In)(reviewRemoveIds) });
             yield transactionalEntityManager.delete(OrderLine_1.OrderLine, { orderId: id });
             yield transactionalEntityManager.delete(OrderCoupon_1.OrderCoupon, { orderId: id });
             yield transactionalEntityManager.delete(Order_1.Order, { id });

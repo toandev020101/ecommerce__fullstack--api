@@ -111,8 +111,8 @@ const Sidebar: React.FC<Props> = ({ width }) => {
           name: 'Danh sách đơn hàng',
         },
         {
-          slug: 'phieu-uu-dai',
-          name: 'Phiếu ưu đãi',
+          slug: 'ma-giam-gia',
+          name: 'Mã giảm giá',
         },
         {
           slug: 'kho',
@@ -121,19 +121,13 @@ const Sidebar: React.FC<Props> = ({ width }) => {
       ],
     },
     {
-      slug: 'giao-hang',
-      name: 'Giao hàng',
+      slug: 'phuong-thuc-giao-hang',
+      name: 'Phương thức giao hàng',
       icon: <MdOutlineLocalShippingIcon />,
-      child: [
-        {
-          slug: 'phuong-thuc',
-          name: 'Phương thức',
-        },
-      ],
     },
     {
-      slug: 'thanh-toan',
-      name: 'Thanh toán',
+      slug: 'phuong-thuc-thanh-toan',
+      name: 'Phương thức thanh toán',
       icon: <MdOutlinePaymentsIcon />,
     },
     {

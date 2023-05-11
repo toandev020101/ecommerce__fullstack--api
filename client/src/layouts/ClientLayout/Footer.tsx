@@ -12,43 +12,46 @@ const Footer: React.FC = () => {
   const customerCares = [
     {
       label: 'Trung tâm trợ giúp',
-      slug: 'ho-tro',
+      slug: '/ho-tro',
     },
     {
       label: 'Hướng dẫn mua hàng',
-      slug: 'huong-dan-mua-hang',
+      slug: '/huong-dan-mua-hang',
     },
     {
       label: 'Thanh toán',
-      slug: 'thanh-toan',
+      slug: '/thanh-toan',
     },
     {
       label: 'Trả hàng & hoàn tiền',
-      slug: 'tra-hang-hoan-tien',
+      slug: '/tra-hang-hoan-tien',
     },
-
     {
       label: 'Chính sách bảo hành',
-      slug: 'chinh-sac-bao-hanh',
+      slug: '/chinh-sac-bao-hanh',
+    },
+    {
+      label: 'Mã giảm giá',
+      slug: '/ma-giam-gia',
     },
   ];
 
   const shopInfos = [
     {
       label: 'Giới thiệu về Ecomshop',
-      slug: 'gioi-thieu',
+      slug: '/gioi-thieu',
     },
     {
       label: 'Điều khoản Ecomshop',
-      slug: 'dieu-khoan',
+      slug: '/dieu-khoan',
     },
     {
       label: 'Chính sách bảo mật',
-      slug: 'chinh-sac-bao-mat',
+      slug: '/chinh-sac-bao-mat',
     },
     {
       label: 'Gửi góp ý & khiếu nại',
-      slug: 'gui-gop-y-khieu-nai',
+      slug: '/gui-gop-y-khieu-nai',
     },
   ];
 
@@ -93,7 +96,7 @@ const Footer: React.FC = () => {
 
   return (
     <>
-      {/* begin: footer conter */}
+      {/* begin: footer content */}
       <Grid container spacing={3}>
         <Grid item md={3}>
           <Typography variant="h6" sx={{ textTransform: 'uppercase' }}>
@@ -186,7 +189,7 @@ const Footer: React.FC = () => {
           </List>
         </Grid>
       </Grid>
-      {/* end: footer conter */}
+      {/* end: footer content */}
 
       {/* begin: footer bottom */}
       <Box marginTop="10px" padding="10px 0" borderTop="1px solid #e0e0e0" textAlign="center">

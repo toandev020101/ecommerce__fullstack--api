@@ -30,3 +30,25 @@ ul {
 ul.MuiList-root.MuiList-padding.MuiMenu-list {
   max-height: 300px;
 }
+
+@keyframes growth {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes heightChange {
+  from {
+    opacity: 0;
+    height: 0;
+  }
+  to {
+    opacity: 1;
+    height: 'auto';
+  }
+}

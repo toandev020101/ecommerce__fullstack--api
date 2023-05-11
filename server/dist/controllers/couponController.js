@@ -8,88 +8,54 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeOne = exports.removeAny = exports.addOne = exports.checkOne = exports.getPagination = void 0;
+exports.removeOne = exports.removeAny = exports.updateOne = exports.addOne = exports.checkOne = exports.getPagination = exports.getAllPublic = void 0;
+const typeorm_1 = require("typeorm");
 const date_1 = require("../utils/date");
 const Coupon_1 = require("./../models/Coupon");
-const Inventory_1 = require("../models/Inventory");
-const ProductItem_1 = require("../models/ProductItem");
-const OrderStatus_1 = require("../models/OrderStatus");
-const AppDataSource_1 = __importDefault(require("../AppDataSource"));
-const CartItem_1 = require("../models/CartItem");
-const Order_1 = require("../models/Order");
-const OrderCoupon_1 = require("../models/OrderCoupon");
-const OrderLine_1 = require("../models/OrderLine");
-const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { _limit, _page, _sort, _order } = req.query;
+const getAllPublic = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const orderRes = yield Order_1.Order.findAndCount({
-            select: {
-                id: true,
-                userId: true,
-                fullName: true,
-                phoneNumber: true,
-                street: true,
-                wardId: true,
-                ward: {
-                    id: true,
-                    name: true,
-                },
-                districtId: true,
-                district: {
-                    id: true,
-                    name: true,
-                },
-                provinceId: true,
-                province: {
-                    id: true,
-                    name: true,
-                },
-                totalPrice: true,
-                orderStatusId: true,
-                orderStatus: {
-                    id: true,
-                    name: true,
-                },
-                paymentMethodId: true,
-                paymentMethod: {
-                    id: true,
-                    name: true,
-                },
-            },
+        const coupons = yield Coupon_1.Coupon.find();
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Lấy tất cả mã giảm giá thành công',
+            data: coupons,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.getAllPublic = getAllPublic;
+const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { _limit, _page, _sort, _order, searchTerm } = req.query;
+    try {
+        const couponRes = yield Coupon_1.Coupon.findAndCount({
+            where: searchTerm
+                ? [
+                    { name: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                    { priceMaxName: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                    { code: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                ]
+                : {},
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },
-            relations: {
-                ward: true,
-                district: true,
-                province: true,
-                paymentMethod: true,
-            },
         });
         return res.status(200).json({
             code: 200,
             success: true,
-            message: 'Lấy danh sách đơn hàng thành công',
-            data: orderRes[0],
+            message: 'Lấy danh sách mã giảm giá thành công',
+            data: couponRes[0],
             pagination: {
                 _limit,
                 _page,
-                _total: orderRes[1],
+                _total: couponRes[1],
             },
         });
     }
@@ -103,7 +69,7 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.getPagination = getPagination;
 const checkOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { code } = req.query;
+    const { code } = req.params;
     try {
         const coupon = yield Coupon_1.Coupon.findOneBy({ code });
         if (!coupon) {
@@ -114,18 +80,26 @@ const checkOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             });
         }
         const currentDate = new Date();
-        if ((0, date_1.toDate)(coupon.startDate) > currentDate) {
+        const currentDateString = (0, date_1.toDateString)(currentDate);
+        if ((0, date_1.toDate)((0, date_1.toDateString)(coupon.startDate)) > (0, date_1.toDate)(currentDateString)) {
             return res.status(400).json({
                 code: 400,
                 success: false,
                 message: 'Mã giảm giá chưa được triển khai',
             });
         }
-        if ((0, date_1.toDate)(coupon.endDate) < currentDate) {
+        if ((0, date_1.toDate)((0, date_1.toDateString)(coupon.endDate)) < (0, date_1.toDate)(currentDateString)) {
             return res.status(400).json({
                 code: 400,
                 success: false,
                 message: 'Mã giảm giá đã quá hạn',
+            });
+        }
+        if (coupon.quantity === 0) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Mã giảm giá đã hết',
             });
         }
         return res.status(200).json({
@@ -145,58 +119,23 @@ const checkOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.checkOne = checkOne;
 const addOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const _a = req.body, { lines, coupons } = _a, others = __rest(_a, ["lines", "coupons"]);
+    const data = req.body;
     const userId = req.userId;
     try {
-        yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
-            var _b;
-            const orderStatus = yield OrderStatus_1.OrderStatus.findOneBy({ name: 'Chờ xác nhận' });
-            if (!orderStatus) {
-                return res.status(500).json({
-                    code: 500,
-                    success: false,
-                    message: `Lỗi server :: không tìm thấy trạng thái`,
-                });
-            }
-            const insertedOrder = yield transactionalEntityManager.insert(Order_1.Order, Object.assign(Object.assign({}, others), { userId, orderStatusId: orderStatus.id }));
-            if (lines.length > 0) {
-                let lineData = [];
-                for (let i = 0; i < lines.length; i++) {
-                    lineData.push({
-                        orderId: insertedOrder.raw.insertId,
-                        variation: lines[i].variation,
-                        quantity: lines[i].quantity,
-                        price: lines[i].price,
-                        productItemId: lines[i].productItemId,
-                    });
-                    yield transactionalEntityManager.delete(CartItem_1.CartItem, { userId, productItemId: lines[i].productItemId });
-                    const productItem = yield ProductItem_1.ProductItem.findOne({
-                        where: { id: lines[i].productItemId },
-                        relations: { inventory: true },
-                    });
-                    yield transactionalEntityManager.update(Inventory_1.Inventory, productItem === null || productItem === void 0 ? void 0 : productItem.inventoryId, {
-                        quantity: ((_b = productItem === null || productItem === void 0 ? void 0 : productItem.inventory) === null || _b === void 0 ? void 0 : _b.quantity) - lines[i].quantity,
-                    });
-                }
-                yield transactionalEntityManager.insert(OrderLine_1.OrderLine, lineData);
-            }
-            if (coupons && coupons.length > 0) {
-                let couponData = [];
-                for (let i = 0; i < coupons.length; i++) {
-                    couponData.push({
-                        orderId: insertedOrder.raw.insertId,
-                        code: coupons[i].code,
-                        price: coupons[i].price,
-                    });
-                }
-                yield transactionalEntityManager.insert(OrderCoupon_1.OrderCoupon, couponData);
-            }
-            return null;
-        }));
+        const coupon = yield Coupon_1.Coupon.findOneBy({ code: data.code });
+        if (coupon) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Mã đã tồn tại',
+                errors: [{ field: 'code', message: 'Mã đã tồn tại!' }],
+            });
+        }
+        yield Coupon_1.Coupon.insert(Object.assign(Object.assign({}, data), { userId }));
         return res.status(200).json({
             code: 200,
             success: true,
-            message: 'Thêm đơn hàng thành công',
+            message: 'Thêm mã giảm giá thành công',
             data: null,
         });
     }
@@ -209,24 +148,63 @@ const addOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.addOne = addOne;
+const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = req.body;
+    const userId = req.userId;
+    const { id } = req.params;
+    try {
+        let coupon = yield Coupon_1.Coupon.findOneBy({ id: parseInt(id) });
+        if (!coupon) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: 'Mã giảm giá không tồn tại',
+            });
+        }
+        coupon = yield Coupon_1.Coupon.findOneBy({ code: data.code });
+        if (coupon && coupon.id !== parseInt(id)) {
+            return res.status(400).json({
+                code: 400,
+                success: false,
+                message: 'Mã đã tồn tại',
+                errors: [{ field: 'code', message: 'Mã đã tồn tại!' }],
+            });
+        }
+        yield Coupon_1.Coupon.update(id, Object.assign(Object.assign({}, data), { userId }));
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Cập nhật mã giảm giá thành công',
+            data: null,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.updateOne = updateOne;
 const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { ids } = req.body;
     try {
         for (let i = 0; i < ids.length; i++) {
-            const order = yield Order_1.Order.findOneBy({ id: ids[i] });
-            if (!order) {
+            const coupon = yield Coupon_1.Coupon.findOneBy({ id: ids[i] });
+            if (!coupon) {
                 return res.status(404).json({
                     code: 404,
                     success: false,
-                    message: 'Đơn hàng không tồn tại',
+                    message: 'Mã giảm giá không tồn tại',
                 });
             }
         }
-        yield Order_1.Order.delete(ids);
+        yield Coupon_1.Coupon.delete(ids);
         return res.status(200).json({
             code: 200,
             success: true,
-            message: 'Xóa danh sách đơn hàng thành công',
+            message: 'Xóa danh sách mã giảm giá thành công',
             data: null,
         });
     }
@@ -242,19 +220,19 @@ exports.removeAny = removeAny;
 const removeOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
     try {
-        const order = yield Order_1.Order.findOneBy({ id });
-        if (!order) {
+        const coupon = yield Coupon_1.Coupon.findOneBy({ id });
+        if (!coupon) {
             return res.status(404).json({
                 code: 404,
                 success: false,
-                message: 'Đơn hàng không tồn tại',
+                message: 'Mã giảm giá không tồn tại',
             });
         }
-        yield CartItem_1.CartItem.delete(id);
+        yield Coupon_1.Coupon.delete(id);
         return res.status(200).json({
             code: 200,
             success: true,
-            message: 'Xóa đơn hàng thành công',
+            message: 'Xóa mã giảm giá thành công',
             data: null,
         });
     }

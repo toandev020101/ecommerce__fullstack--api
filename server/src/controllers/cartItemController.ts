@@ -86,6 +86,7 @@ export const getAll = async (req: Request, res: Response<CommonResponse<CartItem
         },
       },
       where: { userId },
+      order: { id: 'DESC' },
       relations: {
         productItem: {
           product: {

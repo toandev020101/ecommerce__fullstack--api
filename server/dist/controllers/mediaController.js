@@ -128,7 +128,7 @@ const addAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             code: 200,
             success: true,
             message: 'Thêm danh sách file media thành công',
-            data: null,
+            data: medias.map((media) => media.fileUrl),
         });
     }
     catch (error) {

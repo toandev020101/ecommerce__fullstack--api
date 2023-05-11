@@ -310,6 +310,9 @@ export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res
       // delete variation option
       await transactionalEntityManager.delete(VariationOption, { variationId: ids });
 
+      // delete variation category
+      await transactionalEntityManager.delete(VariationCategory, { variationId: ids });
+
       // delete variation
       await transactionalEntityManager.delete(Variation, ids);
     });
@@ -349,6 +352,9 @@ export const removeOne = async (req: Request<{ id: number }, {}, {}, {}>, res: R
     await AppDataSource.transaction(async (transactionalEntityManager) => {
       // delete variation option
       await transactionalEntityManager.delete(VariationOption, { variationId: id });
+
+      // delete variation category
+      await transactionalEntityManager.delete(VariationCategory, { variationId: id });
 
       // delete variation
       await transactionalEntityManager.delete(Variation, id);

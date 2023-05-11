@@ -13,6 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeOne = exports.removeAny = exports.changePassword = exports.changeActive = exports.updateOne = exports.addOne = exports.addAny = exports.getOneAndRoleById = exports.getOneAndRoleByIdPublic = exports.getAllAndRole = exports.getPaginationAndRole = exports.logout = exports.refreshToken = exports.login = exports.register = void 0;
+const Media_1 = require("./../models/Media");
+const OrderCoupon_1 = require("./../models/OrderCoupon");
+const ReviewImage_1 = require("./../models/ReviewImage");
+const Review_1 = require("./../models/Review");
+const OrderLine_1 = require("./../models/OrderLine");
+const Order_1 = require("./../models/Order");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = require("jsonwebtoken");
 const typeorm_1 = require("typeorm");
@@ -583,7 +589,22 @@ const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 avatars.push(user.avatar);
             }
         }
-        yield User_1.User.delete(ids);
+        yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
+            const orderRemoves = yield Order_1.Order.findBy({ userId: (0, typeorm_1.In)(ids) });
+            const orderRemoveIds = orderRemoves.map((orderRemove) => orderRemove.id);
+            const orderLineRemoves = yield OrderLine_1.OrderLine.findBy({ orderId: (0, typeorm_1.In)(orderRemoveIds) });
+            const orderLineRemoveIds = orderLineRemoves.map((orderLineRemove) => orderLineRemove.id);
+            const reviewRemoves = yield Review_1.Review.findBy({ orderLinedId: (0, typeorm_1.In)(orderLineRemoveIds) });
+            const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+            yield transactionalEntityManager.delete(Review_1.Review, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(ReviewImage_1.ReviewImage, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(Review_1.Review, { id: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(OrderLine_1.OrderLine, { orderId: (0, typeorm_1.In)(orderRemoveIds) });
+            yield transactionalEntityManager.delete(OrderCoupon_1.OrderCoupon, { orderId: (0, typeorm_1.In)(orderRemoveIds) });
+            yield transactionalEntityManager.delete(Order_1.Order, { id: (0, typeorm_1.In)(orderRemoveIds) });
+            yield transactionalEntityManager.delete(Media_1.Media, { userId: (0, typeorm_1.In)(ids) });
+            yield transactionalEntityManager.delete(User_1.User, { id: (0, typeorm_1.In)(ids) });
+        }));
         return res.status(200).json({
             code: 200,
             success: true,
@@ -611,7 +632,22 @@ const removeOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 message: 'Tài khoản không tồn tại',
             });
         }
-        yield User_1.User.delete(id);
+        yield AppDataSource_1.default.transaction((transactionalEntityManager) => __awaiter(void 0, void 0, void 0, function* () {
+            const orderRemoves = yield Order_1.Order.findBy({ userId: id });
+            const orderRemoveIds = orderRemoves.map((orderRemove) => orderRemove.id);
+            const orderLineRemoves = yield OrderLine_1.OrderLine.findBy({ orderId: (0, typeorm_1.In)(orderRemoveIds) });
+            const orderLineRemoveIds = orderLineRemoves.map((orderLineRemove) => orderLineRemove.id);
+            const reviewRemoves = yield Review_1.Review.findBy({ orderLinedId: (0, typeorm_1.In)(orderLineRemoveIds) });
+            const reviewRemoveIds = reviewRemoves.map((reviewRemove) => reviewRemove.id);
+            yield transactionalEntityManager.delete(Review_1.Review, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(ReviewImage_1.ReviewImage, { reviewId: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(Review_1.Review, { id: (0, typeorm_1.In)(reviewRemoveIds) });
+            yield transactionalEntityManager.delete(OrderLine_1.OrderLine, { orderId: (0, typeorm_1.In)(orderRemoveIds) });
+            yield transactionalEntityManager.delete(OrderCoupon_1.OrderCoupon, { orderId: (0, typeorm_1.In)(orderRemoveIds) });
+            yield transactionalEntityManager.delete(Order_1.Order, { id: (0, typeorm_1.In)(orderRemoveIds) });
+            yield transactionalEntityManager.delete(Media_1.Media, { userId: id });
+            yield transactionalEntityManager.delete(User_1.User, { id });
+        }));
         return res.status(200).json({
             code: 200,
             success: true,

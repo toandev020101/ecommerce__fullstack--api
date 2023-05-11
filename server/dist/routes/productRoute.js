@@ -36,8 +36,9 @@ const productController = __importStar(require("../controllers/productController
 const router = express_1.default.Router();
 router.get('/pagination/public', productController.getPaginationByCategorySlugPublic);
 router.get('/pagination', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/product/pagination', 'get'), productController.getPagination);
-router.get('/search', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/product/search', 'get'), productController.getListBySearchTerm);
+router.get('/search', productController.getListBySearchTerm);
 router.get('/ids', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/product/ids', 'get'), productController.getListByIds);
+router.get('/public', productController.getAll);
 router.get('', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/product', 'get'), productController.getAll);
 router.get('/:slug/public', productController.getOneBySlugPublic);
 router.get('/:id', checkAuth_1.checkAuth, (0, checkPermission_1.checkPermission)('/product/:id', 'get'), productController.getOneById);

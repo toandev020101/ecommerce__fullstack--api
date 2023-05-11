@@ -352,10 +352,10 @@ const Checkout: React.FC = () => {
         let newCoupon = { code: resData.code, price: 0 };
         let newTotalVoucherPrice = totalVoucherPrice;
         if (resData.type === 1) {
-          if (resData.priceMax && (totalPrice * resData.discountValue) / 100 > resData.priceMax) {
+          if (resData.priceMax && ((totalPrice - totalVoucherPrice) * resData.discountValue) / 100 > resData.priceMax) {
             newCoupon.price = resData.priceMax;
           } else {
-            newCoupon.price = (totalPrice * resData.discountValue) / 100;
+            newCoupon.price = ((totalPrice - totalVoucherPrice) * resData.discountValue) / 100;
           }
         } else {
           newCoupon.price = resData.discountValue;
