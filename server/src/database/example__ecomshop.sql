@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 17, 2023 at 11:51 AM
+-- Generation Time: May 17, 2023 at 03:26 PM
 -- Server version: 10.4.24-MariaDB
 -- PHP Version: 8.1.6
 
@@ -883,7 +883,7 @@ INSERT INTO `inventory` (`id`, `priceEntry`, `locationCode`, `createdAt`, `updat
 (45, 3000000, 'vv-v64-34975', '2023-05-17 15:25:55.542097', '2023-05-17 15:25:55.542097', 0),
 (46, 3000000, 'a55-xl-1485', '2023-05-17 15:46:19.807590', '2023-05-17 15:46:19.807590', 24),
 (47, 5000000, 'a69-d-7583', '2023-05-17 15:51:11.766447', '2023-05-17 15:51:11.766447', 127),
-(48, 4000000, 'vvy-v-1249', '2023-05-17 15:55:40.367654', '2023-05-17 15:55:40.367654', 15),
+(48, 4000000, 'vvy-v-1249', '2023-05-17 15:55:40.367654', '2023-05-17 20:18:47.000000', 14),
 (49, 3000000, 'a57-d64-2947', '2023-05-17 15:59:17.776813', '2023-05-17 15:59:17.776813', 0),
 (50, 3500000, 'tab-a7-d-2482', '2023-05-17 16:04:54.879972', '2023-05-17 16:04:54.879972', 12),
 (51, 6000000, 'air-x-2495', '2023-05-17 16:08:48.807717', '2023-05-17 16:08:48.807717', 40),
@@ -1161,7 +1161,8 @@ CREATE TABLE `order` (
 
 INSERT INTO `order` (`id`, `userId`, `fullName`, `phoneNumber`, `street`, `wardId`, `districtId`, `provinceId`, `totalQuantity`, `totalPrice`, `note`, `orderStatusId`, `shipMethodId`, `paymentMethodId`, `createdAt`, `updatedAt`) VALUES
 (15, 1, 'Đức Toàn', '0924212027', 'Xóm 8', 17143, 421, 40, 1, 6020000, NULL, 4, 1, 5, '2023-05-17 02:18:54.061909', '2023-05-17 02:19:10.000000'),
-(16, 1, 'Đức Toàn', '0924212027', 'Xóm 8', 17143, 421, 40, 1, 5020000, NULL, 4, 1, 5, '2023-05-17 02:59:11.215053', '2023-05-17 02:59:25.000000');
+(16, 1, 'Đức Toàn', '0924212027', 'Xóm 8', 17143, 421, 40, 1, 5020000, NULL, 4, 1, 5, '2023-05-17 02:59:11.215053', '2023-05-17 02:59:25.000000'),
+(17, 15, 'Đức Toàn', '0924212027', 'Xóm 8', 7, 1, 1, 1, 5170000, NULL, 4, 1, 5, '2023-05-17 20:18:47.910709', '2023-05-17 20:22:02.000000');
 
 -- --------------------------------------------------------
 
@@ -1197,7 +1198,8 @@ CREATE TABLE `order_line` (
 
 INSERT INTO `order_line` (`id`, `variation`, `quantity`, `price`, `productItemId`, `orderId`) VALUES
 (40, 'Đen, 8GB', 1, 5990000, 25, 15),
-(41, 'Đen, 8GB', 1, 4990000, 19, 16);
+(41, 'Đen, 8GB', 1, 4990000, 19, 16),
+(42, 'Vàng', 1, 5140000, 48, 17);
 
 -- --------------------------------------------------------
 
@@ -1872,7 +1874,8 @@ CREATE TABLE `review` (
 
 INSERT INTO `review` (`id`, `userId`, `orderLinedId`, `ratingValue`, `comment`, `createdAt`, `updatedAt`, `status`, `type`, `reviewId`) VALUES
 (13, 1, 40, 5, 'Sản phẩm rất tốt', '2023-05-17 02:19:41.571866', '2023-05-17 02:44:22.000000', 1, 0, NULL),
-(14, 1, 41, 3, 'Sản phẩm tạm ổn', '2023-05-17 03:05:10.681993', '2023-05-17 03:05:26.000000', 1, 0, NULL);
+(14, 1, 41, 3, 'Sản phẩm tạm ổn', '2023-05-17 03:05:10.681993', '2023-05-17 03:05:26.000000', 1, 0, NULL),
+(15, 15, 42, 4, 'ok', '2023-05-17 20:22:57.755283', '2023-05-17 20:22:57.755283', 0, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -1917,7 +1920,7 @@ CREATE TABLE `role` (
 
 INSERT INTO `role` (`id`, `name`, `createdAt`, `updatedAt`) VALUES
 (1, 'Quản trị viên', '2023-03-23 19:17:30.414000', '2023-03-27 23:47:39.000000'),
-(2, 'Khách hàng', '2023-03-23 19:18:30.414000', '2023-05-11 23:53:06.000000');
+(2, 'Khách hàng', '2023-03-23 19:18:30.414000', '2023-05-17 20:20:17.000000');
 
 -- --------------------------------------------------------
 
@@ -2051,30 +2054,31 @@ INSERT INTO `role_permission` (`id`, `roleId`, `permissionId`) VALUES
 (361, 1, 142),
 (362, 1, 143),
 (363, 1, 144),
-(364, 2, 26),
-(365, 2, 48),
-(366, 2, 50),
-(367, 2, 51),
-(368, 2, 52),
-(369, 2, 98),
-(370, 2, 100),
-(371, 2, 101),
-(372, 2, 102),
-(373, 2, 103),
-(374, 2, 104),
-(375, 2, 105),
-(376, 2, 106),
-(377, 2, 107),
-(378, 2, 108),
-(379, 2, 111),
-(380, 2, 115),
-(381, 2, 117),
-(382, 2, 118),
-(383, 2, 119),
-(384, 2, 120),
-(385, 2, 136),
-(386, 2, 138),
-(387, 2, 139);
+(388, 2, 26),
+(389, 2, 48),
+(390, 2, 50),
+(391, 2, 51),
+(392, 2, 52),
+(393, 2, 98),
+(394, 2, 100),
+(395, 2, 101),
+(396, 2, 102),
+(397, 2, 103),
+(398, 2, 104),
+(399, 2, 105),
+(400, 2, 106),
+(401, 2, 107),
+(402, 2, 108),
+(403, 2, 111),
+(404, 2, 115),
+(405, 2, 116),
+(406, 2, 117),
+(407, 2, 118),
+(408, 2, 119),
+(409, 2, 120),
+(410, 2, 136),
+(411, 2, 138),
+(412, 2, 139);
 
 -- --------------------------------------------------------
 
@@ -2153,8 +2157,9 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id`, `fullName`, `username`, `password`, `avatar`, `gender`, `email`, `phoneNumber`, `street`, `wardId`, `districtId`, `provinceId`, `isActive`, `tokenVersion`, `roleId`, `createdAt`, `updatedAt`) VALUES
-(1, 'Đức Toàn', 'admin', '$2b$10$3IQkjC7yjWmG7y13Y2Zjru9BnzWSglMnl.EjudotAKfSedAxFyRnK', 'http://localhost:4000/1683191075635_833380064-avatar3.jpg', 0, NULL, NULL, 'Xóm 8', 17143, 421, 40, 1, 39, 1, '2023-03-23 22:08:53.420094', '2023-05-10 21:43:54.000000'),
-(15, 'Đức Toàn', 'toan020101', '$2b$10$T8OPlsJa/Gj2N1jgL17N5OjANV61leXYnwkZ2DfkEteQ69piUIfN.', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 1, 0, 2, '2023-05-11 23:59:38.573845', '2023-05-11 23:59:38.573845');
+(1, 'Đức Toàn', 'admin', '$2b$10$3IQkjC7yjWmG7y13Y2Zjru9BnzWSglMnl.EjudotAKfSedAxFyRnK', 'http://localhost:4000/1683191075635_833380064-avatar3.jpg', 0, NULL, NULL, 'Xóm 8', 17143, 421, 40, 1, 45, 1, '2023-03-23 22:08:53.420094', '2023-05-17 20:25:23.000000'),
+(15, 'Đức Toàn', 'toan020101', '$2b$10$b5B6pTCNaKW6lBdsDD5mK.21pZwbprWr8yqbCsSqGyE7Fpgu.CL8.', NULL, 0, 'toan020101@gmail.com', NULL, NULL, NULL, NULL, NULL, 1, 4, 2, '2023-05-11 23:59:38.573845', '2023-05-17 20:23:11.000000'),
+(22, 'Văn D', 'vand', '$2b$10$NSu7jBnpuO0DllHY1iaS4e7icAR.wDlAiz9jBRxgEiyz6cajlw0tS', NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL, 1, 1, 2, '2023-05-17 20:13:56.302725', '2023-05-17 20:15:58.000000');
 
 -- --------------------------------------------------------
 
@@ -13661,7 +13666,7 @@ ALTER TABLE `ward`
 -- AUTO_INCREMENT for table `cart_item`
 --
 ALTER TABLE `cart_item`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=202;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=205;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -13697,7 +13702,7 @@ ALTER TABLE `media`
 -- AUTO_INCREMENT for table `order`
 --
 ALTER TABLE `order`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `order_coupon`
@@ -13709,7 +13714,7 @@ ALTER TABLE `order_coupon`
 -- AUTO_INCREMENT for table `order_line`
 --
 ALTER TABLE `order_line`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=42;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT for table `order_status`
@@ -13775,7 +13780,7 @@ ALTER TABLE `province`
 -- AUTO_INCREMENT for table `review`
 --
 ALTER TABLE `review`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `review_image`
@@ -13793,7 +13798,7 @@ ALTER TABLE `role`
 -- AUTO_INCREMENT for table `role_permission`
 --
 ALTER TABLE `role_permission`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=388;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=413;
 
 --
 -- AUTO_INCREMENT for table `ship_method`
@@ -13811,7 +13816,7 @@ ALTER TABLE `tag`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `variation`
