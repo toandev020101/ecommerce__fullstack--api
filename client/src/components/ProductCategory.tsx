@@ -109,6 +109,13 @@ const ProductCategory: React.FC = () => {
   ];
 
   useEffect(() => {
+    const urlArray = url.split('?');
+    if (urlArray.length > 0) {
+      setPage(0);
+    }
+  }, [url]);
+
+  useEffect(() => {
     const getListVariationByCategorySlug = async () => {
       try {
         const res = await variationApi.getListByCategorySlugPublic(categorySlug as string);
