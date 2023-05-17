@@ -32,10 +32,10 @@ const OrderStatus_1 = require("./models/OrderStatus");
 const ShipMethod_1 = require("./models/ShipMethod");
 const PaymentMethod_1 = require("./models/PaymentMethod");
 const AppDataSource = new typeorm_1.DataSource({
-    type: (process.env.DB_TYPE || 'postgres'),
-    username: process.env.DB_USERNAME || 'postgres',
+    type: (process.env.DB_TYPE || 'mysql'),
+    username: process.env.DB_USERNAME || 'root',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || '',
+    database: process.env.DB_NAME || 'ecomshop',
     synchronize: true,
     logging: false,
     entities: [

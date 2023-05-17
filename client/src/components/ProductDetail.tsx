@@ -22,7 +22,7 @@ import {
 import parseToHTML from 'html-react-parser';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { AiOutlineMinus as AiOutlineMinusIcon, AiOutlinePlus as AiOutlinePlusIcon } from 'react-icons/ai';
-import { BiX as BiXIcon, BiSearchAlt as BiSearchAltIcon } from 'react-icons/bi';
+import { BiSearchAlt as BiSearchAltIcon, BiX as BiXIcon } from 'react-icons/bi';
 import { FaStar as FaStarIcon } from 'react-icons/fa';
 import { MdAddShoppingCart as MdAddShoppingCartIcon } from 'react-icons/md';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -926,14 +926,6 @@ const ProductDetail: React.FC = () => {
                 >
                   Thêm vào giỏ hàng
                 </LoadingButton>
-                <Button
-                  variant="contained"
-                  size="large"
-                  sx={{ width: '100%' }}
-                  disabled={(product?.productItems[itemActive].inventory.quantity as number) === 0}
-                >
-                  Mua ngay
-                </Button>
               </Box>
               {/* button */}
             </Box>

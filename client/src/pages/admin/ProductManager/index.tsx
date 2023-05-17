@@ -210,7 +210,7 @@ const ProductManager: React.FC = () => {
     {
       label: 'Kho',
       numeric: false,
-      width: 100,
+      width: 120,
     },
     {
       label: 'Giá',

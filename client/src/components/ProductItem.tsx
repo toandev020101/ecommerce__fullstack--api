@@ -175,11 +175,13 @@ const ProductItem: React.FC<Props> = ({
           <Box marginTop="5px" fontSize="16px" fontWeight={500} color={theme.palette.error.main}>
             {price}
           </Box>
-          <Box marginTop="5px" display="flex" alignItems="center" gap="5px" fontSize="14px">
-            <span style={{ color: theme.palette.warning.main, fontWeight: 500, marginTop: '2px' }}>{rate}</span>
-            <Rating name="read-only" value={rate} precision={0.1} size="small" readOnly />
-            <span style={{ color: theme.palette.neutral[300] }}>({ratingCount})</span>
-          </Box>
+          {rate > 0 && (
+            <Box marginTop="5px" display="flex" alignItems="center" gap="5px" fontSize="14px">
+              <span style={{ color: theme.palette.warning.main, fontWeight: 500, marginTop: '2px' }}>{rate}</span>
+              <Rating name="read-only" value={rate} precision={0.1} size="small" readOnly />
+              <span style={{ color: theme.palette.neutral[300] }}>({ratingCount})</span>
+            </Box>
+          )}
           {/* end: content */}
         </Box>
       )}

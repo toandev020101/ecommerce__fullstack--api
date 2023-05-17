@@ -36,7 +36,7 @@ import ProductItem from './ProductItem';
 import TitlePage from './TitlePage';
 import { Theme } from '../theme';
 
-const limit = 2;
+const limit = 5;
 
 const ProductCategory: React.FC = () => {
   const navigate = useNavigate();
@@ -59,6 +59,7 @@ const ProductCategory: React.FC = () => {
   const [categoryFilters, setCategoryFilters] = useState<number[]>([]);
   const [variationFilters, setVariationFilters] = useState<{ id: number; values: number[] }[]>([]);
   const [statusFilters, setStatusFilters] = useState<string[]>([]);
+  const [ratingFilters, setRatingFilters] = useState<string[]>([]);
   const [reload, setReload] = useState<boolean>(false);
 
   const [page, setPage] = useState<number>(0);
@@ -153,6 +154,7 @@ const ProductCategory: React.FC = () => {
           categoryFilters,
           variationFilters,
           statusFilters,
+          ratingFilters,
         });
         setProducts(res.data as Product[]);
         setTotal(res.pagination?._total as number);
@@ -167,7 +169,19 @@ const ProductCategory: React.FC = () => {
       }
     };
     getPaginationProductByCategorySlug();
-  }, [navigate, categorySlug, page, sort, order, reload, price, categoryFilters, variationFilters, statusFilters]);
+  }, [
+    navigate,
+    categorySlug,
+    page,
+    sort,
+    order,
+    reload,
+    price,
+    categoryFilters,
+    variationFilters,
+    statusFilters,
+    ratingFilters,
+  ]);
 
   const handlePriceRangeChange = () => {
     const newErrors: FieldError[] = [];
@@ -247,6 +261,21 @@ const ProductCategory: React.FC = () => {
     setReload(!reload);
   };
 
+  const handleRatingChange = (name: string) => {
+    const newRatingFilters = [...ratingFilters];
+
+    const ratingFilterIndex = newRatingFilters.findIndex((ratingFilter) => ratingFilter === name);
+
+    if (ratingFilterIndex === -1) {
+      newRatingFilters.push(name);
+    } else {
+      newRatingFilters.splice(ratingFilterIndex, 1);
+    }
+
+    setRatingFilters(newRatingFilters);
+    setReload(!reload);
+  };
+
   const handleResetFilter = () => {
     setPriceFrom('');
     setPriceTo('');
@@ -254,6 +283,7 @@ const ProductCategory: React.FC = () => {
     setCategoryFilters([]);
     setVariationFilters([]);
     setStatusFilters([]);
+    setRatingFilters([]);
   };
 
   const handleSort = (name: string, type: 'asc' | 'desc') => {
@@ -474,7 +504,13 @@ const ProductCategory: React.FC = () => {
                     htmlFor={`checkbox${rate}`}
                     style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginLeft: '-10px' }}
                   >
-                    <Checkbox id={`checkbox${rate}`} color="primary" size="small" />
+                    <Checkbox
+                      id={`checkbox${rate}`}
+                      color="primary"
+                      size="small"
+                      name={rate.toString()}
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => handleRatingChange(e.target.name)}
+                    />
                     <Rating value={rate} readOnly size="small" />{' '}
                     {rate !== 5 && <span style={{ marginLeft: '5px' }}>trở lên</span>}
                   </label>
@@ -647,6 +683,23 @@ const ProductCategory: React.FC = () => {
                             ? `${priceFormat(priceArr[0])} - ${priceFormat(priceArr[priceArr.length - 1])}`
                             : priceFormat(priceArr[0]);
 
+                        // ratingAvgNumber
+                        let ratingValueTotal = 0;
+                        let ratingValueLength = 0;
+                        product.productItems.forEach((productItem) => {
+                          productItem.reviews?.forEach((review) => {
+                            if (review.id != null) {
+                              ratingValueTotal += review.ratingValue;
+                              ratingValueLength++;
+                            }
+                          });
+                        });
+
+                        let ratingAvgNumber = 0;
+                        if (ratingValueLength > 0) {
+                          ratingAvgNumber = parseFloat((ratingValueTotal / ratingValueLength).toFixed(1));
+                        }
+
                         return (
                           <ProductItem
                             key={`product-item-discount-${index}`}
@@ -657,8 +710,8 @@ const ProductCategory: React.FC = () => {
                             price={priceString}
                             isLatest={isLatest}
                             isHot={product.isHot === 1}
-                            rate={4.5}
-                            ratingCount={232}
+                            rate={ratingAvgNumber}
+                            ratingCount={ratingValueLength}
                           />
                         );
                       })}

@@ -9,7 +9,8 @@
     "server": "nodemon dist/index.js",
     "start-ts": "ts-node src/index.ts",
     "server-ts": "nodemon --exec ts-node src/index.ts",
-    "watch": "tsc -w"
+    "watch": "tsc -w",
+    "seed": "node dist/seeds/user.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",

@@ -37,6 +37,13 @@ export interface ProductItem {
     },
   ];
 
+  reviews?: [
+    {
+      id: number;
+      ratingValue: number;
+    },
+  ];
+
   product?: Product;
 }
 

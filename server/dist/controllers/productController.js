@@ -129,16 +129,9 @@ const getListByIds = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.getListByIds = getListByIds;
 const getPaginationByCategorySlugPublic = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { _limit, _page, _sort, _order, categorySlug, price, categoryFilters, variationFilters, statusFilters } = req.query;
+    const { _limit, _page, _sort, _order, categorySlug, price, categoryFilters, variationFilters, statusFilters, ratingFilters, } = req.query;
     try {
-        const category = yield Category_1.Category.findOneBy({ slug: categorySlug });
-        if (!category) {
-            return res.status(404).json({
-                code: 404,
-                success: false,
-                message: 'Danh mục không tồn tại !',
-            });
-        }
+        const categories = yield Category_1.Category.find({ where: [{ slug: categorySlug }, { parent: { slug: categorySlug } }] });
         const productRepository = AppDataSource_1.default.getRepository(Product_1.Product);
         const queryBuilder = productRepository.createQueryBuilder('product');
         queryBuilder
@@ -167,16 +160,29 @@ const getPaginationByCategorySlugPublic = (req, res) => __awaiter(void 0, void 0
             'variationOption.id',
             'variationOption.value',
             'variationOption.variationId',
+            'reviews.id',
+            'reviews.ratingValue',
+            'reviews.status',
         ])
             .leftJoin('product.category', 'category')
             .leftJoin('product.productItems', 'productItems')
             .leftJoin('productItems.inventory', 'inventory')
             .leftJoin('productItems.productConfigurations', 'productConfigurations', 'productConfigurations.productItemId = productItems.id')
             .leftJoin('productConfigurations.variationOption', 'variationOption')
-            .where('category.slug = :categorySlug', { categorySlug })
+            .leftJoin('productItems.orderLines', 'orderLines', 'productItems.id = orderLines.productItemId')
+            .leftJoin('orderLines.reviews', 'reviews')
             .andWhere('product.deleted = :deleted', { deleted: 0 })
             .andWhere('product.isActive = :isActive', { isActive: 1 })
             .andWhere('productItems.deleted = :deleted', { deleted: 0 });
+        let queryString = '(product.categoryId in(';
+        categories.forEach((category, index) => {
+            queryString += `${category.id}`;
+            if (index !== categories.length - 1) {
+                queryString += ', ';
+            }
+        });
+        queryString += '))';
+        queryBuilder.andWhere(queryString);
         if (categoryFilters) {
             let queryString = '(';
             categoryFilters.forEach((categoryFilter, index) => {
@@ -243,6 +249,13 @@ const getPaginationByCategorySlugPublic = (req, res) => __awaiter(void 0, void 0
                                     },
                                 },
                             ],
+                            reviews: [
+                                {
+                                    id: product.reviews_id,
+                                    ratingValue: product.reviews_ratingValue,
+                                    status: product.reviews_status,
+                                },
+                            ],
                         },
                     ],
                 });
@@ -273,21 +286,74 @@ const getPaginationByCategorySlugPublic = (req, res) => __awaiter(void 0, void 0
                                 },
                             },
                         ],
+                        reviews: [
+                            {
+                                id: product.reviews_id,
+                                ratingValue: product.reviews_ratingValue,
+                                status: product.reviews_status,
+                            },
+                        ],
                     });
                 }
                 else {
-                    data[dataIndex].productItems[data[dataIndex].productItems.length - 1].productConfigurations.push({
-                        id: product.productConfigurations_id,
-                        variationOptionId: product.productConfigurations_variationOptionId,
-                        variationOption: {
-                            id: product.variationOption_id,
-                            value: product.variationOption_value,
-                            variationId: product.variationOption_variationId,
-                        },
-                    });
+                    const productConfigurationIndex = data[dataIndex].productItems[data[dataIndex].productItems.length - 1].productConfigurations.findIndex((productConfiguration) => productConfiguration.id === product.productConfigurations_id);
+                    if (productConfigurationIndex === -1) {
+                        data[dataIndex].productItems[data[dataIndex].productItems.length - 1].productConfigurations.push({
+                            id: product.productConfigurations_id,
+                            variationOptionId: product.productConfigurations_variationOptionId,
+                            variationOption: {
+                                id: product.variationOption_id,
+                                value: product.variationOption_value,
+                                variationId: product.variationOption_variationId,
+                            },
+                        });
+                    }
+                    const reviewIndex = data[dataIndex].productItems[data[dataIndex].productItems.length - 1].reviews.findIndex((review) => review.id === product.reviews_id);
+                    if (reviewIndex === -1) {
+                        data[dataIndex].productItems[data[dataIndex].productItems.length - 1].reviews.push({
+                            id: product.reviews_id,
+                            ratingValue: product.reviews_ratingValue,
+                            status: product.reviews_status,
+                        });
+                    }
                 }
             }
         });
+        data.forEach((product) => {
+            product.productItems.forEach((productItem) => {
+                const newReviews = [];
+                productItem.reviews.forEach((review) => {
+                    if (review.status !== 0) {
+                        newReviews.push(review);
+                    }
+                });
+                productItem.reviews = newReviews;
+            });
+        });
+        if (ratingFilters) {
+            const newData = [];
+            data.forEach((product) => {
+                let ratingValueTotal = 0;
+                let ratingValueLength = 0;
+                product.productItems.forEach((productItem) => {
+                    productItem.reviews.forEach((review) => {
+                        if (review.id != null) {
+                            ratingValueTotal += review.ratingValue;
+                            ratingValueLength++;
+                        }
+                    });
+                });
+                let ratingAvgNumber = 0;
+                if (ratingValueLength > 0) {
+                    ratingAvgNumber = parseFloat((ratingValueTotal / ratingValueLength).toFixed(1));
+                }
+                ratingFilters.sort((ratingFilter1, ratingFilter2) => parseInt(ratingFilter1) - parseInt(ratingFilter2));
+                if (ratingAvgNumber >= parseInt(ratingFilters[0])) {
+                    newData.push(product);
+                }
+            });
+            data = [...newData];
+        }
         if (price) {
             const currentDate = new Date();
             const newData = [];

@@ -31,10 +31,10 @@ import { ShipMethod } from './models/ShipMethod';
 import { PaymentMethod } from './models/PaymentMethod';
 
 const AppDataSource = new DataSource({
-  type: (process.env.DB_TYPE || 'postgres') as any,
-  username: process.env.DB_USERNAME || 'postgres',
+  type: (process.env.DB_TYPE || 'mysql') as any,
+  username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || '',
+  database: process.env.DB_NAME || 'ecomshop',
   synchronize: true,
   logging: false,
   entities: [

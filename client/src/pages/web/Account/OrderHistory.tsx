@@ -79,8 +79,6 @@ const OrderHistory: React.FC = () => {
   const [tabActive, setTabActive] = useState<number>(0);
   const [orderStatusArr, setOrderStatusArr] = useState<OrderStatus[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-
-  const [openRatingDialog, setOpenRatingDialog] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
@@ -155,6 +153,8 @@ const OrderHistory: React.FC = () => {
     const theme: Theme = useTheme();
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
+
+    const [openRatingDialog, setOpenRatingDialog] = useState<boolean>(false);
 
     const handleBuyBackClick = async () => {
       const newCartItems = data.orderLines.map((orderLine) => ({
