@@ -33,19 +33,19 @@ const getPaginationByProductId = (req, res) => __awaiter(void 0, void 0, void 0,
     const { _limit, _page, _sort, _order, star, isImage, searchTerm } = req.query;
     let whereOptions = [
         {
-            comment: (0, typeorm_1.Like)(`%${searchTerm}%`),
+            comment: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`),
             orderLine: { productItem: { product: { id: productId } } },
             status: 1,
             type: 0,
         },
         {
-            user: { fullName: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+            user: { fullName: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
             orderLine: { productItem: { product: { id: productId } } },
             status: 1,
             type: 0,
         },
         {
-            user: { username: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+            user: { username: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
             orderLine: { productItem: { product: { id: productId } } },
             status: 1,
             type: 0,
@@ -105,14 +105,14 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const reviewRes = yield Review_1.Review.findAndCount({
             where: status !== ''
                 ? [
-                    { comment: (0, typeorm_1.Like)(`%${searchTerm}%`), status },
-                    { user: { fullName: (0, typeorm_1.Like)(`%${searchTerm}%`) }, status },
-                    { user: { username: (0, typeorm_1.Like)(`%${searchTerm}%`) }, status },
+                    { comment: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`), status },
+                    { user: { fullName: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) }, status },
+                    { user: { username: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) }, status },
                 ]
                 : [
-                    { comment: (0, typeorm_1.Like)(`%${searchTerm}%`) },
-                    { user: { fullName: (0, typeorm_1.Like)(`%${searchTerm}%`) } },
-                    { user: { username: (0, typeorm_1.Like)(`%${searchTerm}%`) } },
+                    { comment: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
+                    { user: { fullName: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) } },
+                    { user: { username: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) } },
                 ],
             skip: _page * _limit,
             take: _limit,

@@ -44,7 +44,10 @@ export const getListBySearchTermAndVariationId = async (
 
   try {
     // find variationOptions
-    const variationOptions = await VariationOption.findBy({ variationId, value: Like(`%${searchTerm}%`) });
+    const variationOptions = await VariationOption.findBy({
+      variationId,
+      value: Like(`%${searchTerm.toLowerCase()}%`),
+    });
 
     // send results
     return res.status(200).json({
@@ -80,8 +83,8 @@ export const getPaginationByVariationId = async (
         slug: true,
       },
       where: [
-        { variationId, value: Like(`%${searchTerm}%`) },
-        { variationId, slug: Like(`%${searchTerm}%`) },
+        { variationId, value: Like(`%${searchTerm.toLowerCase()}%`) },
+        { variationId, slug: Like(`%${searchTerm.toLowerCase()}%`) },
       ],
       skip: _page * _limit,
       take: _limit,

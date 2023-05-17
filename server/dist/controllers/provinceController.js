@@ -15,7 +15,7 @@ const typeorm_1 = require("typeorm");
 const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
     try {
-        const provinces = yield Province_1.Province.findBy(searchTerm ? { name: (0, typeorm_1.Like)(`%${searchTerm}%`) } : {});
+        const provinces = yield Province_1.Province.findBy(searchTerm ? { name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) } : {});
         return res.status(200).json({
             code: 200,
             success: true,

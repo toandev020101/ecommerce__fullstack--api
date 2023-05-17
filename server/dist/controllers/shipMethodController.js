@@ -35,7 +35,7 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { _limit, _page, _sort, _order, searchTerm } = req.query;
     try {
         const shipMethodRes = yield ShipMethod_1.ShipMethod.findAndCount({
-            where: searchTerm ? [{ name: (0, typeorm_1.Like)(`%${searchTerm}%`), deleted: 0 }] : { deleted: 0 },
+            where: searchTerm ? [{ name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`), deleted: 0 }] : { deleted: 0 },
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },

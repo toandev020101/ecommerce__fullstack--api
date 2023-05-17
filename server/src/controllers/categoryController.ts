@@ -102,7 +102,7 @@ export const getListBySearchTerm = async (
 
   try {
     // find categories
-    const categories = await Category.findBy({ name: Like(`%${searchTerm}%`) });
+    const categories = await Category.findBy({ name: Like(`%${searchTerm.toLowerCase()}%`) });
 
     // send results
     return res.status(200).json({
@@ -147,7 +147,9 @@ export const getPaginationAndParent = async (
     queryBuilder.leftJoin('category.parent', 'parent');
 
     if (searchTerm && searchTerm !== '') {
-      queryBuilder.andWhere(`category.name like '%${searchTerm}%'`).orWhere(`category.slug like '%${searchTerm}%'`);
+      queryBuilder
+        .andWhere(`category.name like '%${searchTerm.toLowerCase()}%'`)
+        .orWhere(`category.slug like '%${searchTerm.toLowerCase()}%'`);
     }
 
     if (_limit && _page) {

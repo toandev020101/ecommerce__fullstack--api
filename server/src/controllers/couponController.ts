@@ -37,9 +37,9 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
     const couponRes = await Coupon.findAndCount({
       where: searchTerm
         ? [
-            { name: Like(`%${searchTerm}%`) },
-            { priceMaxName: Like(`%${searchTerm}%`) },
-            { code: Like(`%${searchTerm}%`) },
+            { name: Like(`%${searchTerm.toLowerCase()}%`) },
+            { priceMaxName: Like(`%${searchTerm.toLowerCase()}%`) },
+            { code: Like(`%${searchTerm.toLowerCase()}%`) },
           ]
         : {},
       skip: _page * _limit,

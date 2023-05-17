@@ -39,7 +39,7 @@ exports.getAll = getAll;
 const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
     try {
-        const tags = yield Tag_1.Tag.findBy({ name: (0, typeorm_1.Like)(`%${searchTerm}%`) });
+        const tags = yield Tag_1.Tag.findBy({ name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) });
         return res.status(200).json({
             code: 200,
             success: true,
@@ -60,7 +60,7 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { _limit, _page, _sort, _order, searchTerm } = req.query;
     try {
         const tagRes = yield Tag_1.Tag.findAndCount({
-            where: [{ name: (0, typeorm_1.Like)(`%${searchTerm}%`) }, { slug: (0, typeorm_1.Like)(`%${searchTerm}%`) }],
+            where: [{ name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) }, { slug: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) }],
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },

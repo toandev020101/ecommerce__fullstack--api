@@ -12,7 +12,7 @@ export const getListBySearchTerm = async (
 
   try {
     // find provinces
-    const provinces = await Province.findBy(searchTerm ? { name: Like(`%${searchTerm}%`) } : {});
+    const provinces = await Province.findBy(searchTerm ? { name: Like(`%${searchTerm.toLowerCase()}%`) } : {});
 
     // send results
     return res.status(200).json({
@@ -30,4 +30,3 @@ export const getListBySearchTerm = async (
     });
   }
 };
-

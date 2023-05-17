@@ -59,10 +59,10 @@ const getPaginationAndRole = (req, res) => __awaiter(void 0, void 0, void 0, fun
             },
             where: method
                 ? [
-                    { method, name: (0, typeorm_1.Like)(`%${searchTerm}%`) },
-                    { method, slug: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                    { method, name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
+                    { method, slug: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
                 ]
-                : [{ name: (0, typeorm_1.Like)(`%${searchTerm}%`) }, { slug: (0, typeorm_1.Like)(`%${searchTerm}%`) }],
+                : [{ name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) }, { slug: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) }],
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },

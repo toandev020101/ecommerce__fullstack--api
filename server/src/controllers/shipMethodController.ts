@@ -37,7 +37,7 @@ export const getPagination = async (
   try {
     // find shipMethods
     const shipMethodRes = await ShipMethod.findAndCount({
-      where: searchTerm ? [{ name: Like(`%${searchTerm}%`), deleted: 0 }] : { deleted: 0 },
+      where: searchTerm ? [{ name: Like(`%${searchTerm.toLowerCase()}%`), deleted: 0 }] : { deleted: 0 },
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },

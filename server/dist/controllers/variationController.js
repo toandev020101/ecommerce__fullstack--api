@@ -93,7 +93,7 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     value: true,
                 },
             },
-            where: [{ name: (0, typeorm_1.Like)(`%${searchTerm}%`) }, { slug: (0, typeorm_1.Like)(`%${searchTerm}%`) }],
+            where: [{ name: (0, typeorm_1.Like)(`%${searchTerm}%`) }, { slug: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) }],
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },

@@ -38,7 +38,7 @@ export const getListBySearchTerm = async (
 
   try {
     // find tags
-    const tags = await Tag.findBy({ name: Like(`%${searchTerm}%`) });
+    const tags = await Tag.findBy({ name: Like(`%${searchTerm.toLowerCase()}%`) });
 
     // send results
     return res.status(200).json({
@@ -64,7 +64,7 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
   try {
     // find tags
     const tagRes = await Tag.findAndCount({
-      where: [{ name: Like(`%${searchTerm}%`) }, { slug: Like(`%${searchTerm}%`) }],
+      where: [{ name: Like(`%${searchTerm.toLowerCase()}%`) }, { slug: Like(`%${searchTerm.toLowerCase()}%`) }],
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },

@@ -17,7 +17,7 @@ const getListByDistrictIdAndSearchTerm = (req, res) => __awaiter(void 0, void 0,
     const { searchTerm } = req.query;
     try {
         const wards = yield Ward_1.Ward.find({
-            where: searchTerm ? { districtId, name: (0, typeorm_1.Like)(`%${searchTerm}%`) } : { districtId },
+            where: searchTerm ? { districtId, name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) } : { districtId },
         });
         return res.status(200).json({
             code: 200,

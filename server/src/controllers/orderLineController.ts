@@ -15,7 +15,7 @@ export const getListBySearchTerm = async (
     const orderLines = await OrderLine.find({
       where: searchTerm
         ? {
-            productItem: { product: { name: Like(`%${searchTerm}%`) } },
+            productItem: { product: { name: Like(`%${searchTerm.toLowerCase()}%`) } },
             reviews: { id: IsNull() },
             order: { orderStatus: { name: 'Thành công' } },
           }

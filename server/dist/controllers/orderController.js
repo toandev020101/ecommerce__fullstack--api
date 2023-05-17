@@ -54,7 +54,7 @@ const getListByStatusId = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 orderLines: {
                     productItem: {
                         product: {
-                            name: (0, typeorm_1.Like)(`%${searchTerm}%`),
+                            name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`),
                         },
                     },
                 },
@@ -72,7 +72,7 @@ const getListByStatusId = (req, res) => __awaiter(void 0, void 0, void 0, functi
                 orderLines: {
                     productItem: {
                         product: {
-                            name: (0, typeorm_1.Like)(`%${searchTerm}%`),
+                            name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`),
                         },
                     },
                 },
@@ -143,8 +143,8 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (statusId && searchTerm) {
             whereOptions = [
                 { orderStatusId: statusId, id: (0, typeorm_1.Like)(`%${searchTerm[0] === '#' ? searchTerm.split('#')[1] : searchTerm}%`) },
-                { orderStatusId: statusId, fullName: (0, typeorm_1.Like)(`%${searchTerm}%`) },
-                { orderStatusId: statusId, phoneNumber: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                { orderStatusId: statusId, fullName: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
+                { orderStatusId: statusId, phoneNumber: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
             ];
         }
         else if (statusId) {
@@ -153,8 +153,8 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         else if (searchTerm) {
             whereOptions = [
                 { id: (0, typeorm_1.Like)(`%${searchTerm[0] === '#' ? searchTerm.split('#')[1] : searchTerm}%`) },
-                { fullName: (0, typeorm_1.Like)(`%${searchTerm}%`) },
-                { phoneNumber: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                { fullName: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
+                { phoneNumber: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
             ];
         }
         const orderRes = yield Order_1.Order.findAndCount({

@@ -16,19 +16,19 @@ export const getPaginationByProductId = async (
 
   let whereOptions: any[] = [
     {
-      comment: Like(`%${searchTerm}%`),
+      comment: Like(`%${searchTerm.toLowerCase()}%`),
       orderLine: { productItem: { product: { id: productId } } },
       status: 1,
       type: 0,
     },
     {
-      user: { fullName: Like(`%${searchTerm}%`) },
+      user: { fullName: Like(`%${searchTerm.toLowerCase()}%`) },
       orderLine: { productItem: { product: { id: productId } } },
       status: 1,
       type: 0,
     },
     {
-      user: { username: Like(`%${searchTerm}%`) },
+      user: { username: Like(`%${searchTerm.toLowerCase()}%`) },
       orderLine: { productItem: { product: { id: productId } } },
       status: 1,
       type: 0,
@@ -98,14 +98,14 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
       where:
         status !== ''
           ? [
-              { comment: Like(`%${searchTerm}%`), status },
-              { user: { fullName: Like(`%${searchTerm}%`) }, status },
-              { user: { username: Like(`%${searchTerm}%`) }, status },
+              { comment: Like(`%${searchTerm.toLowerCase()}%`), status },
+              { user: { fullName: Like(`%${searchTerm.toLowerCase()}%`) }, status },
+              { user: { username: Like(`%${searchTerm.toLowerCase()}%`) }, status },
             ]
           : [
-              { comment: Like(`%${searchTerm}%`) },
-              { user: { fullName: Like(`%${searchTerm}%`) } },
-              { user: { username: Like(`%${searchTerm}%`) } },
+              { comment: Like(`%${searchTerm.toLowerCase()}%`) },
+              { user: { fullName: Like(`%${searchTerm.toLowerCase()}%`) } },
+              { user: { username: Like(`%${searchTerm.toLowerCase()}%`) } },
             ],
       skip: _page * _limit,
       take: _limit,

@@ -71,9 +71,13 @@ const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, func
     try {
         const products = yield Product_1.Product.find({
             where: [
-                { name: (0, typeorm_1.Like)(`%${searchTerm}%`), deleted: 0, productItems: { deleted: 0 } },
-                { deleted: 0, productItems: { deleted: 0, price: (0, typeorm_1.Like)(`%${searchTerm}%`) } },
-                { productTags: { tag: { name: (0, typeorm_1.Like)(`%${searchTerm}%`) } }, deleted: 0, productItems: { deleted: 0 } },
+                { name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`), deleted: 0, productItems: { deleted: 0 } },
+                { deleted: 0, productItems: { deleted: 0, price: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) } },
+                {
+                    productTags: { tag: { name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) } },
+                    deleted: 0,
+                    productItems: { deleted: 0 },
+                },
             ],
             relations: {
                 productItems: {
@@ -481,7 +485,7 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             queryBuilder.andWhere('product.isActive = :isActive', { isActive });
         }
         if (searchTerm && searchTerm !== '') {
-            queryBuilder.andWhere('product.name like :searchTerm OR product.slug like :searchTerm', { searchTerm });
+            queryBuilder.andWhere(`product.name like '%${searchTerm.toLowerCase()}%' OR product.slug like '%${searchTerm.toLowerCase()}%'`);
         }
         if (_sort === 'price') {
             queryBuilder.orderBy('productItems.price', _order.toUpperCase());

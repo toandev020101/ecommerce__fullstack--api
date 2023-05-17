@@ -38,9 +38,9 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         const couponRes = yield Coupon_1.Coupon.findAndCount({
             where: searchTerm
                 ? [
-                    { name: (0, typeorm_1.Like)(`%${searchTerm}%`) },
-                    { priceMaxName: (0, typeorm_1.Like)(`%${searchTerm}%`) },
-                    { code: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                    { name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
+                    { priceMaxName: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
+                    { code: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
                 ]
                 : {},
             skip: _page * _limit,

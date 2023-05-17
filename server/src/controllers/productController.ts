@@ -59,9 +59,13 @@ export const getListBySearchTerm = async (
     // find products
     const products = await Product.find({
       where: [
-        { name: Like(`%${searchTerm}%`), deleted: 0, productItems: { deleted: 0 } },
-        { deleted: 0, productItems: { deleted: 0, price: Like(`%${searchTerm}%`) } },
-        { productTags: { tag: { name: Like(`%${searchTerm}%`) } }, deleted: 0, productItems: { deleted: 0 } },
+        { name: Like(`%${searchTerm.toLowerCase()}%`), deleted: 0, productItems: { deleted: 0 } },
+        { deleted: 0, productItems: { deleted: 0, price: Like(`%${searchTerm.toLowerCase()}%`) } },
+        {
+          productTags: { tag: { name: Like(`%${searchTerm.toLowerCase()}%`) } },
+          deleted: 0,
+          productItems: { deleted: 0 },
+        },
       ],
       relations: {
         productItems: {
@@ -553,7 +557,9 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
     }
 
     if (searchTerm && searchTerm !== '') {
-      queryBuilder.andWhere('product.name like :searchTerm OR product.slug like :searchTerm', { searchTerm });
+      queryBuilder.andWhere(
+        `product.name like '%${searchTerm.toLowerCase()}%' OR product.slug like '%${searchTerm.toLowerCase()}%'`,
+      );
     }
 
     if (_sort === 'price') {

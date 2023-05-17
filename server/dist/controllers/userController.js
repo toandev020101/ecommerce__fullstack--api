@@ -227,9 +227,9 @@ const getPaginationAndRole = (req, res) => __awaiter(void 0, void 0, void 0, fun
         }
         if (searchTerm && searchTerm !== '') {
             queryBuilder.andWhere(new typeorm_1.Brackets((qb) => {
-                qb.where(`user.fullName like '%${searchTerm}%'`)
-                    .orWhere(`user.username like '%${searchTerm}%'`)
-                    .orWhere(`user.email like '%${searchTerm}%'`);
+                qb.where(`user.fullName like '%${searchTerm.toLowerCase()}%'`)
+                    .orWhere(`user.username like '%${searchTerm.toLowerCase()}%'`)
+                    .orWhere(`user.email like '%${searchTerm.toLowerCase()}%'`);
             }));
         }
         if (_limit && _page) {

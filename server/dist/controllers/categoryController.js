@@ -89,7 +89,7 @@ exports.getListByParentSlugPublic = getListByParentSlugPublic;
 const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = req.query;
     try {
-        const categories = yield Category_1.Category.findBy({ name: (0, typeorm_1.Like)(`%${searchTerm}%`) });
+        const categories = yield Category_1.Category.findBy({ name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) });
         return res.status(200).json({
             code: 200,
             success: true,
@@ -123,7 +123,9 @@ const getPaginationAndParent = (req, res) => __awaiter(void 0, void 0, void 0, f
         ]);
         queryBuilder.leftJoin('category.parent', 'parent');
         if (searchTerm && searchTerm !== '') {
-            queryBuilder.andWhere(`category.name like '%${searchTerm}%'`).orWhere(`category.slug like '%${searchTerm}%'`);
+            queryBuilder
+                .andWhere(`category.name like '%${searchTerm.toLowerCase()}%'`)
+                .orWhere(`category.slug like '%${searchTerm.toLowerCase()}%'`);
         }
         if (_limit && _page) {
             queryBuilder.skip(_page * _limit);

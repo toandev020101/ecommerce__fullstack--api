@@ -58,7 +58,7 @@ export const getPaginationAndUser = async (
     }
 
     if (searchTerm && searchTerm !== '') {
-      queryBuilder.andWhere(`media.name like '%${searchTerm}%'`);
+      queryBuilder.andWhere(`media.name like '%${searchTerm.toLowerCase()}%'`);
     }
 
     if (_limit && _page) {

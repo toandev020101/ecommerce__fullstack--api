@@ -41,7 +41,10 @@ const getListBySearchTermAndVariationId = (req, res) => __awaiter(void 0, void 0
     const { variationId } = req.params;
     const { searchTerm } = req.query;
     try {
-        const variationOptions = yield VariationOption_1.VariationOption.findBy({ variationId, value: (0, typeorm_1.Like)(`%${searchTerm}%`) });
+        const variationOptions = yield VariationOption_1.VariationOption.findBy({
+            variationId,
+            value: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`),
+        });
         return res.status(200).json({
             code: 200,
             success: true,
@@ -69,8 +72,8 @@ const getPaginationByVariationId = (req, res) => __awaiter(void 0, void 0, void 
                 slug: true,
             },
             where: [
-                { variationId, value: (0, typeorm_1.Like)(`%${searchTerm}%`) },
-                { variationId, slug: (0, typeorm_1.Like)(`%${searchTerm}%`) },
+                { variationId, value: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
+                { variationId, slug: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) },
             ],
             skip: _page * _limit,
             take: _limit,

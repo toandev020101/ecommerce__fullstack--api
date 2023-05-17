@@ -35,7 +35,7 @@ const getPagination = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { _limit, _page, _sort, _order, searchTerm } = req.query;
     try {
         const paymentMethodRes = yield PaymentMethod_1.PaymentMethod.findAndCount({
-            where: searchTerm ? [{ name: (0, typeorm_1.Like)(`%${searchTerm}%`), deleted: 0 }] : { deleted: 0 },
+            where: searchTerm ? [{ name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`), deleted: 0 }] : { deleted: 0 },
             skip: _page * _limit,
             take: _limit,
             order: { [_sort]: _order },

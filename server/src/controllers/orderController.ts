@@ -39,7 +39,7 @@ export const getListByStatusId = async (
         orderLines: {
           productItem: {
             product: {
-              name: Like(`%${searchTerm}%`),
+              name: Like(`%${searchTerm.toLowerCase()}%`),
             },
           },
         },
@@ -55,7 +55,7 @@ export const getListByStatusId = async (
         orderLines: {
           productItem: {
             product: {
-              name: Like(`%${searchTerm}%`),
+              name: Like(`%${searchTerm.toLowerCase()}%`),
             },
           },
         },
@@ -133,16 +133,16 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
     if (statusId && searchTerm) {
       whereOptions = [
         { orderStatusId: statusId, id: Like(`%${searchTerm[0] === '#' ? searchTerm.split('#')[1] : searchTerm}%`) },
-        { orderStatusId: statusId, fullName: Like(`%${searchTerm}%`) },
-        { orderStatusId: statusId, phoneNumber: Like(`%${searchTerm}%`) },
+        { orderStatusId: statusId, fullName: Like(`%${searchTerm.toLowerCase()}%`) },
+        { orderStatusId: statusId, phoneNumber: Like(`%${searchTerm.toLowerCase()}%`) },
       ];
     } else if (statusId) {
       whereOptions = [{ orderStatusId: statusId }];
     } else if (searchTerm) {
       whereOptions = [
         { id: Like(`%${searchTerm[0] === '#' ? searchTerm.split('#')[1] : searchTerm}%`) },
-        { fullName: Like(`%${searchTerm}%`) },
-        { phoneNumber: Like(`%${searchTerm}%`) },
+        { fullName: Like(`%${searchTerm.toLowerCase()}%`) },
+        { phoneNumber: Like(`%${searchTerm.toLowerCase()}%`) },
       ];
     }
 

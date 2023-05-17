@@ -47,7 +47,7 @@ const getPaginationAndUser = (req, res) => __awaiter(void 0, void 0, void 0, fun
             queryBuilder.andWhere(`MONTH(media.createdAt) = ${newDate.getMonth() + 1} AND YEAR(media.createdAt) = ${newDate.getFullYear()}`);
         }
         if (searchTerm && searchTerm !== '') {
-            queryBuilder.andWhere(`media.name like '%${searchTerm}%'`);
+            queryBuilder.andWhere(`media.name like '%${searchTerm.toLowerCase()}%'`);
         }
         if (_limit && _page) {
             queryBuilder.take((parseInt(_page.toString()) + 1) * _limit);

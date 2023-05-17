@@ -88,7 +88,7 @@ export const getPagination = async (req: Request<{}, {}, {}, ListParams>, res: R
           value: true,
         },
       },
-      where: [{ name: Like(`%${searchTerm}%`) }, { slug: Like(`%${searchTerm}%`) }],
+      where: [{ name: Like(`%${searchTerm}%`) }, { slug: Like(`%${searchTerm.toLowerCase()}%`) }],
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },

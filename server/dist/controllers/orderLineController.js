@@ -18,7 +18,7 @@ const getListBySearchTerm = (req, res) => __awaiter(void 0, void 0, void 0, func
         const orderLines = yield OrderLine_1.OrderLine.find({
             where: searchTerm
                 ? {
-                    productItem: { product: { name: (0, typeorm_1.Like)(`%${searchTerm}%`) } },
+                    productItem: { product: { name: (0, typeorm_1.Like)(`%${searchTerm.toLowerCase()}%`) } },
                     reviews: { id: (0, typeorm_1.IsNull)() },
                     order: { orderStatus: { name: 'Thành công' } },
                 }

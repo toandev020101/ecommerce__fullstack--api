@@ -292,9 +292,9 @@ export const getPaginationAndRole = async (
     if (searchTerm && searchTerm !== '') {
       queryBuilder.andWhere(
         new Brackets((qb) => {
-          qb.where(`user.fullName like '%${searchTerm}%'`)
-            .orWhere(`user.username like '%${searchTerm}%'`)
-            .orWhere(`user.email like '%${searchTerm}%'`);
+          qb.where(`user.fullName like '%${searchTerm.toLowerCase()}%'`)
+            .orWhere(`user.username like '%${searchTerm.toLowerCase()}%'`)
+            .orWhere(`user.email like '%${searchTerm.toLowerCase()}%'`);
         }),
       );
     }

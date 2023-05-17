@@ -14,7 +14,7 @@ export const getListByDistrictIdAndSearchTerm = async (
   try {
     // find wards
     const wards = await Ward.find({
-      where: searchTerm ? { districtId, name: Like(`%${searchTerm}%`) } : { districtId },
+      where: searchTerm ? { districtId, name: Like(`%${searchTerm.toLowerCase()}%`) } : { districtId },
     });
 
     // send results

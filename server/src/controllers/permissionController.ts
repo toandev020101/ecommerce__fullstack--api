@@ -58,10 +58,10 @@ export const getPaginationAndRole = async (
       },
       where: method
         ? [
-            { method, name: Like(`%${searchTerm}%`) },
-            { method, slug: Like(`%${searchTerm}%`) },
+            { method, name: Like(`%${searchTerm.toLowerCase()}%`) },
+            { method, slug: Like(`%${searchTerm.toLowerCase()}%`) },
           ]
-        : [{ name: Like(`%${searchTerm}%`) }, { slug: Like(`%${searchTerm}%`) }],
+        : [{ name: Like(`%${searchTerm.toLowerCase()}%`) }, { slug: Like(`%${searchTerm.toLowerCase()}%`) }],
       skip: _page * _limit,
       take: _limit,
       order: { [_sort]: _order },
