@@ -307,6 +307,46 @@ export const updateOne = async (
   }
 };
 
+// change active one category
+export const changeActive = async (
+  req: Request<{ id: number }, {}, { isActive: number }, {}>,
+  res: Response<CommonResponse<null>>,
+) => {
+  const { id } = req.params;
+  const data = req.body;
+
+  try {
+    // check category
+    const category = await Category.findOneBy({ id });
+
+    if (!category) {
+      return res.status(404).json({
+        code: 404,
+        success: false,
+        message: 'Danh mục không tồn tại',
+      });
+    }
+
+    // update category
+    await Category.update(id, data);
+
+    // send results
+    return res.status(200).json({
+      code: 200,
+      success: true,
+      message: 'Cập nhật danh mục thành công',
+      data: null,
+    });
+  } catch (error) {
+    // send error
+    return res.status(500).json({
+      code: 500,
+      success: false,
+      message: `Lỗi server :: ${error.message}`,
+    });
+  }
+};
+
 // delete any category
 export const removeAny = async (req: Request<{}, {}, { ids: number[] }, {}>, res: Response<CommonResponse<null>>) => {
   const { ids } = req.body;

@@ -72,13 +72,7 @@ router.put(
 // @route PATCH api/v1/category/:id
 // @desc Patch one category (isActive, ...)
 // @access Private
-router.patch(
-  '/:id',
-  checkAuth,
-  checkPermission('/category/:id', 'patch'),
-  validateYup(categorySchema),
-  categoryController.updateOne,
-);
+router.patch('/:id', checkAuth, checkPermission('/category/:id', 'patch'), categoryController.changeActive);
 
 // @route DELETE api/v1/category
 // @desc Delete any category

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeOne = exports.removeAny = exports.updateOne = exports.addOne = exports.getOneAndParentById = exports.getPaginationAndParent = exports.getListBySearchTerm = exports.getListByParentSlugPublic = exports.getAll = exports.getAllPublic = void 0;
+exports.removeOne = exports.removeAny = exports.changeActive = exports.updateOne = exports.addOne = exports.getOneAndParentById = exports.getPaginationAndParent = exports.getListBySearchTerm = exports.getListByParentSlugPublic = exports.getAll = exports.getAllPublic = void 0;
 const typeorm_1 = require("typeorm");
 const AppDataSource_1 = __importDefault(require("../AppDataSource"));
 const Category_1 = require("./../models/Category");
@@ -248,6 +248,35 @@ const updateOne = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.updateOne = updateOne;
+const changeActive = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const data = req.body;
+    try {
+        const category = yield Category_1.Category.findOneBy({ id });
+        if (!category) {
+            return res.status(404).json({
+                code: 404,
+                success: false,
+                message: 'Danh mục không tồn tại',
+            });
+        }
+        yield Category_1.Category.update(id, data);
+        return res.status(200).json({
+            code: 200,
+            success: true,
+            message: 'Cập nhật danh mục thành công',
+            data: null,
+        });
+    }
+    catch (error) {
+        return res.status(500).json({
+            code: 500,
+            success: false,
+            message: `Lỗi server :: ${error.message}`,
+        });
+    }
+});
+exports.changeActive = changeActive;
 const removeAny = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { ids } = req.body;
     try {

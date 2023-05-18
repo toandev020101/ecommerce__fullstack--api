@@ -464,10 +464,10 @@ const Checkout: React.FC = () => {
 
       dispatch(
         showToast({
-          page: 'orderAccount',
+          page: 'orderHistory',
           type: 'success',
           message: res.message,
-          options: { theme: 'colored', toastId: 'orderAccountId' },
+          options: { theme: 'colored', toastId: 'orderHistoryId' },
         }),
       );
       setIsLoading(false);
