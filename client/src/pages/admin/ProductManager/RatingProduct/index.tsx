@@ -918,7 +918,12 @@ const RatingProduct: React.FC = () => {
           aria-describedby="alert-dialog-description"
         >
           <DialogTitle id="alert-dialog-title" sx={{ fontSize: '18px' }}>
-            Xác nhận xóa {rows[deleteRowIndex]?.type === 0 ? 'đánh giá' : 'phản hồi'}
+            Xác nhận xóa{' '}
+            {deleteRowIndex === -1
+              ? 'đánh giá hoặc phản hồi'
+              : rows[deleteRowIndex]?.type === 0
+              ? 'đánh giá'
+              : 'phản hồi'}
           </DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description" sx={{ fontSize: '16px' }}>
